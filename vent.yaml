@@ -55,6 +55,48 @@ touchscreen:
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
+# Шрифты для LVGL
+font:
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-28.c"
+    id: montserrat_28
+    size: 28
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-22.c"
+    id: montserrat_22
+    size: 22
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-20.c"
+    id: montserrat_20
+    size: 20
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-18.c"
+    id: montserrat_18
+    size: 18
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-14.c"
+    id: montserrat_14
+    size: 14
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-12.c"
+    id: montserrat_12
+    size: 12
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-10.c"
+    id: montserrat_10
+    size: 10
+    bpp: 4
+
+  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-65.c"
+    id: montserrat_65
+    size: 65
+    bpp: 4
+
 # Ваш интерфейс LVGL
 lvgl:
   pages:
@@ -164,7 +206,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "С улицы\n"
+                  text: "С улицы"
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
@@ -227,7 +269,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "На улицу\n"
+                  text: "На улицу"
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
@@ -290,7 +332,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "Из дома\n"
+                  text: "Из дома"
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
@@ -353,7 +395,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "В дом\n"
+                  text: "В дом"
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
@@ -430,7 +472,7 @@ lvgl:
                   y: 84
                   width: 92
                   height: 12
-                  text: "Приточка\n"
+                  text: "Приточка"
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
