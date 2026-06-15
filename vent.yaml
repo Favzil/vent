@@ -7,29 +7,22 @@ esp32:
   framework:
     type: esp-idf
 
-# Wi-Fi (оставьте как есть — после прошивки настроите через точку доступа)
 wifi:
   ssid: "Ваш_WiFi"
   password: "Ваш_пароль"
 
-# Каптивный портал для настройки Wi-Fi
 captive_portal:
 
-# Включение PSRAM (обязательно для этого дисплея)
 psram:
   mode: octal
   speed: 80MHz
 
-# Логирование
 logger:
 
-# API для ESPHome
 api:
 
-# OTA обновления
 ota:
 
-# Правильная конфигурация дисплея для ESP32-4848S040C
 display:
   - platform: mipi_rgb
     model: GUITION-4848S040
@@ -48,16 +41,13 @@ display:
     vsync_pin: GPIO17
     pclk_pin: GPIO21
 
-# Сенсорный экран (ёмкостный)
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
-# Шрифты для LVGL
-# Шрифты для LVGL (через Google Fonts)
-# Шрифты для LVGL (через Google Fonts)
+# Шрифты для LVGL (через Google Fonts) - ИСПРАВЛЕНАЯ ВЕРСИЯ
 font:
   - file: "gfonts://Montserrat"
     id: montserrat_28
@@ -106,7 +96,7 @@ font:
     size: 65
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+=Экономичный'
-# Ваш интерфейс LVGL
+
 lvgl:
   pages:
     - id: canvas_9
