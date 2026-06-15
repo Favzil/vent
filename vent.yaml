@@ -1,5 +1,5 @@
 esphome:
-  name: vent-display
+  name: vent_display
   friendly_name: Ventilation Display
 
 esp32:
@@ -119,7 +119,7 @@ lvgl:
                   text_font: montserrat_12
 
         - obj:
-            id: t-indoor
+            id: t_indoor
             x: 23
             y: 68
             width: 85
@@ -182,7 +182,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-outdoor
+            id: t_outdoor
             x: 140
             y: 68
             width: 85
@@ -245,7 +245,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-fromhome
+            id: t_fromhome
             x: 265
             y: 68
             width: 85
@@ -308,7 +308,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-tohome
+            id: t_tohome
             x: 380
             y: 68
             width: 85
@@ -371,7 +371,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: Pritok-filter
+            id: Pritok_filter
             x: 16
             y: 300
             width: 100
