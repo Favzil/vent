@@ -47,116 +47,97 @@ touchscreen:
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
-# Шрифты для LVGL (через Google Fonts)
+# Шрифты для LVGL (упрощённая версия)
 font:
   - file: "gfonts://Montserrat"
     id: montserrat_28
     size: 28
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_22
     size: 22
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_20
     size: 20
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_18
     size: 18
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_14
     size: 14
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_12
     size: 12
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_10
     size: 10
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_26
     size: 26
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
   - file: "gfonts://Montserrat"
     id: montserrat_65
     size: 65
     bpp: 4
-    glyphs:
-      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-      - 'abcdefghijklmnopqrstuvwxyz'
-      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      - '1234567890°C%/-.:'
-      - ' !@#$%^&*()_+='
-      - ''
-      - 'Экономичный'
+    glyphs: [
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: !@#$%^&*()_+="
+    ]
 
 lvgl:
   pages:
