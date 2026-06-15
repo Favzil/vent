@@ -1,3 +1,42 @@
+esphome:
+  name: vent-display
+  friendly_name: Ventilation Display
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# Настройки дисплея для ESP32-4848S040C
+display:
+  - platform: ili9341
+    model: ST7701S  # Контроллер вашего дисплея
+    cs_pin: GPIO5
+    dc_pin: GPIO4
+    reset_pin: GPIO48
+    lambda: |-
+      it.fill(Color::BLACK);
+
+# Сенсорный экран (ёмкостный)
+touchscreen:
+  - platform: gt911
+    interrupt_pin: GPIO3
+    reset_pin: GPIO47
+
+# Wi-Fi (временно для теста)
+wifi:
+  ssid: "Ваш_WiFi"
+  password: "Ваш_пароль"
+
+# Логирование
+logger:
+
+# API для ESPHome
+api:
+
+# OTA обновления
+ota:
+
 lvgl:
   pages:
     - id: canvas_9
