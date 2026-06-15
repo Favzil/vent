@@ -691,7 +691,7 @@ lvgl:
             outline_opa: 0%
             shadow_opa: 0%
             text_color: 0x0EC852
-            text_font: montserrat_65
+            text_font: font_65
 
         - obj:
             id: widget_1781261697547_kzlml3d0h
