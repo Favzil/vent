@@ -7,10 +7,18 @@ esp32:
   framework:
     type: esp-idf
 
-# Wi-Fi (замените на ваши данные)
+# Wi-Fi (оставьте как есть — после прошивки настроите через точку доступа)
 wifi:
   ssid: "Ваш_WiFi"
   password: "Ваш_пароль"
+
+# Каптивный портал для настройки Wi-Fi
+captive_portal:
+
+# Включение PSRAM (обязательно для этого дисплея)
+psram:
+  mode: octal
+  speed: 80MHz
 
 # Логирование
 logger:
