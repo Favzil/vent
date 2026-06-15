@@ -47,53 +47,50 @@ touchscreen:
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
-# Шрифты для LVGL (через Google Fonts) - ИСПРАВЛЕНАЯ ВЕРСИЯ
+# Шрифты для LVGL (встроенные, без внешних загрузок)
 font:
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_28.c"
     id: montserrat_28
-    size: 28
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_22.c"
     id: montserrat_22
-    size: 22
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_20.c"
     id: montserrat_20
-    size: 20
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_18.c"
     id: montserrat_18
-    size: 18
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_14.c"
     id: montserrat_14
-    size: 14
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_12.c"
     id: montserrat_12
-    size: 12
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_10.c"
     id: montserrat_10
-    size: 10
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
 
-  - file: "gfonts://Montserrat"
+  - file: "lvgl:src/font/lv_font_montserrat_26.c"
+    id: montserrat_26
+    bpp: 4
+    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+
+  - file: "lvgl:src/font/lv_font_montserrat_65.c"
     id: montserrat_65
-    size: 65
     bpp: 4
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+=Экономичный'
 
