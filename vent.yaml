@@ -17,6 +17,20 @@ psram:
   mode: octal
   speed: 80MHz
 
+# Настройка I²C шины для сенсорного экрана GT911
+i2c:
+  - sda: GPIO1
+    scl: GPIO2
+    scan: true
+    id: bus_a
+
+# Настройка SPI шины для дисплея
+spi:
+  - clk_pin: GPIO5
+    mosi_pin: GPIO4
+    miso_pin: GPIO40
+    id: spi_bus
+
 logger:
 
 api:
@@ -47,7 +61,7 @@ touchscreen:
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
-# Шрифты для LVGL (без указания glyphs)
+# Шрифты для LVGL (упрощённая версия)
 font:
   - file: "gfonts://Montserrat"
     id: montserrat_28
