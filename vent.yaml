@@ -437,7 +437,7 @@ lvgl:
                   text_font: montserrat_10
 
         - obj:
-            id: Vityazh-filter
+            id: Vityazh_filter
             x: 365
             y: 300
             width: 100
