@@ -62,96 +62,49 @@ font:
     id: montserrat_28
     size: 28
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: ",
-      "!@#$%^&*()_+=",
-      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_22
     size: 22
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: ",
-      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_20
     size: 20
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: ",
-      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_18
     size: 18
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: ",
-      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_14
     size: 14
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: ",
-      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_12
     size: 12
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: "
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_10
     size: 10
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "°C%/-.: "
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+="
 
   - file: "gfonts://Montserrat"
     id: montserrat_65
     size: 65
     bpp: 4
-    glyphs: [
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "1234567890",
-      "Экономичный",
-      "°C%/-.: "
-    ]
+    glyphs: "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+=Экономичный"
 
 # Ваш интерфейс LVGL
 lvgl:
