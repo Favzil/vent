@@ -56,46 +56,102 @@ touchscreen:
     reset_pin: GPIO38
 
 # Шрифты для LVGL
+# Шрифты для LVGL (через Google Fonts)
 font:
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-28.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_28
     size: 28
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: ",
+      "!@#$%^&*()_+=",
+      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-22.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_22
     size: 22
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: ",
+      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-20.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_20
     size: 20
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: ",
+      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-18.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_18
     size: 18
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: ",
+      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-14.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_14
     size: 14
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: ",
+      "\uF015", "\uF013", "\uF0E7", "\uF1EB"
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-12.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_12
     size: 12
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: "
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-10.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_10
     size: 10
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "°C%/-.: "
+    ]
 
-  - file: "https://github.com/lvgl/lvgl/raw/master/examples/libs/font/montserrat-65.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_65
     size: 65
     bpp: 4
+    glyphs: [
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "1234567890",
+      "Экономичный",
+      "°C%/-.: "
+    ]
 
 # Ваш интерфейс LVGL
 lvgl:
