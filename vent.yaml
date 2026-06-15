@@ -1,112 +1,208 @@
 esphome:
-  name: vent_display
+  name: vent-display
   friendly_name: Ventilation Display
+  comment: "ESP32-4848S040C Smart Display"
 
 esp32:
   board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
   framework:
     type: esp-idf
+    version: recommended
 
-wifi:
-  ssid: "Ваш_WiFi"
-  password: "Ваш_пароль"
-
-captive_portal:
-
+# Включение PSRAM (обязательно для RGB дисплея) [citation:1]
 psram:
   mode: octal
   speed: 80MHz
 
-# Настройка I²C шины для сенсорного экрана GT911
-i2c:
-  - sda: GPIO1
-    scl: GPIO2
-    scan: true
-    id: bus_a
+# Настройка Wi-Fi
+wifi:
+  ssid: "Ваш_WiFi"
+  password: "Ваш_пароль"
+  ap:
+    ssid: "Vent_Fallback"
+    password: "config123"
 
-# Настройка SPI шины для дисплея
-spi:
-  - clk_pin: GPIO39
-    mosi_pin: GPIO41
-    miso_pin: GPIO40
-    id: spi_bus
+captive_portal:
+
+# API и OTA для обновлений
+api:
+  encryption:
+    key: "1111111111111111"
+ota:
+  - platform: esphome
+    password: "admin123"
 
 logger:
+  hardware_uart: UART0
 
-api:
+# === SPI ДЛЯ ДИСПЛЕЯ (ST7701S) ===
+spi:
+  clk_pin: GPIO48
+  mosi_pin: GPIO47
 
-ota:
+# === I²C ДЛЯ СЕНСОРА (GT911) === [citation:1]
+i2c:
+  - id: bus_a
+    sda: GPIO19
+    scl: GPIO45
+    scan: true
 
+# === НАСТРОЙКА ДИСПЛЕЯ ST7701S ===
 display:
-  - platform: mipi_rgb
-    model: GUITION-4848S040
+  - platform: st7701s
+    id: my_display
+    update_interval: never
+    auto_clear_enabled: true
+    data_rate: 2MHz
+    spi_mode: MODE3
+    color_order: RGB
+    invert_colors: false
     dimensions:
       width: 480
       height: 480
-    data_rate: 80MHz
-    pclk_frequency: 16MHz
-    reset_pin: GPIO48
-    data_pins:
-      red: [11, 12, 13, 14, 0]
-      green: [8, 20, 3, 46, 9, 10]
-      blue: [4, 5, 6, 7, 15]
+    cs_pin: GPIO39
     de_pin: GPIO18
     hsync_pin: GPIO16
     vsync_pin: GPIO17
     pclk_pin: GPIO21
+    pclk_frequency: 12MHz
+    pclk_inverted: false
+    # Критические тайминги для ST7701S [citation:2][citation:4]
+    hsync_pulse_width: 8
+    hsync_front_porch: 10
+    hsync_back_porch: 50
+    vsync_pulse_width: 8
+    vsync_front_porch: 10
+    vsync_back_porch: 20
+    # Последовательность инициализации [citation:2][citation:4]
+    init_sequence:
+      - 1
+      - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10]  # Вход в режим команд
+      - [0xCD, 0x00]                            # Отключение MDT флага
+    # Пины RGB данных [citation:1]
+    data_pins:
+      red:
+        - GPIO11
+        - GPIO12
+        - GPIO13
+        - GPIO14
+        - GPIO0
+      green:
+        - GPIO8
+        - GPIO20
+        - GPIO3
+        - GPIO46
+        - GPIO9
+        - GPIO10
+      blue:
+        - GPIO4
+        - GPIO5
+        - GPIO6
+        - GPIO7
+        - GPIO15
 
+# === НАСТРОЙКА СЕНСОРА GT911 ===
 touchscreen:
   - platform: gt911
     id: my_touchscreen
+    i2c_id: bus_a
     interrupt_pin: GPIO38
     reset_pin: GPIO37
+    transform:
+      swap_xy: false
+      mirror_x: false
+      mirror_y: false
 
-# Шрифты для LVGL (упрощённая версия)
+# === ПОДСВЕТКА (PWM) ===
+output:
+  - platform: ledc
+    pin: GPIO38
+    id: backlight_pwm
+
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    name: "Display Backlight"
+    id: back_light
+    restore_mode: ALWAYS_ON
+
+# === ШРИФТЫ ДЛЯ LVGL === [citation:1]
 font:
   - file: "gfonts://Montserrat"
-    id: montserrat_28
+    id: font_28
     size: 28
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_22
+    id: font_22
     size: 22
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_20
+    id: font_20
     size: 20
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_18
+    id: font_18
     size: 18
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_14
+    id: font_14
     size: 14
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_12
+    id: font_12
     size: 12
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_10
+    id: font_10
     size: 10
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
   - file: "gfonts://Montserrat"
-    id: montserrat_26
-    size: 26
-    bpp: 4
-
-  - file: "gfonts://Montserrat"
-    id: montserrat_65
+    id: font_65
     size: 65
     bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°C",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяЭкономичный"
+    ]
+
+# === ДАЛЕЕ ВАШ ИНТЕРФЕЙС LVGL ===
 
 lvgl:
   pages:
