@@ -29,7 +29,7 @@ captive_portal:
 # API и OTA для обновлений
 api:
   encryption:
-    key: "1111111111111111"
+    key: "dGhpcyBpcyBhIDMyIGJ5dGUga2V5IGZvciBlcGhvbWU="
 ota:
   - platform: esphome
     password: "admin123"
