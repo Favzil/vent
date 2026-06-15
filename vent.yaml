@@ -7,23 +7,7 @@ esp32:
   framework:
     type: esp-idf
 
-# Настройки дисплея для ESP32-4848S040C
-display:
-  - platform: ili9341
-    model: ST7701S  # Контроллер вашего дисплея
-    cs_pin: GPIO5
-    dc_pin: GPIO4
-    reset_pin: GPIO48
-    lambda: |-
-      it.fill(Color::BLACK);
-
-# Сенсорный экран (ёмкостный)
-touchscreen:
-  - platform: gt911
-    interrupt_pin: GPIO3
-    reset_pin: GPIO47
-
-# Wi-Fi (временно для теста)
+# Wi-Fi (замените на ваши данные)
 wifi:
   ssid: "Ваш_WiFi"
   password: "Ваш_пароль"
@@ -37,6 +21,33 @@ api:
 # OTA обновления
 ota:
 
+# Правильная конфигурация дисплея для ESP32-4848S040C
+display:
+  - platform: mipi_rgb
+    model: GUITION-4848S040
+    dimensions:
+      width: 480
+      height: 480
+    data_rate: 80MHz
+    pclk_frequency: 16MHz
+    reset_pin: GPIO48
+    data_pins:
+      red: [11, 12, 13, 14, 0]
+      green: [8, 20, 3, 46, 9, 10]
+      blue: [4, 5, 6, 7, 15]
+    de_pin: GPIO18
+    hsync_pin: GPIO16
+    vsync_pin: GPIO17
+    pclk_pin: GPIO21
+
+# Сенсорный экран (ёмкостный)
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    interrupt_pin: GPIO16
+    reset_pin: GPIO38
+
+# Ваш интерфейс LVGL
 lvgl:
   pages:
     - id: canvas_9
@@ -50,7 +61,7 @@ lvgl:
             y: 285
             width: 155
             height: 115
-            spin_time: 1000ms
+            spin_time: 1000
             arc_length: 60deg
             arc_width: 15
             arc_color: 0x10B981
