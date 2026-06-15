@@ -47,52 +47,116 @@ touchscreen:
     interrupt_pin: GPIO16
     reset_pin: GPIO38
 
-# Шрифты для LVGL (встроенные, без внешних загрузок)
+# Шрифты для LVGL (через Google Fonts)
 font:
-  - file: "lvgl:src/font/lv_font_montserrat_28.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_28
+    size: 28
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_22.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_22
+    size: 22
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_20.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_20
+    size: 20
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_18.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_18
+    size: 18
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_14.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_14
+    size: 14
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_12.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_12
+    size: 12
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_10.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_10
+    size: 10
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_26.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_26
+    size: 26
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+='
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
 
-  - file: "lvgl:src/font/lv_font_montserrat_65.c"
+  - file: "gfonts://Montserrat"
     id: montserrat_65
+    size: 65
     bpp: 4
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890°C%/-.: !@#$%^&*()_+=Экономичный'
+    glyphs:
+      - 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+      - 'abcdefghijklmnopqrstuvwxyz'
+      - 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      - '1234567890°C%/-.:'
+      - ' !@#$%^&*()_+='
+      - ''
+      - 'Экономичный'
 
 lvgl:
   pages:
