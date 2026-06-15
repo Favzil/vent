@@ -2,6 +2,10 @@ esphome:
   name: vent-display
   friendly_name: Ventilation Display
   comment: "ESP32-4848S040C Smart Display"
+  on_boot:
+    then:
+      - delay: 3s
+      - light.turn_on: back_light
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -11,7 +15,7 @@ esp32:
     type: esp-idf
     version: recommended
 
-# Включение PSRAM (обязательно для RGB дисплея) [citation:1]
+# Включение PSRAM (обязательно для RGB дисплея)
 psram:
   mode: octal
   speed: 80MHz
@@ -30,6 +34,7 @@ captive_portal:
 api:
   encryption:
     key: "dGhpcyBpcyBhIDMyIGJ5dGUga2V5IGZvciBlcGhvbWU="
+
 ota:
   - platform: esphome
     password: "admin123"
@@ -42,20 +47,20 @@ spi:
   clk_pin: GPIO48
   mosi_pin: GPIO47
 
-# === I²C ДЛЯ СЕНСОРА (GT911) === [citation:1]
+# === I²C ДЛЯ СЕНСОРА (GT911) ===
 i2c:
   - id: bus_a
     sda: GPIO19
     scl: GPIO45
     scan: true
 
-# === НАСТРОЙКА ДИСПЛЕЯ ST7701S ===
+# === НАСТРОЙКА ДИСПЛЕЯ ST7701S (обновлённый компонент mipi_rgb) ===
 display:
-  - platform: st7701s
+  - platform: mipi_rgb
     id: my_display
+    model: CUSTOM
     update_interval: never
     data_rate: 2MHz
-    spi_mode: MODE3
     color_order: RGB
     invert_colors: false
     dimensions:
@@ -68,19 +73,19 @@ display:
     pclk_pin: GPIO21
     pclk_frequency: 12MHz
     pclk_inverted: false
-    # Критические тайминги для ST7701S [citation:2][citation:4]
+    # Тайминги для ST7701S
     hsync_pulse_width: 8
     hsync_front_porch: 10
     hsync_back_porch: 50
     vsync_pulse_width: 8
     vsync_front_porch: 10
     vsync_back_porch: 20
-    # Последовательность инициализации [citation:2][citation:4]
+    # Последовательность инициализации для ST7701S
     init_sequence:
       - 1
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10]  # Вход в режим команд
       - [0xCD, 0x00]                            # Отключение MDT флага
-    # Пины RGB данных [citation:1]
+    # Пины RGB данных
     data_pins:
       red:
         - GPIO11
@@ -119,13 +124,14 @@ output:
   - platform: ledc
     pin: GPIO38
     id: backlight_pwm
+    frequency: 100Hz
 
 light:
   - platform: monochromatic
     output: backlight_pwm
     name: "Display Backlight"
     id: back_light
-    restore_mode: ALWAYS_ON
+    restore_mode: ALWAYS_OFF
 
 # === ШРИФТЫ ДЛЯ LVGL === 
 font:
@@ -198,13 +204,13 @@ font:
     bpp: 4
     glyphs: [
       " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
-      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя",
-     
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
     ]
 
-# === ДАЛЕЕ ВАШ ИНТЕРФЕЙС LVGL ===
-
+# === ИНТЕРФЕЙС LVGL ===
 lvgl:
+  displays:
+    - my_display
   pages:
     - id: canvas_9
       bg_color: 0x111827
