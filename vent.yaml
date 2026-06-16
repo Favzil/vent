@@ -38,27 +38,14 @@ logger:
   hardware_uart: UART0
   level: DEBUG
 
-# === SPI ДЛЯ ДИСПЛЕЯ И SD КАРТЫ ===
 spi:
-  - id: display_spi
-    clk_pin: GPIO48
-    mosi_pin: GPIO47
-    miso_pin: GPIO41  # MISO для SD карты
-  
-  - id: sd_spi
-    clk_pin: GPIO48
-    mosi_pin: GPIO47
-    miso_pin: GPIO41
-    cs_pin: GPIO42
+  clk_pin: GPIO48
+  mosi_pin: GPIO47
 
-# === I2C ДЛЯ ТАЧСКРИНА ===
 i2c:
-  - id: touch_i2c
-    sda: GPIO19
-    scl: GPIO45
-    scan: true
+  sda: GPIO19
+  scl: GPIO45
 
-# === ДИСПЛЕЙ ST7701S ===
 display:
   - platform: mipi_rgb
     id: my_display
@@ -74,38 +61,16 @@ display:
     pclk_pin: GPIO21
     pclk_frequency: 12MHz
     pclk_inverted: false
-    
-    # Правильные пины RGB (16 линий данных)
     data_pins:
-      red:
-        - GPIO11
-        - GPIO12
-        - GPIO13
-        - GPIO14
-        - GPIO0
-      green:
-        - GPIO8
-        - GPIO20
-        - GPIO3
-        - GPIO46
-        - GPIO9
-        - GPIO10
-      blue:
-        - GPIO4
-        - GPIO5
-        - GPIO6
-        - GPIO7
-        - GPIO15
-    
-    # Тайминги для ST7701S
+      red: [GPIO11, GPIO12, GPIO13, GPIO14, GPIO0]
+      green: [GPIO8, GPIO20, GPIO3, GPIO46, GPIO9, GPIO10]
+      blue: [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]
     hsync_pulse_width: 8
     hsync_front_porch: 10
     hsync_back_porch: 50
     vsync_pulse_width: 8
     vsync_front_porch: 10
     vsync_back_porch: 20
-    
-    # Оптимизированная инициализация
     init_sequence:
       - 1
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10]
@@ -123,15 +88,13 @@ display:
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x12]
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x13]
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x00]
-    
     color_order: RGB
     invert_colors: false
 
-# === ТАЧСКРИН GT911 ===
 touchscreen:
   - platform: gt911
     id: my_touchscreen
-    i2c_id: touch_i2c
+    i2c_id: i2c
     interrupt_pin: GPIO41
     reset_pin: GPIO37
     transform:
@@ -139,7 +102,6 @@ touchscreen:
       mirror_x: false
       mirror_y: false
 
-# === ПОДСВЕТКА ===
 output:
   - platform: ledc
     pin: GPIO38
@@ -153,27 +115,18 @@ light:
     id: back_light
     restore_mode: ALWAYS_ON
 
-# === SD КАРТА ===
-spi_device:
-  - id: sd_card
-    spi_id: sd_spi
-    cs_pin: GPIO42
-
 # === UART ДЛЯ СВЯЗИ С ARDUINO ===
 uart:
   - id: arduino_uart
     tx_pin: GPIO43
     rx_pin: GPIO44
     baud_rate: 9600
-    stop_bits: 1
-    data_bits: 8
-    parity: NONE
 
-# === ОБРАБОТЧИК КОМАНД ОТ ARDUINO ===
+# === ОБРАБОТКА ДАННЫХ ОТ ARDUINO ===
 text_sensor:
   - platform: uart
-    id: arduino_rx
     uart_id: arduino_uart
+    id: arduino_data
     name: "Arduino Data"
     on_value:
       then:
@@ -186,34 +139,45 @@ button:
     name: "Fan ON"
     id: fan_on
     on_press:
-      - uart.write: "FAN_ON\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_ON\n"
   - platform: template
     name: "Fan OFF"
     id: fan_off
     on_press:
-      - uart.write: "FAN_OFF\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_OFF\n"
   - platform: template
     name: "Speed 1"
     id: fan_speed_1
     on_press:
-      - uart.write: "FAN_SPEED_1\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_SPEED_1\n"
   - platform: template
     name: "Speed 2"
     id: fan_speed_2
     on_press:
-      - uart.write: "FAN_SPEED_2\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_SPEED_2\n"
   - platform: template
     name: "Speed 3"
     id: fan_speed_3
     on_press:
-      - uart.write: "FAN_SPEED_3\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_SPEED_3\n"
   - platform: template
     name: "Emergency Stop"
     id: fan_emergency
     on_press:
-      - uart.write: "FAN_EMERGENCY_STOP\n"
+      - uart.write:
+          id: arduino_uart
+          data: "FAN_EMERGENCY_STOP\n"
 
-# === ШРИФТЫ ===
 font:
   - file: "gfonts://Montserrat"
     id: montserrat_28
@@ -223,7 +187,7 @@ font:
       " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
       "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
     ]
-  
+
   - file: "gfonts://Montserrat"
     id: montserrat_20
     size: 20
@@ -232,7 +196,7 @@ font:
       " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
       "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
     ]
-  
+
   - file: "gfonts://Montserrat"
     id: montserrat_14
     size: 14
@@ -242,7 +206,6 @@ font:
       "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
     ]
 
-# === ИНТЕРФЕЙС LVGL ===
 lvgl:
   displays:
     - my_display
@@ -276,7 +239,9 @@ lvgl:
             text_color: 0xffffff
             radius: 10
             on_press:
-              - uart.write: "FAN_ON\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_ON\n"
         
         # Кнопка ВЫКЛ
         - btn:
@@ -291,7 +256,9 @@ lvgl:
             text_color: 0xffffff
             radius: 10
             on_press:
-              - uart.write: "FAN_OFF\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_OFF\n"
         
         # Скорости
         - btn:
@@ -306,7 +273,9 @@ lvgl:
             text_color: 0xffffff
             radius: 8
             on_press:
-              - uart.write: "FAN_SPEED_1\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_SPEED_1\n"
         
         - btn:
             id: btn_speed_2
@@ -320,7 +289,9 @@ lvgl:
             text_color: 0xffffff
             radius: 8
             on_press:
-              - uart.write: "FAN_SPEED_2\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_SPEED_2\n"
         
         - btn:
             id: btn_speed_3
@@ -334,7 +305,9 @@ lvgl:
             text_color: 0xffffff
             radius: 8
             on_press:
-              - uart.write: "FAN_SPEED_3\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_SPEED_3\n"
         
         # Статус
         - label:
@@ -361,7 +334,9 @@ lvgl:
             text_color: 0xffffff
             radius: 10
             on_press:
-              - uart.write: "FAN_EMERGENCY_STOP\n"
+              - uart.write:
+                  id: arduino_uart
+                  data: "FAN_EMERGENCY_STOP\n"
         
         # Статус связи с Arduino
         - label:
