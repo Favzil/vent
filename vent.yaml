@@ -94,7 +94,6 @@ display:
 touchscreen:
   - platform: gt911
     id: my_touchscreen
-    i2c_id: i2c
     interrupt_pin: GPIO41
     reset_pin: GPIO37
     transform:
@@ -115,23 +114,12 @@ light:
     id: back_light
     restore_mode: ALWAYS_ON
 
-# === UART ДЛЯ СВЯЗИ С ARDUINO ===
+# === UART ДЛЯ СВЯЗИ С ARDUINO (только отправка) ===
 uart:
   - id: arduino_uart
     tx_pin: GPIO43
     rx_pin: GPIO44
     baud_rate: 9600
-
-# === ОБРАБОТКА ДАННЫХ ОТ ARDUINO ===
-text_sensor:
-  - platform: uart
-    uart_id: arduino_uart
-    id: arduino_data
-    name: "Arduino Data"
-    on_value:
-      then:
-        - lambda: |-
-            ESP_LOGD("arduino", "Received: %s", x.c_str());
 
 # === ОТПРАВКА КОМАНД НА ARDUINO ===
 button:
