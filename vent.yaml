@@ -114,7 +114,7 @@ light:
     id: back_light
     restore_mode: ALWAYS_ON
 
-# === UART ДЛЯ СВЯЗИ С ARDUINO (только отправка) ===
+# === UART ДЛЯ СВЯЗИ С ARDUINO ===
 uart:
   - id: arduino_uart
     tx_pin: GPIO43
@@ -215,7 +215,7 @@ lvgl:
             text_font: montserrat_20
         
         # Кнопка ВКЛ
-        - btn:
+        - button:
             id: btn_on
             x: 30
             y: 70
@@ -232,7 +232,7 @@ lvgl:
                   data: "FAN_ON\n"
         
         # Кнопка ВЫКЛ
-        - btn:
+        - button:
             id: btn_off
             x: 250
             y: 70
@@ -249,7 +249,7 @@ lvgl:
                   data: "FAN_OFF\n"
         
         # Скорости
-        - btn:
+        - button:
             id: btn_speed_1
             x: 30
             y: 170
@@ -265,7 +265,7 @@ lvgl:
                   id: arduino_uart
                   data: "FAN_SPEED_1\n"
         
-        - btn:
+        - button:
             id: btn_speed_2
             x: 175
             y: 170
@@ -281,7 +281,7 @@ lvgl:
                   id: arduino_uart
                   data: "FAN_SPEED_2\n"
         
-        - btn:
+        - button:
             id: btn_speed_3
             x: 320
             y: 170
@@ -310,7 +310,7 @@ lvgl:
             text_font: montserrat_20
         
         # Аварийная остановка
-        - btn:
+        - button:
             id: btn_emergency
             x: 30
             y: 320
