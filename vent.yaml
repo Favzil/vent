@@ -4,7 +4,7 @@ esphome:
   comment: "ESP32-4848S040C Smart Display"
   on_boot:
     then:
-      - delay: 2s
+      - delay: 3s
       - light.turn_on: back_light
 
 esp32:
@@ -38,14 +38,27 @@ logger:
   hardware_uart: UART0
   level: DEBUG
 
+# === SPI ДЛЯ ДИСПЛЕЯ И SD КАРТЫ ===
 spi:
-  clk_pin: GPIO48
-  mosi_pin: GPIO47
+  - id: display_spi
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
+    miso_pin: GPIO41  # MISO для SD карты
+  
+  - id: sd_spi
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
+    miso_pin: GPIO41
+    cs_pin: GPIO42
 
+# === I2C ДЛЯ ТАЧСКРИНА ===
 i2c:
-  sda: GPIO19
-  scl: GPIO45
+  - id: touch_i2c
+    sda: GPIO19
+    scl: GPIO45
+    scan: true
 
+# === ДИСПЛЕЙ ST7701S ===
 display:
   - platform: mipi_rgb
     id: my_display
@@ -60,19 +73,39 @@ display:
     vsync_pin: GPIO17
     pclk_pin: GPIO21
     pclk_frequency: 12MHz
-    data_pins:
-      red: [GPIO11, GPIO12, GPIO13, GPIO14, GPIO0]
-      green: [GPIO8, GPIO20, GPIO3, GPIO46, GPIO9, GPIO10]
-      blue: [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]
-    color_order: BGR
-    invert_colors: false
     pclk_inverted: false
+    
+    # Правильные пины RGB (16 линий данных)
+    data_pins:
+      red:
+        - GPIO11
+        - GPIO12
+        - GPIO13
+        - GPIO14
+        - GPIO0
+      green:
+        - GPIO8
+        - GPIO20
+        - GPIO3
+        - GPIO46
+        - GPIO9
+        - GPIO10
+      blue:
+        - GPIO4
+        - GPIO5
+        - GPIO6
+        - GPIO7
+        - GPIO15
+    
+    # Тайминги для ST7701S
     hsync_pulse_width: 8
     hsync_front_porch: 10
     hsync_back_porch: 50
     vsync_pulse_width: 8
     vsync_front_porch: 10
     vsync_back_porch: 20
+    
+    # Оптимизированная инициализация
     init_sequence:
       - 1
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10]
@@ -90,25 +123,97 @@ display:
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x12]
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x13]
       - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x00]
+    
+    color_order: RGB
+    invert_colors: false
 
+# === ТАЧСКРИН GT911 ===
 touchscreen:
   - platform: gt911
+    id: my_touchscreen
+    i2c_id: touch_i2c
     interrupt_pin: GPIO41
     reset_pin: GPIO37
+    transform:
+      swap_xy: false
+      mirror_x: false
+      mirror_y: false
 
+# === ПОДСВЕТКА ===
 output:
   - platform: ledc
     pin: GPIO38
-    id: backlight
+    id: backlight_pwm
     frequency: 100Hz
 
 light:
   - platform: monochromatic
-    output: backlight
+    output: backlight_pwm
     name: "Display Backlight"
     id: back_light
     restore_mode: ALWAYS_ON
 
+# === SD КАРТА ===
+spi_device:
+  - id: sd_card
+    spi_id: sd_spi
+    cs_pin: GPIO42
+
+# === UART ДЛЯ СВЯЗИ С ARDUINO ===
+uart:
+  - id: arduino_uart
+    tx_pin: GPIO43
+    rx_pin: GPIO44
+    baud_rate: 9600
+    stop_bits: 1
+    data_bits: 8
+    parity: NONE
+
+# === ОБРАБОТЧИК КОМАНД ОТ ARDUINO ===
+text_sensor:
+  - platform: uart
+    id: arduino_rx
+    uart_id: arduino_uart
+    name: "Arduino Data"
+    on_value:
+      then:
+        - lambda: |-
+            ESP_LOGD("arduino", "Received: %s", x.c_str());
+
+# === ОТПРАВКА КОМАНД НА ARDUINO ===
+button:
+  - platform: template
+    name: "Fan ON"
+    id: fan_on
+    on_press:
+      - uart.write: "FAN_ON\n"
+  - platform: template
+    name: "Fan OFF"
+    id: fan_off
+    on_press:
+      - uart.write: "FAN_OFF\n"
+  - platform: template
+    name: "Speed 1"
+    id: fan_speed_1
+    on_press:
+      - uart.write: "FAN_SPEED_1\n"
+  - platform: template
+    name: "Speed 2"
+    id: fan_speed_2
+    on_press:
+      - uart.write: "FAN_SPEED_2\n"
+  - platform: template
+    name: "Speed 3"
+    id: fan_speed_3
+    on_press:
+      - uart.write: "FAN_SPEED_3\n"
+  - platform: template
+    name: "Emergency Stop"
+    id: fan_emergency
+    on_press:
+      - uart.write: "FAN_EMERGENCY_STOP\n"
+
+# === ШРИФТЫ ===
 font:
   - file: "gfonts://Montserrat"
     id: montserrat_28
@@ -118,22 +223,154 @@ font:
       " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
       "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
     ]
+  
+  - file: "gfonts://Montserrat"
+    id: montserrat_20
+    size: 20
+    bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
+  
+  - file: "gfonts://Montserrat"
+    id: montserrat_14
+    size: 14
+    bpp: 4
+    glyphs: [
+      " !%&()+,-./0123456789:;=ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz°",
+      "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+    ]
 
+# === ИНТЕРФЕЙС LVGL ===
 lvgl:
   displays:
     - my_display
   pages:
     - id: main_page
-      bg_color: 0x0000FF
+      bg_color: 0x1a1a2e
       bg_opa: 100%
       widgets:
+        # Заголовок
         - label:
-            id: test_label
+            id: title
             x: 0
-            y: 200
+            y: 10
             width: 480
-            height: 80
-            text: "ДИСПЛЕЙ РАБОТАЕТ!"
-            text_color: 0xFFFFFF
+            height: 40
+            text: "УПРАВЛЕНИЕ ВЕНТИЛЯЦИЕЙ"
+            text_color: 0xe0e0e0
             text_align: CENTER
-            text_font: montserrat_28
+            text_font: montserrat_20
+        
+        # Кнопка ВКЛ
+        - btn:
+            id: btn_on
+            x: 30
+            y: 70
+            width: 200
+            height: 80
+            text: "ВКЛ"
+            text_font: montserrat_20
+            bg_color: 0x27ae60
+            text_color: 0xffffff
+            radius: 10
+            on_press:
+              - uart.write: "FAN_ON\n"
+        
+        # Кнопка ВЫКЛ
+        - btn:
+            id: btn_off
+            x: 250
+            y: 70
+            width: 200
+            height: 80
+            text: "ВЫКЛ"
+            text_font: montserrat_20
+            bg_color: 0xe74c3c
+            text_color: 0xffffff
+            radius: 10
+            on_press:
+              - uart.write: "FAN_OFF\n"
+        
+        # Скорости
+        - btn:
+            id: btn_speed_1
+            x: 30
+            y: 170
+            width: 130
+            height: 60
+            text: "Скорость 1"
+            text_font: montserrat_14
+            bg_color: 0x3498db
+            text_color: 0xffffff
+            radius: 8
+            on_press:
+              - uart.write: "FAN_SPEED_1\n"
+        
+        - btn:
+            id: btn_speed_2
+            x: 175
+            y: 170
+            width: 130
+            height: 60
+            text: "Скорость 2"
+            text_font: montserrat_14
+            bg_color: 0x3498db
+            text_color: 0xffffff
+            radius: 8
+            on_press:
+              - uart.write: "FAN_SPEED_2\n"
+        
+        - btn:
+            id: btn_speed_3
+            x: 320
+            y: 170
+            width: 130
+            height: 60
+            text: "Скорость 3"
+            text_font: montserrat_14
+            bg_color: 0x3498db
+            text_color: 0xffffff
+            radius: 8
+            on_press:
+              - uart.write: "FAN_SPEED_3\n"
+        
+        # Статус
+        - label:
+            id: status_label
+            x: 0
+            y: 260
+            width: 480
+            height: 40
+            text: "Статус: Ожидание"
+            text_color: 0xf1c40f
+            text_align: CENTER
+            text_font: montserrat_20
+        
+        # Аварийная остановка
+        - btn:
+            id: btn_emergency
+            x: 30
+            y: 320
+            width: 420
+            height: 60
+            text: "АВАРИЙНАЯ ОСТАНОВКА"
+            text_font: montserrat_20
+            bg_color: 0xc0392b
+            text_color: 0xffffff
+            radius: 10
+            on_press:
+              - uart.write: "FAN_EMERGENCY_STOP\n"
+        
+        # Статус связи с Arduino
+        - label:
+            id: arduino_status
+            x: 0
+            y: 400
+            width: 480
+            height: 30
+            text: "Связь с Arduino: OK"
+            text_color: 0x2ecc71
+            text_align: CENTER
+            text_font: montserrat_14
