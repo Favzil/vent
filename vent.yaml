@@ -370,7 +370,7 @@ script:
           url: "http://${ha_address}/api/services/weather/get_forecasts?return_response=null"  
           capture_response: true
           max_response_buffer_size: 10240
-           request_headers:
+            request_headers:
             Content-Type: application/json
             Authorization: Bearer ${ha_authtoken}
           json:
