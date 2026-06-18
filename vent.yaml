@@ -1106,7 +1106,7 @@ lvgl:
                   border_width: 0
                   pad_all: 0
                   bg_color: color_panelarea
-                  bg_opa: 50% 
+                  bg_opa: "50%" 
                   layout:
                     type: GRID
                     grid_rows: [FR(3),FR(1)]
@@ -1119,14 +1119,14 @@ lvgl:
                     # Подсветим фон сенсора на экране для обратной связи
                     - lvgl.obj.update: 
                         id: switch1_iconarea
-                        bg_opa: 30%
+                        bg_opa: "30%"
                         bg_color: color_amber
                   on_release:
                     # Уберем подсветку фона сенсора на экране для обратной связи                    
                     - lvgl.obj.update: 
                         id: switch1_iconarea
                         bg_color: color_panelarea
-                        bg_opa: 50%
+                        bg_opa: "50%"
                   widgets:
                     - label:
                         id: switch1_label
@@ -1166,7 +1166,7 @@ lvgl:
                   border_width: 0
                   pad_all: 0
                   bg_color: color_panelarea
-                  bg_opa: 50% 
+                  bg_opa: "50%" 
                   layout:
                     type: GRID
                     grid_rows: [FR(3),FR(1)]
@@ -1179,14 +1179,14 @@ lvgl:
                     # Подсветим фон сенсора на экране для обратной связи
                     - lvgl.obj.update: 
                         id: switch2_iconarea
-                        bg_opa: 30%
+                        bg_opa: "30%"
                         bg_color: color_amber
                   on_release:
                     # Уберем подсветку фона сенсора на экране для обратной связи                    
                     - lvgl.obj.update: 
                         id: switch2_iconarea
                         bg_color: color_panelarea
-                        bg_opa: 50%
+                        bg_opa: "50%"
                   widgets:
                     - label:
                         id: switch2_label
@@ -1227,7 +1227,7 @@ lvgl:
                   border_width: 0
                   pad_all: 0
                   bg_color: color_panelarea
-                  bg_opa: 50% 
+                  bg_opa: "50%" 
                   layout:
                     type: GRID
                     grid_rows: [FR(3),FR(1)]
@@ -1240,14 +1240,14 @@ lvgl:
                     # Подсветим фон сенсора на экране для обратной связи
                     - lvgl.obj.update: 
                         id: switch3_iconarea
-                        bg_opa: 30%
+                        bg_opa: "30%"
                         bg_color: color_amber
                   on_release:
                     # Уберем подсветку фона сенсора на экране для обратной связи                    
                     - lvgl.obj.update: 
                         id: switch3_iconarea
                         bg_color: color_panelarea
-                        bg_opa: 50%
+                        bg_opa: "50%"
                   widgets:
                     - label:
                         id: switch3_label
@@ -1286,7 +1286,7 @@ lvgl:
             width: 100%
             height: 170
             bg_color: color_panelarea
-            bg_opa: 50% 
+            bg_opa: "50%" 
             pad_all: 0
             layout:
               type: GRID
@@ -1386,7 +1386,7 @@ lvgl:
                               grid_cell_y_align: STRETCH 
                               border_width: 0
                               bg_color: color_weatherzebra
-                              bg_opa: 10%
+                              bg_opa: "10%"
                               pad_all: 0
                           - obj:
                               grid_cell_row_pos: 0
@@ -1395,7 +1395,7 @@ lvgl:
                               grid_cell_y_align: STRETCH 
                               border_width: 0
                               bg_color: color_weatherzebra
-                              bg_opa: 10%
+                              bg_opa: "10%"
                               pad_all: 0
                           - obj:
                               grid_cell_row_pos: 0
@@ -1404,7 +1404,7 @@ lvgl:
                               grid_cell_y_align: STRETCH 
                               border_width: 0
                               bg_color: color_weatherzebra
-                              bg_opa: 10%
+                              bg_opa: "10%"
                               pad_all: 0
                           - obj:
                               grid_cell_row_pos: 0
@@ -1413,7 +1413,7 @@ lvgl:
                               grid_cell_y_align: STRETCH 
                               border_width: 0
                               bg_color: color_weatherzebra
-                              bg_opa: 10%
+                              bg_opa: "10%"
                               pad_all: 0
                     - obj: # Секция значков погоды на графике
                         grid_cell_row_pos: 0
@@ -1713,7 +1713,7 @@ lvgl:
             text_align: CENTER
             text: " "
             text_color: color_calendar
-            text_font: font_calendar            opa: 70%
+            text_font: font_calendar            opa: "70%"
         - label:
             id: display_month
             y: 3px            
@@ -1723,7 +1723,7 @@ lvgl:
             text: " "
             text_color: color_calendar
             text_font: font_text
-            opa: 70%
+            opa: "70%"
         - label:
             id: display_time
             x: -65px
@@ -1733,7 +1733,7 @@ lvgl:
             text: " "
             text_color: color_clock
             text_font: font_clock
-            opa: 60%
+            opa: "60%"
         - label:
             id: display_day
             x: -65px
@@ -1743,7 +1743,7 @@ lvgl:
             text: " "
             text_color: color_clock
             text_font: font_text
-            opa: 70%
+            opa: "70%"
     # Экран блокировки (идея этого экрана не столько блокировка, сколько режим протирки экрана)
     - id: page_lockscreen
       skip: true
@@ -1845,7 +1845,7 @@ lvgl:
             border_color: color_neutralline
             width: 100%
             bg_color: color_panelarea
-            bg_opa: 50%             
+            bg_opa: "50%"             
             scrollable : false
             layout:
               type: GRID
