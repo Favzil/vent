@@ -1062,7 +1062,6 @@ lvgl:
           id: ha_status
           align: TOP_RIGHT
           x: -35
-          #y: 5
           text: "${ha}"
           text_color: color_inactive
           text_font: smallicon
@@ -1072,10 +1071,6 @@ lvgl:
     - id: page_main
       bg_opa: COVER 
       # bg_image_src: bg_main    
-      #skip: true
-      #layout:
-      #  type: flex
-      #  flex_flow: column_wrap
       width:      100%
       height:     100%
       pad_top:      30 
@@ -1306,7 +1301,6 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   grid_cell_y_align: STRETCH 
                   border_width: 0
-                  #bg_color: 0x200020
                   bg_opa: TRANSP
                   pad_all: 0
                   layout:
@@ -1352,7 +1346,6 @@ lvgl:
                   text: "Нет данных\nпрогноза погоды"
                   text_color: color_weathertext
                   text_font: font_text
-                  #opa: COVER                  
               - obj: # Область графика-прогноза погоды
                   id: weather_forecastchart
                   hidden: false
@@ -1361,7 +1354,6 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   grid_cell_y_align: STRETCH 
                   border_width: 0
-                  #bg_color: 0x202020
                   bg_opa: TRANSP
                   pad_all: 0
                   layout:
@@ -1378,7 +1370,6 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH 
                         border_width: 0
-                        #bg_color: 0x202020
                         bg_opa: TRANSP
                         pad_all: 0
                         layout:
@@ -1430,7 +1421,6 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH 
                         border_width: 0
-                        #bg_color: 0x202020
                         bg_opa: TRANSP
                         pad_all: 0
                         layout:
@@ -1450,8 +1440,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_4
@@ -1463,8 +1451,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_6
@@ -1476,8 +1462,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_8
@@ -1489,8 +1473,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_10
@@ -1502,8 +1484,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_12
@@ -1515,8 +1495,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_i_14
@@ -1528,8 +1506,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: smallicon
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                     - obj: # Секция температуры в графике
                         grid_cell_row_pos: 1
@@ -1537,7 +1513,6 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH 
                         border_width: 0
-                        #bg_color: 0x202020
                         bg_opa: TRANSP
                         pad_all: 0
                         layout:
@@ -1557,8 +1532,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_4
@@ -1570,8 +1543,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_6
@@ -1583,8 +1554,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_8
@@ -1596,8 +1565,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_10
@@ -1609,8 +1576,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_12
@@ -1622,8 +1587,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_t_14
@@ -1635,8 +1598,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                     - line: # График прогноза погоды 
                         id: weather_chart
@@ -1644,13 +1605,10 @@ lvgl:
                         grid_cell_column_pos: 0
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH 
-                        #width: 100%
-                        #height: 150px
                         border_color: color_neutralline
                         border_width: 0
                         points:
                           - 0, 0
-                          #- 460, 148
                         line_width: 2
                         line_color: color_weatherchart
                         line_rounded: true
@@ -1660,7 +1618,6 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH 
                         border_width: 0
-                        #bg_color: 0x202020
                         bg_opa: TRANSP
                         pad_all: 0
                         layout:
@@ -1680,8 +1637,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_4
@@ -1693,8 +1648,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_6
@@ -1706,8 +1659,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_8
@@ -1719,8 +1670,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_10
@@ -1732,8 +1681,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_12
@@ -1745,8 +1692,6 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
                           - label:
                               id: weather_hr_14
@@ -1758,31 +1703,19 @@ lvgl:
                               text_color: color_weathertext
                               text_font: font_text
                               border_width: 0
-                              #bg_color: 0x002020
-                              #bg_opa: COVER
                               pad_all: 0
 
-        #- image:
-        #    align: BOTTOM_RIGHT
-        #    src: img_calendar #img_month_1
-        #    opa: 40%
-        #    x: 10px
-        #    y: 10px     
         - label:
             id: display_monthday
-            #x: 7px
             y: -20px     
             width: 40px       
             align: BOTTOM_RIGHT
             text_align: CENTER
             text: " "
             text_color: color_calendar
-            text_font: font_calendar
-            opa: 70%
-            #transform_angle: 16
+            text_font: font_calendar            opa: 70%
         - label:
             id: display_month
-            #x: 2px
             y: 3px            
             width: 40px       
             align: BOTTOM_RIGHT
@@ -1791,7 +1724,6 @@ lvgl:
             text_color: color_calendar
             text_font: font_text
             opa: 70%
-            #transform_angle: 16
         - label:
             id: display_time
             x: -65px
@@ -1825,7 +1757,6 @@ lvgl:
             width: 470
             align: center
             pad_all: 4
-            #bg_color: Black
             bg_opa: TRANSP
             border_width: 0  
             widgets:
@@ -1833,7 +1764,6 @@ lvgl:
                 height: 100%
                 width: 100%
                 align: center
-                #bg_color: White
                 bg_opa: TRANSP
                 border_width: 0
                 text_color: color_clock
@@ -1849,24 +1779,12 @@ lvgl:
                     range_to: 60
                     angle_range: 360
                     rotation: 270
-
-                    # Minuite hand
                     indicators:
                       - line:
                           id: minute_hand
                           width: 3
                           color: color_clock
                           r_mod: -50
-                  # Major ticks
-                  #- angle_range: 330
-                  #  rotation: 300
-                  #  range_from: 1
-                  #  range_to: 12
-                  #  ticks:
-                  #    width: 3
-                  #    count: 12
-                  #    length: 20
-                  #    color:  color_clock                    
 
                   - range_from: 1 # hours scale for labels
                     range_to: 12
@@ -1909,7 +1827,6 @@ lvgl:
     # Экран конфигурации  
     - id: page_config
       bg_opa: COVER 
-      # bg_image_src: bg_cfg    
       pad_top:      30 
       pad_bottom:   60
       pad_left:     10
@@ -1918,9 +1835,6 @@ lvgl:
       skip: true
       width: 100%
       height: 100%
-      #bg_color: 0x202020
-      #text_font: smallicon
-      #scrollbar_mode: 'off'
       layout:
         type: flex
         flex_flow: ROW_WRAP
@@ -1930,13 +1844,11 @@ lvgl:
             border_width: 0
             border_color: color_neutralline
             width: 100%
-            #height: 88
             bg_color: color_panelarea
             bg_opa: 50%             
             scrollable : false
             layout:
               type: GRID
-              #grid_rows: [22px, 22px, 22px, 22px]
               grid_rows: [FR(1),FR(1),FR(1),FR(1)]
               grid_columns: [FR(48), FR(2), FR(50)]            
             widgets:
@@ -2009,11 +1921,9 @@ lvgl:
             border_color: color_neutralline
             width: 100%
             height: SIZE_CONTENT
-            #bg_color: color_panelarea
             bg_opa: TRANSP
             scrollable : false
             pad_all: 0
-            #scrollbar_mode: AUTO
             layout:
               type: GRID
               grid_rows: [45px,45px,45px,45px]
@@ -2032,7 +1942,7 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   pad_top: 4
                   pad_bottom: 3
-              - obj: # Насипрйки таймаута приглушения подсветки экрана
+              - obj:
                   border_width: 0
                   align: CENTER
                   grid_cell_column_pos: 2
@@ -2097,7 +2007,7 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   pad_top: 5
                   pad_bottom: 5
-              - obj: # Насипрйки таймаута отключения подсветки экрана
+              - obj:
                   border_width: 0
                   align: CENTER
                   grid_cell_column_pos: 2
@@ -2162,7 +2072,7 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   pad_top: 5
                   pad_bottom: 5
-              - slider: # Слайдер настройки пришлкшенной яркости
+              - slider:
                   id: scdimmer_slider
                   grid_cell_row_pos: 2
                   grid_cell_column_pos: 2
@@ -2199,7 +2109,7 @@ lvgl:
                   grid_cell_x_align: STRETCH
                   pad_top: 5
                   pad_bottom: 5
-              - slider: # Слайдер настройки полной яркости
+              - slider:
                   id: scfull_slider
                   grid_cell_row_pos: 3
                   grid_cell_column_pos: 2
@@ -2226,7 +2136,6 @@ lvgl:
                     - number.set:
                         id: dispbr_full                    
                         value:  !lambda return x;
-        # Эта матрица кнопок выведена за основной лайаут станицы и игнорирует ее скроллирование 
         - buttonmatrix:  
             y: 50
             ignore_layout: true 
