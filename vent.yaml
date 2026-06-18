@@ -1707,12 +1707,13 @@ lvgl:
 
         - label:
             id: display_monthday
-            y: -20px     
-            width: 40px       
+            y: -20px
+            width: 40px
             align: BOTTOM_RIGHT
             text_align: CENTER
             text: " "
-            text_color: color_calendar            text_font: font_calendar
+            text_color: color_calendar
+            text_font: font_calendar
             opa: "70%"
         - label:
             id: display_month
