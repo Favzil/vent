@@ -1724,8 +1724,7 @@ lvgl:
             x: -65px
             y: -16px
             align: BOTTOM_RIGHT
-            text_align: RIGHT            
-            text: " "
+            text_align: RIGHT            text: " "
             text_color: color_clock
             text_font: font_clock
             opa: "60%"
