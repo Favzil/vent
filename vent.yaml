@@ -784,21 +784,19 @@ switch:
 #-------------------------------------------
 # Картинки
 #-------------------------------------------
-image:
-  - file: "img/bg_cfg.png"
-    id: bg_cfg
-    type: RGB565
-    #use_transparency: False
-  - file: "img/bg_main.png"
-    id: bg_main
-    type: RGB565
-    #use_transparency: False
+# image:
+#   - file: "img/bg_cfg.png"
+#     id: bg_cfg
+#     type: RGB565
+#   - file: "img/bg_main.png"
+#     id: bg_main
+#     type: RGB565
 
 #-------------------------------------------
 # Шрифты 
 #-------------------------------------------
 font:
-  - file: "https://github.com/Pictogrammers/pictogrammers.github.io/raw/refs/heads/main/@mdi/font/7.4.47/fonts/materialdesignicons-webfont.ttf" #"fonts/materialdesignicons-webfont.ttf"
+  - file: "https://github.com/Pictogrammers/pictogrammers.github.io/raw/refs/heads/main/@mdi/font/7.4.47/fonts/materialdesignicons-webfont.ttf"
     id: smallicon
     size: 24
     bpp: 8
@@ -827,11 +825,8 @@ font:
         "\U000F059D", # weather_windy
         "\U000F059E", # weather_windy_variant
       ]
-    extras: # Добавим к символам знак пробела         
-      - file: "fonts/Roboto-Regular.ttf"
-        glyphs: [" "]
 
-  - file: "https://github.com/Pictogrammers/pictogrammers.github.io/raw/refs/heads/main/@mdi/font/7.4.47/fonts/materialdesignicons-webfont.ttf" #"fonts/materialdesignicons-webfont.ttf"
+  - file: "https://github.com/Pictogrammers/pictogrammers.github.io/raw/refs/heads/main/@mdi/font/7.4.47/fonts/materialdesignicons-webfont.ttf"
     id: bigicon
     size: 80
     bpp: 4
@@ -839,7 +834,6 @@ font:
       [
         "\U000F1A25", # switch on
         "\U000F1A26", # switch off
-
         "\U000F0594", # weather_night
         "\U000F0590", # weather_cloudy
         "\U000F0591", # weather_fog
@@ -856,25 +850,25 @@ font:
         "\U000F059D", # weather_windy
         "\U000F059E", # weather_windy_variant
       ]
-    extras: # Добавим к символам знак пробела            
-      - file: "gfonts://Roboto@regular"
-        glyphs: [" "]
 
-  - file: "gfonts://Roboto@Regular" #"fonts/Roboto-Regular.ttf"
+  - file: "gfonts://Roboto@Regular"
     id: font_text
     size: 20
     bpp: 4
     glyphs: |-
       !"%()+=,-_.:°0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ абвгдеёжзийклмнопрстуфхцчшщьыъэюяabcdefghijklmnopqrstuvwxyz'éèàòùç/&ôœìïöñ
 
-  - file: "gfonts://Roboto@bold" #"fonts/Roboto-Bold.ttf"
+  - file: "gfonts://Roboto@Bold"
     id: font_clock
     size: 50
+    bpp: 4
     glyphs: |-
       0123456789:.-c C°
-  - file: "gfonts://Roboto@bold" #"fonts/Roboto-Bold.ttf"
+
+  - file: "gfonts://Roboto@Bold"
     id: font_calendar
     size: 30
+    bpp: 4
     glyphs: |-
       0123456789 -
 
@@ -1026,8 +1020,8 @@ lvgl:
 
   page_wrap: false
   disp_bg_color: color_lockscreen
-  disp_bg_image: bg_main  
-  bg_image_src: bg_main
+  # disp_bg_image: bg_main  
+  # bg_image_src: bg_main
   top_layer:
     widgets:
       - label:
@@ -1077,7 +1071,7 @@ lvgl:
     # Основной экран
     - id: page_main
       bg_opa: COVER 
-      bg_image_src: bg_main    
+      # bg_image_src: bg_main    
       #skip: true
       #layout:
       #  type: flex
@@ -1915,7 +1909,7 @@ lvgl:
     # Экран конфигурации  
     - id: page_config
       bg_opa: COVER 
-      bg_image_src: bg_cfg    
+      # bg_image_src: bg_cfg    
       pad_top:      30 
       pad_bottom:   60
       pad_left:     10
@@ -2257,5 +2251,4 @@ lvgl:
                       - lvgl.page.show: 
                           id: page_main
                           animation: OUT_TOP
-                          time: 300ms 
-
+                          time: 300ms
