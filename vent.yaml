@@ -367,19 +367,16 @@ script:
     then:
       - logger.log: "Requested forecast data..."
       - http_request.post:
-          url: "http://${ha_address}/api/services/weather/get_forecasts?return_response=null"  
+          url: "http://${ha_address}/api/services/weather/get_forecasts"
           capture_response: true
           max_response_buffer_size: 10240
-            request_headers:
-            Content-Type: application/json
-            Authorization: Bearer ${ha_authtoken}
           json:
             entity_id: ${sensor_weather}
             type: hourly
           on_response:
             - if:
                 condition:
-                   lambda: return response->status_code == 200;
+                  lambda: return response->status_code == 200;
                 then:
                   - lambda: |-
                       json::parse_json(body, [](JsonObject root) -> bool
@@ -503,7 +500,6 @@ script:
                                 case 11: lv_label_set_text(id(weather_hr_12),buf); lv_label_set_text(id(weather_t_12),buf_t); lv_label_set_text(id(weather_i_12),buf_i);lv_obj_set_style_text_color(id(weather_i_12),lv_iclr,0);break;
                                 case 13: lv_label_set_text(id(weather_hr_14),buf); lv_label_set_text(id(weather_t_14),buf_t); lv_label_set_text(id(weather_i_14),buf_i);lv_obj_set_style_text_color(id(weather_i_14),lv_iclr,0);break;
                                 }
-                              //ESP_LOGI("cal", "%d %d",(int)new_points[i].x,(int)new_points[i].y);
                               }
                               
                               lv_line_set_points(line, new_points,pcount);
@@ -514,7 +510,7 @@ script:
                         if(!isok) {lv_obj_clear_flag(id(weather_forecastnodata), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(weather_forecastchart), LV_OBJ_FLAG_HIDDEN);}
 
                         return true;
-                      }); 
+                      });
           on_error:
             then:
               - logger.log: "Weather forecast Request failed!"
