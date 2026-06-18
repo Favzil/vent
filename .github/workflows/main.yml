@@ -1,3 +1,11 @@
+- name: Clean cache
+  run: |
+    rm -rf .esphome
+    rm -rf build
+
+- name: Compile firmware
+  run: |
+    esphome run vent.yaml
 name: Build ESPHome Firmware
 
 on:
