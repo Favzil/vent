@@ -1713,7 +1713,8 @@ lvgl:
             text_align: CENTER
             text: " "
             text_color: color_calendar
-            text_font: font_calendar            opa: "70%"
+            text_font: font_calendar            
+            opa: "70%"
         - label:
             id: display_month
             y: 3px            
