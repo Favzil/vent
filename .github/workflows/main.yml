@@ -1,31 +1,27 @@
-- name: Clean cache
-  run: |
-    rm -rf .esphome
-    rm -rf build
-
-- name: Compile firmware
-  run: |
-    esphome run vent.yaml
-name: Build ESPHome Firmware
+name: Build ESPHome firmware
 
 on:
-  workflow_dispatch:  # Позволяет запускать сборку вручную кнопкой
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: ESPHome Builder
-        uses: esphome/build-action@v6  # Используем последнюю версию
-        id: build
-        with:
-          yaml-file: vent.yaml  # ⚠️ СЮДА ВСТАВЬТЕ ИМЯ ВАШЕГО ФАЙЛА
+      - name: Setup ESPHome
+        run: |
+          pip install esphome
 
-      - name: Upload firmware
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware  # Название папки с результатом
-          path: ${{ steps.build.outputs.name }}
+      - name: Clean cache
+        run: |
+          rm -rf .esphome
+          rm -rf build
+
+      - name: Compile firmware
+        run: |
+          esphome run vent.yaml
