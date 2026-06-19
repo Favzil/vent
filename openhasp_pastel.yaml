@@ -78,24 +78,21 @@ display:
       height: 480
 
 # ==========================================
-# LVGL с правильным синтаксисом
+# LVGL - самый простой рабочий вариант
 # ==========================================
 lvgl:
   displays:
     - my_display
   on_ready:
     then:
-      - lvgl.label.update:
+      - lvgl.widget.create:
+          type: label
           id: my_label
+          align: CENTER
           text: "Привет"
-  widgets:
-    - label:
-        id: my_label
-        align: CENTER
-        text: "Привет"
-        styles:
-          text_color: 0xFFFFFF
-          text_font: montserrat_40
+          style:
+            text_color: 0xFFFFFF
+            text_font: montserrat_40
 
 # Подсветка
 switch:
