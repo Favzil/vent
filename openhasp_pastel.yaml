@@ -32,14 +32,12 @@ touchscreen:
     interrupt_pin: GPIO38
     address: 0x5D
 
-# ★ ДОБАВЛЯЕМ SPI ДЛЯ ИНИЦИАЛИЗАЦИИ ДИСПЛЕЯ
+# SPI для инициализации дисплея
 spi:
   - id: display_spi
     clk_pin: GPIO10
     mosi_pin: GPIO11
-    # MISO не требуется
-    interface: hardware
-    frequency: 1MHz
+    data_rate: 1MHz   # Исправлено: frequency → data_rate
 
 # Настройка дисплея
 display:
@@ -47,7 +45,6 @@ display:
     id: my_display
     model: GUITION-4848S040
     rotation: 0
-    # Привязываем SPI к дисплею
     spi_id: display_spi
 
 # LVGL — создаём надпись "Привет"
