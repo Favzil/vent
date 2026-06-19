@@ -78,7 +78,7 @@ display:
       height: 480
 
 # ==========================================
-# LVGL с правильным использованием styles
+# LVGL - упрощенная конфигурация без styles
 # ==========================================
 lvgl:
   displays:
@@ -93,9 +93,8 @@ lvgl:
         id: my_label
         align: CENTER
         text: "Привет"
-        styles:   # Используем styles, а не style
-          text_color: 0xFFFFFF
-          text_font: montserrat_40
+        text_color: 0xFFFFFF
+        text_font: montserrat_40
 
 # Подсветка
 switch:
