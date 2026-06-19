@@ -1,76 +1,54 @@
-# ESPHome конфигурация для ESP32-4848S040C
 esphome:
-  name: esp32-4848s040c
-  comment: "ESP32-4848S040C 4.0 inch Display"
+  name: esp32-display
 
 esp32:
   board: esp32-s3-devkitc-1
   framework:
-    type: esp-idf
-    version: recommended
+    type: esp-idf  # Обязательно для этого дисплея
 
-# Включаем PSRAM (обязательно для mipi_rgb)
+# Включаем PSRAM — обязательно для работы с экраном
 psram:
   mode: octal
   speed: 80MHz
 
-# Включаем отладку
 logger:
 api:
 
-# Настройка Wi-Fi
 wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
-  fast_connect: true
 
-# Настройка I2C для сенсора GT911
+# Настройка сенсорного экрана (I2C)
 i2c:
   - id: bus_i2c
     sda: GPIO19
     scl: GPIO20
     frequency: 400kHz
 
-# Сенсор GT911
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
     interrupt_pin: GPIO38
     address: 0x5D
-    on_touch:
-      then:
-        - logger.log: "Сенсор нажат!"
 
-# ==========================================
-# ДИСПЛЕЙ - встроенная модель GUITION-4848S040
-# ==========================================
+# ★ САМОЕ ГЛАВНОЕ: настройка дисплея
 display:
   - platform: mipi_rgb
-    model: GUITION-4848S040
     id: my_display
+    model: GUITION-4848S040  # <-- Это ключевая строка!
     rotation: 0
 
-# ==========================================
-# LVGL - ПРОСТЕЙШИЙ РАБОЧИЙ ВАРИАНТ
-# ==========================================
+# LVGL — создаём надпись "Привет"
 lvgl:
   displays:
     - my_display
   widgets:
     - label:
-        id: my_label
         align: CENTER
         text: "Привет"
-  on_ready:
-    then:
-      - lvgl.widget.update:
-          id: my_label
-          state: true
-          label:
-            text: "Привет"
 
-# Подсветка
+# Включаем подсветку
 switch:
   - platform: gpio
     id: backlight
