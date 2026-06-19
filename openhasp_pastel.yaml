@@ -1,9 +1,7 @@
 # ESPHome конфигурация для ESP32-4848S040C
-# с параллельным дисплеем ST7701 через компонент mipi_rgb
-
 esphome:
-  name: esp32-display
-  comment: "ESP32-4848S040C с дисплеем 4.3 480x480"
+  name: esp32-4848s040c
+  comment: "ESP32-4848S040C 4.0 inch Display"
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -11,20 +9,21 @@ esp32:
     type: esp-idf
     version: recommended
 
-# Wi-Fi (замени на свои данные)
-wifi:
-  ssid: "ваш_wi-fi"
-  password: "ваш_пароль"
-
-# Включаем отладку
+# Включаем отладку, чтобы видеть сообщения
 logger:
 api:
 
-# I2C для сенсора GT911
+# Настройка Wi-Fi
+wifi:
+  ssid: "ваш_wi-fi"
+  password: "ваш_пароль"
+  fast_connect: true
+
+# Настройка I2C для сенсора GT911
 i2c:
   - id: bus_i2c
-    sda: GPIO8
-    scl: GPIO9
+    sda: GPIO19  # SDA для сенсора
+    scl: GPIO20  # SCL для сенсора
     frequency: 400kHz
 
 # Сенсор GT911
@@ -32,48 +31,49 @@ touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
-    interrupt_pin: GPIO10
+    interrupt_pin: GPIO38
     address: 0x5D
     on_touch:
       then:
-        - logger.log: "Экран нажат!"
+        - logger.log: "Сенсор нажат!"
 
-# ==============================================
-# ГЛАВНОЕ ИЗМЕНЕНИЕ: Используем mipi_rgb
-# ==============================================
+# ==========================================
+# ГЛАВНОЕ: Настройка дисплея ST7701S
+# Используем компонент mipi_rgb
+# ==========================================
 display:
   - platform: mipi_rgb
     id: my_display
-    model: ST7701S  # Указываем модель
-    data_pins:      # 16-битные пины данных
-      - GPIO0
-      - GPIO1
-      - GPIO2
-      - GPIO3
-      - GPIO4
-      - GPIO5
-      - GPIO6
-      - GPIO7
-      - GPIO8
-      - GPIO9
-      - GPIO10
-      - GPIO11
-      - GPIO12
-      - GPIO13
-      - GPIO14
-      - GPIO15
-    hsync_pin: GPIO38  # Горизонтальная синхронизация
-    vsync_pin: GPIO39  # Вертикальная синхронизация
-    pclk_pin: GPIO41   # Пиксельная синхронизация
-    de_pin: GPIO40     # Разрешение данных
-    reset_pin: GPIO42  # Сброс дисплея
+    model: ST7701S  # Модель драйвера
+    
+    # Пины данных в порядке: R0-R4, G0-G5, B0-B4 (всего 16 бит)
+    data_pins:
+      red:   [GPIO11, GPIO12, GPIO13, GPIO14, GPIO0]   # R0-R4
+      green: [GPIO8, GPIO20, GPIO3, GPIO46, GPIO9, GPIO10]  # G0-G5
+      blue:  [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]      # B0-B4
+    
+    # Сигналы управления дисплеем
+    de_pin: GPIO18      # Data Enable
+    pclk_pin: GPIO21    # Pixel Clock
+    hsync_pin: GPIO16   # Horizontal Sync
+    vsync_pin: GPIO17   # Vertical Sync
+    reset_pin: GPIO39   # Сброс дисплея
+    
+    # Тайминги для ST7701
+    hsync_pulse_width: 8
+    hsync_back_porch: 50
+    hsync_front_porch: 10
+    vsync_pulse_width: 8
+    vsync_back_porch: 20
+    vsync_front_porch: 10
+    pclk_frequency: 16MHz
+    
     rotation: 0
-    color_order: RGB
-    invert_colors: False
     dimensions:
       width: 480
       height: 480
-    pclk_frequency: 16MHz  # Важно: стабильная частота для ST7701 [citation:3]
+    
+    # LVGL для отображения
     lvgl:
       id: my_lvgl
       on_ready:
@@ -81,7 +81,7 @@ display:
           - lvgl.widget.update: my_label
             text: "Привет"
 
-# LVGL — метка с текстом
+# Создаем надпись "Привет"
 lvgl:
   - id: my_lvgl
     widgets:
@@ -93,22 +93,10 @@ lvgl:
           text_color: 0xFFFFFF
           text_font: montserrat_40
 
-# Реле (3 штуки)
+# Кнопка для управления подсветкой (GPIO38)
 switch:
   - platform: gpio
-    id: relay_1
-    name: "Реле 1"
-    pin: GPIO16
-    restore_mode: ALWAYS_OFF
-
-  - platform: gpio
-    id: relay_2
-    name: "Реле 2"
-    pin: GPIO17
-    restore_mode: ALWAYS_OFF
-
-  - platform: gpio
-    id: relay_3
-    name: "Реле 3"
-    pin: GPIO18
-    restore_mode: ALWAYS_OFF
+    id: backlight
+    name: "Подсветка"
+    pin: GPIO38
+    restore_mode: ALWAYS_ON
