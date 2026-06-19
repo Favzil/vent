@@ -16,19 +16,21 @@ api:
 wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
+  fast_connect: true
 
-# ИСПРАВЛЕННЫЙ I2C: SCL на GPIO45
+# I2C для сенсора (SCL на GPIO45)
 i2c:
   - id: bus_i2c
     sda: GPIO19
-    scl: GPIO45      # <-- Исправлено: был GPIO20
+    scl: GPIO45
     frequency: 400kHz
 
+# Сенсор: interrupt_pin на GPIO21 (НЕ НА GPIO38!)
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
-    interrupt_pin: GPIO38
+    interrupt_pin: GPIO21    # <-- ИСПРАВЛЕНО: был GPIO38
     address: 0x5D
     on_touch:
       then:
@@ -56,6 +58,7 @@ lvgl:
         align: CENTER
         text: "Привет"
 
+# Подсветка: GPIO38 (только здесь!)
 switch:
   - platform: gpio
     id: backlight
