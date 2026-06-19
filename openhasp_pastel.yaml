@@ -16,16 +16,14 @@ api:
 wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
-  fast_connect: true
 
-# I2C для сенсора (GPIO19 и GPIO20 конфликтуют с USB, но это стандарт для данной платы)
+# ИСПРАВЛЕННЫЙ I2C: SCL на GPIO45
 i2c:
   - id: bus_i2c
     sda: GPIO19
-    scl: GPIO20
+    scl: GPIO45      # <-- Исправлено: был GPIO20
     frequency: 400kHz
 
-# Сенсор: interrupt_pin вынесен на GPIO38
 touchscreen:
   - platform: gt911
     id: my_touch
@@ -42,50 +40,22 @@ spi:
     clk_pin: GPIO48
     mosi_pin: GPIO47
 
-# ДИСПЛЕЙ: ТОЧНАЯ РАСПИНОВКА ДЛЯ ST7701
 display:
   - platform: mipi_rgb
     id: my_display
-    model: ST7701S  # Указываем модель контроллера
-
-    # Полная распиновка из документации [citation:3][citation:6]
-    data_pins:
-      red:   [GPIO11, GPIO12, GPIO13, GPIO14, GPIO0]
-      green: [GPIO8, GPIO20, GPIO3, GPIO46, GPIO9, GPIO10]
-      blue:  [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]
-
-    de_pin: GPIO18
-    pclk_pin: GPIO21
-    hsync_pin: GPIO16
-    vsync_pin: GPIO17
-    reset_pin: GPIO39  # Пин сброса дисплея
-    cs_pin: GPIO39     # CS пин для SPI инициализации
-
-    # Тайминги из документации [citation:6]
-    hsync_pulse_width: 8
-    hsync_back_porch: 50
-    hsync_front_porch: 10
-    vsync_pulse_width: 8
-    vsync_back_porch: 20
-    vsync_front_porch: 10
-    pclk_frequency: 16MHz
-
+    model: GUITION-4848S040
     rotation: 0
-    dimensions:
-      width: 480
-      height: 480
+    spi_id: display_spi
+    cs_pin: GPIO39
 
-# LVGL
 lvgl:
   displays:
     - my_display
   widgets:
     - label:
-        id: my_label
         align: CENTER
         text: "Привет"
 
-# Подсветка: ПИН 38 ОСТАВЛЕН ТОЛЬКО ЗДЕСЬ
 switch:
   - platform: gpio
     id: backlight
