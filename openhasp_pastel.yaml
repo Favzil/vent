@@ -20,20 +20,21 @@ wifi:
 logger:
 api:
 
-# I2C для сенсора GT911 (пины из твоего описания)
+# I2C для сенсора GT911
+# Используем другие пины, не конфликтующие с USB-JTAG
 i2c:
   - id: bus_i2c
-    sda: GPIO19
-    scl: GPIO20
+    sda: GPIO8
+    scl: GPIO9
     frequency: 400kHz
 
-# Сенсор GT911
+# Сенсор GT911 (без reset_pin, если он не подключен)
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
-    interrupt_pin: GPIO21
-    reset_pin: GPIO22
+    interrupt_pin: GPIO10
+    # reset_pin убран, т.к. GPIO22 недоступен на ESP32-S3
     address: 0x5D
     on_touch:
       then:
@@ -61,8 +62,8 @@ display:
       - GPIO13
       - GPIO14
       - GPIO15
-    cs_pin: GPIO39
-    dc_pin: GPIO38
+    cs_pin: GPIO38
+    dc_pin: GPIO39
     reset_pin: GPIO40
     wr_pin: GPIO41
     rd_pin: GPIO42
@@ -91,7 +92,7 @@ lvgl:
           text_color: 0xFFFFFF
           text_font: montserrat_40
 
-# Реле (3 штуки) - замени GPIO на свои пины
+# Реле (3 штуки) - используем доступные пины
 switch:
   - platform: gpio
     id: relay_1
