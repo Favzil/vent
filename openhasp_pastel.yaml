@@ -78,21 +78,24 @@ display:
       height: 480
 
 # ==========================================
-# LVGL - самый простой рабочий вариант
+# LVGL: Создаём надпись и обновляем её при готовности
 # ==========================================
 lvgl:
   displays:
     - my_display
   on_ready:
     then:
-      - lvgl.widget.create:
-          type: label
+      - lvgl.label.update:
           id: my_label
-          align: CENTER
           text: "Привет"
-          style:
-            text_color: 0xFFFFFF
-            text_font: montserrat_40
+  widgets:
+    - label:
+        id: my_label
+        align: CENTER
+        text: "Привет"
+        style:
+          text_color: 0xFFFFFF
+          text_font: montserrat_40
 
 # Подсветка
 switch:
