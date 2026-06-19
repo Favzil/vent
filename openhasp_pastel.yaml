@@ -9,7 +9,15 @@ esp32:
     type: esp-idf
     version: recommended
 
-# Включаем отладку, чтобы видеть сообщения
+# ==========================================
+# ДОБАВЛЯЕМ КОМПОНЕНТ PSRAM
+# У твоей платы 8 МБайт PSRAM в режиме OPI
+# ==========================================
+psram:
+  mode: octal      # Для 8 МБайт PSRAM используется octal режим
+  speed: 80MHz     # Поддерживаемая частота
+
+# Включаем отладку
 logger:
 api:
 
@@ -22,8 +30,8 @@ wifi:
 # Настройка I2C для сенсора GT911
 i2c:
   - id: bus_i2c
-    sda: GPIO19  # SDA для сенсора
-    scl: GPIO20  # SCL для сенсора
+    sda: GPIO19
+    scl: GPIO20
     frequency: 400kHz
 
 # Сенсор GT911
@@ -38,13 +46,12 @@ touchscreen:
         - logger.log: "Сенсор нажат!"
 
 # ==========================================
-# ГЛАВНОЕ: Настройка дисплея ST7701S
-# Используем компонент mipi_rgb
+# Настройка дисплея ST7701S через mipi_rgb
 # ==========================================
 display:
   - platform: mipi_rgb
     id: my_display
-    model: ST7701S  # Модель драйвера
+    model: ST7701S
     
     # Пины данных в порядке: R0-R4, G0-G5, B0-B4 (всего 16 бит)
     data_pins:
@@ -53,11 +60,11 @@ display:
       blue:  [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]      # B0-B4
     
     # Сигналы управления дисплеем
-    de_pin: GPIO18      # Data Enable
-    pclk_pin: GPIO21    # Pixel Clock
-    hsync_pin: GPIO16   # Horizontal Sync
-    vsync_pin: GPIO17   # Vertical Sync
-    reset_pin: GPIO39   # Сброс дисплея
+    de_pin: GPIO18
+    pclk_pin: GPIO21
+    hsync_pin: GPIO16
+    vsync_pin: GPIO17
+    reset_pin: GPIO39
     
     # Тайминги для ST7701
     hsync_pulse_width: 8
@@ -93,7 +100,7 @@ lvgl:
           text_color: 0xFFFFFF
           text_font: montserrat_40
 
-# Кнопка для управления подсветкой (GPIO38)
+# Подсветка
 switch:
   - platform: gpio
     id: backlight
