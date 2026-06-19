@@ -14,14 +14,9 @@ psram:
 logger:
 
 api:
-  # Убираем шифрование
-  # encryption:
-  #   key: !secret encryption_key
 
 ota:
   - platform: esphome
-    # Убираем пароль
-    # password: !secret ota_password
     on_begin:
       - light.turn_off:
           id: display_backlight
@@ -122,14 +117,16 @@ touchscreen:
     id: tft_touch
     display: tft_display
 
-# LVGL
+# ==========================================
+# LVGL - ИСПРАВЛЕННЫЙ ВАРИАНТ
+# ==========================================
 lvgl:
   displays:
     - tft_display
   widgets:
     - label:
+        id: my_label
         align: CENTER
         text: "Привет"
-        style:
-          text_color: 0xFFFFFF
-          text_font: montserrat_40
+        text_color: 0xFFFFFF
+        text_font: montserrat_40
