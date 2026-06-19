@@ -25,12 +25,12 @@ i2c:
     scl: GPIO45
     frequency: 400kHz
 
-# Сенсор: interrupt_pin на GPIO21 (НЕ НА GPIO38!)
+# Сенсор: interrupt_pin на GPIO40 (НЕ НА GPIO21!)
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
-    interrupt_pin: GPIO21    # <-- ИСПРАВЛЕНО: был GPIO38
+    interrupt_pin: GPIO40
     address: 0x5D
     on_touch:
       then:
@@ -58,7 +58,7 @@ lvgl:
         align: CENTER
         text: "Привет"
 
-# Подсветка: GPIO38 (только здесь!)
+# Подсветка: GPIO38
 switch:
   - platform: gpio
     id: backlight
