@@ -13,19 +13,12 @@ psram:
 
 logger:
 
-api:
-
-ota:
-  - platform: esphome
-    on_begin:
-      - light.turn_off:
-          id: display_backlight
-          transition_length: 0s
-      - lambda: "id(display_backlight).loop();"
-
-wifi:
-  ssid: "ваш_wi-fi"
-  password: "ваш_пароль"
+# ==========================================
+# УБРАНО ВСЁ, ЧТО СВЯЗАНО С ИНТЕРНЕТОМ
+# - wifi (удалён)
+# - api (удалён)
+# - ota (удалён)
+# ==========================================
 
 # Реле
 switch:
@@ -117,15 +110,12 @@ touchscreen:
     id: tft_touch
     display: tft_display
 
-# ==========================================
-# LVGL - ИСПРАВЛЕННЫЙ ВАРИАНТ
-# ==========================================
+# LVGL
 lvgl:
   displays:
     - tft_display
   widgets:
     - label:
-        id: my_label
         align: CENTER
         text: "Привет"
         text_color: 0xFFFFFF
