@@ -1,5 +1,5 @@
 # ESPHome конфигурация для ESP32-4848S040C
-# с параллельным дисплеем ST7701 и сенсором GT911
+# с параллельным дисплеем ST7701 через компонент mipi_rgb
 
 esphome:
   name: esp32-display
@@ -21,31 +21,31 @@ logger:
 api:
 
 # I2C для сенсора GT911
-# Используем другие пины, не конфликтующие с USB-JTAG
 i2c:
   - id: bus_i2c
     sda: GPIO8
     scl: GPIO9
     frequency: 400kHz
 
-# Сенсор GT911 (без reset_pin, если он не подключен)
+# Сенсор GT911
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
     interrupt_pin: GPIO10
-    # reset_pin убран, т.к. GPIO22 недоступен на ESP32-S3
     address: 0x5D
     on_touch:
       then:
         - logger.log: "Экран нажат!"
 
-# Дисплей ST7701 через параллельный интерфейс
+# ==============================================
+# ГЛАВНОЕ ИЗМЕНЕНИЕ: Используем mipi_rgb
+# ==============================================
 display:
-  - platform: ili9xxx
+  - platform: mipi_rgb
     id: my_display
-    model: ST7701
-    data_pins:
+    model: ST7701S  # Указываем модель
+    data_pins:      # 16-битные пины данных
       - GPIO0
       - GPIO1
       - GPIO2
@@ -62,17 +62,18 @@ display:
       - GPIO13
       - GPIO14
       - GPIO15
-    cs_pin: GPIO38
-    dc_pin: GPIO39
-    reset_pin: GPIO40
-    wr_pin: GPIO41
-    rd_pin: GPIO42
+    hsync_pin: GPIO38  # Горизонтальная синхронизация
+    vsync_pin: GPIO39  # Вертикальная синхронизация
+    pclk_pin: GPIO41   # Пиксельная синхронизация
+    de_pin: GPIO40     # Разрешение данных
+    reset_pin: GPIO42  # Сброс дисплея
     rotation: 0
     color_order: RGB
     invert_colors: False
     dimensions:
       width: 480
       height: 480
+    pclk_frequency: 16MHz  # Важно: стабильная частота для ST7701 [citation:3]
     lvgl:
       id: my_lvgl
       on_ready:
@@ -92,7 +93,7 @@ lvgl:
           text_color: 0xFFFFFF
           text_font: montserrat_40
 
-# Реле (3 штуки) - используем доступные пины
+# Реле (3 штуки)
 switch:
   - platform: gpio
     id: relay_1
