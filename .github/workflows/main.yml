@@ -24,4 +24,4 @@ jobs:
 
       - name: Compile firmware
         run: |
-          esphome run vent.yaml
+          esphome run openhasp_pastel.yaml
