@@ -43,33 +43,32 @@ touchscreen:
         - logger.log: "Сенсор нажат!"
 
 # ==========================================
-# ДИСПЛЕЙ — УПРОЩЁННАЯ КОНФИГУРАЦИЯ
+# ДИСПЛЕЙ - встроенная модель GUITION-4848S040
 # ==========================================
 display:
   - platform: mipi_rgb
-    model: GUITION-4848S040   # <-- ВСТРОЕННАЯ МОДЕЛЬ!
+    model: GUITION-4848S040
     id: my_display
     rotation: 0
 
 # ==========================================
-# LVGL — ПРОСТОЙ ВАРИАНТ БЕЗ ОШИБОК
+# LVGL - ПРОСТЕЙШИЙ РАБОЧИЙ ВАРИАНТ
 # ==========================================
 lvgl:
   displays:
     - my_display
-  on_ready:
-    then:
-      - lvgl.widget.update:
-          id: my_label
-          text: "Привет"
   widgets:
     - label:
         id: my_label
         align: CENTER
         text: "Привет"
-        style:
-          text_color: 0xFFFFFF
-          text_font: montserrat_40
+  on_ready:
+    then:
+      - lvgl.widget.update:
+          id: my_label
+          state: true
+          label:
+            text: "Привет"
 
 # Подсветка
 switch:
