@@ -4,9 +4,9 @@ esphome:
 esp32:
   board: esp32-s3-devkitc-1
   framework:
-    type: esp-idf  # Обязательно для этого дисплея
+    type: esp-idf
 
-# Включаем PSRAM — обязательно для работы с экраном
+# Включаем PSRAM
 psram:
   mode: octal
   speed: 80MHz
@@ -18,7 +18,7 @@ wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
 
-# Настройка сенсорного экрана (I2C)
+# I2C для сенсора
 i2c:
   - id: bus_i2c
     sda: GPIO19
@@ -32,12 +32,23 @@ touchscreen:
     interrupt_pin: GPIO38
     address: 0x5D
 
-# ★ САМОЕ ГЛАВНОЕ: настройка дисплея
+# ★ ДОБАВЛЯЕМ SPI ДЛЯ ИНИЦИАЛИЗАЦИИ ДИСПЛЕЯ
+spi:
+  - id: display_spi
+    clk_pin: GPIO10
+    mosi_pin: GPIO11
+    # MISO не требуется
+    interface: hardware
+    frequency: 1MHz
+
+# Настройка дисплея
 display:
   - platform: mipi_rgb
     id: my_display
-    model: GUITION-4848S040  # <-- Это ключевая строка!
+    model: GUITION-4848S040
     rotation: 0
+    # Привязываем SPI к дисплею
+    spi_id: display_spi
 
 # LVGL — создаём надпись "Привет"
 lvgl:
@@ -47,8 +58,11 @@ lvgl:
     - label:
         align: CENTER
         text: "Привет"
+        style:
+          text_color: 0xFFFFFF
+          text_font: montserrat_40
 
-# Включаем подсветку
+# Подсветка
 switch:
   - platform: gpio
     id: backlight
