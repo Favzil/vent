@@ -18,11 +18,21 @@ wifi:
 logger:
 api:
 
+# Явно объявляем SPI (это было пропущено)
+spi:
+  - id: main_spi
+    clk_pin: GPIO14      # замени на свой SCLK
+    mosi_pin: GPIO13     # замени на свой MOSI
+    miso_pin: GPIO12     # замени на свой MISO (если не используется, можно оставить)
+
 # Настройка дисплея (ST7701S, 480x480)
 display:
   - platform: st7701s
     id: my_display
-    cs_pin: 39           # CS пин (может отличаться)
+    spi_id: main_spi     # привязываем к объявленному SPI
+    cs_pin: GPIO39       # CS пин (может отличаться)
+    dc_pin: GPIO38       # DC пин (обязательно добавь)
+    reset_pin: GPIO40    # Reset пин (обязательно добавь)
     data_rate: 2MHz
     spi_mode: MODE3
     color_order: RGB
