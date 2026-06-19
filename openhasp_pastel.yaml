@@ -78,18 +78,19 @@ display:
       height: 480
 
 # ==========================================
-# LVGL объявляем отдельно
+# LVGL объявляем отдельно (исправленный синтаксис)
 # ==========================================
 lvgl:
-  - id: my_lvgl
-    display: my_display  # Привязываем к дисплею
-    on_ready:
-      then:
-        - lvgl.widget.update: my_label
+  displays:
+    - my_display  # Правильно: displays, а не display
+  on_ready:
+    then:
+      - lvgl.label.update:
+          id: my_label
           text: "Привет"
-    widgets:
-      - id: my_label
-        type: label
+  widgets:
+    - label:
+        id: my_label
         align: CENTER
         text: "Привет"
         style:
