@@ -1,45 +1,79 @@
 # ESPHome конфигурация для ESP32-4848S040C
-# Отображает слово "Привет" по центру экрана
+# с параллельным дисплеем ST7701 и сенсором GT911
 
 esphome:
   name: esp32-display
+  comment: "ESP32-4848S040C с дисплеем 4.3" 480x480
 
 esp32:
   board: esp32-s3-devkitc-1
   framework:
-    type: esp-idf        # обязательно для ST7701S
+    type: esp-idf
+    version: recommended
 
 # Wi-Fi (замени на свои данные)
 wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
 
-# Для отладки
+# Включаем отладку
 logger:
 api:
 
-# Явно объявляем SPI (это было пропущено)
-spi:
-  - id: main_spi
-    clk_pin: GPIO14      # замени на свой SCLK
-    mosi_pin: GPIO13     # замени на свой MOSI
-    miso_pin: GPIO12     # замени на свой MISO (если не используется, можно оставить)
+# I2C для сенсора GT911 (пины из твоего описания)
+i2c:
+  - id: bus_i2c
+    sda: GPIO19
+    scl: GPIO20
+    frequency: 400kHz
 
-# Настройка дисплея (ST7701S, 480x480)
+# Сенсор GT911
+touchscreen:
+  - platform: gt911
+    id: my_touch
+    i2c_id: bus_i2c
+    interrupt_pin: GPIO21   # обычно используется, уточни по схеме
+    reset_pin: GPIO22       # обычно используется, уточни по схеме
+    address: 0x5D
+    on_touch:
+      then:
+        - logger.log: "Экран нажат!"
+
+# Дисплей ST7701 через параллельный интерфейс (ESP32-S3 Parallel)
 display:
-  - platform: st7701s
+  - platform: ili9xxx       # ili9xxx поддерживает параллельный режим
     id: my_display
-    spi_id: main_spi     # привязываем к объявленному SPI
-    cs_pin: GPIO39       # CS пин (может отличаться)
-    dc_pin: GPIO38       # DC пин (обязательно добавь)
-    reset_pin: GPIO40    # Reset пин (обязательно добавь)
-    data_rate: 2MHz
-    spi_mode: MODE3
+    model: ST7701
+    # Параллельный интерфейс (8-бит или 16-бит)
+    data_pins:
+      - GPIO0   # D0
+      - GPIO1   # D1
+      - GPIO2   # D2
+      - GPIO3   # D3
+      - GPIO4   # D4
+      - GPIO5   # D5
+      - GPIO6   # D6
+      - GPIO7   # D7
+      - GPIO8   # D8
+      - GPIO9   # D9
+      - GPIO10  # D10
+      - GPIO11  # D11
+      - GPIO12  # D12
+      - GPIO13  # D13
+      - GPIO14  # D14
+      - GPIO15  # D15
+    cs_pin: GPIO39          # Chip Select
+    dc_pin: GPIO38          # Data/Command
+    reset_pin: GPIO40       # Reset
+    wr_pin: GPIO41          # Write (WR)
+    rd_pin: GPIO42          # Read (RD) - может не использоваться
+    rotation: 0
     color_order: RGB
     invert_colors: False
     dimensions:
       width: 480
       height: 480
+    # LVGL для отображения текста
     lvgl:
       id: my_lvgl
       on_ready:
@@ -58,3 +92,36 @@ lvgl:
         style:
           text_color: 0xFFFFFF
           text_font: montserrat_40
+
+# Реле (3 штуки)
+switch:
+  - platform: gpio
+    id: relay_1
+    name: "Реле 1"
+    pin: GPIO16
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: relay_2
+    name: "Реле 2"
+    pin: GPIO17
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: relay_3
+    name: "Реле 3"
+    pin: GPIO18
+    restore_mode: ALWAYS_OFF
+
+# SD-карта (SPI)
+spi:
+  - id: sd_spi
+    clk_pin: GPIO10
+    mosi_pin: GPIO11
+    miso_pin: GPIO12
+
+sdmmc:
+  - id: sd_card
+    spi_id: sd_spi
+    cs_pin: GPIO13
+    mode: SPI
