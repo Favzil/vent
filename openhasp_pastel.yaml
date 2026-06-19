@@ -78,11 +78,11 @@ display:
       height: 480
 
 # ==========================================
-# LVGL объявляем отдельно (исправленный синтаксис)
+# LVGL с правильным синтаксисом
 # ==========================================
 lvgl:
   displays:
-    - my_display  # Правильно: displays, а не display
+    - my_display
   on_ready:
     then:
       - lvgl.label.update:
@@ -93,7 +93,7 @@ lvgl:
         id: my_label
         align: CENTER
         text: "Привет"
-        style:
+        styles:
           text_color: 0xFFFFFF
           text_font: montserrat_40
 
