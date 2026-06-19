@@ -7,25 +7,23 @@ esp32:
   framework:
     type: arduino
 
-# Включение логирования
 logger:
 
-# Включение API для Home Assistant
 api:
   encryption:
-    key: "ваш-ключ-шифрования"
+    key: "12345678901234567890123456789012"
 
 ota:
-  password: "ваш-ota-пароль"
+  - platform: esphome
+    password: "my_ota_password_123"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
-  # Включение запасной точки доступа на случай проблем с WiFi
   ap:
     ssid: "OpenHASP Pastel"
-    password: "запасной-пароль"
+    password: "fallback123"
 
 captive_portal:
 openhasp:
