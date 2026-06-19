@@ -33,48 +33,6 @@ wifi:
 
 captive_portal:
 
-# Ваша конфигурация OpenHASP
-openhasp:
-  plate05:
-    objects:
-      - obj: p1b3
-        properties:
-          text: "{{ states('sensor.bedroom_temp') | round(0) }}°C"
-      - obj: p1b6
-        properties:
-          text: "{{ states('sensor.bedroom_humidity') | round(0) }}%"
-      - obj: p1b9
-        event:
-          down:
-            - service: scene.turn_on
-esphome:
-  name: openhasp_pastel
-  friendly_name: "OpenHASP Pastel"
-
-esp32:
-  board: esp32dev
-  framework:
-    type: arduino
-
-logger:
-
-api:
-  encryption:
-    key: "12345678901234567890123456789012"
-
-ota:
-  - platform: esphome
-    password: "my_ota_password_123"
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-
-  ap:
-    ssid: "OpenHASP Pastel"
-    password: "fallback123"
-
-captive_portal:
 openhasp:
   plate05:
     objects:
