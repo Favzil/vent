@@ -1,12 +1,13 @@
 esphome:
   name: esp32-display
+  comment: "ESP32-4848S040C 4.0 inch Display"
 
 esp32:
   board: esp32-s3-devkitc-1
   framework:
     type: esp-idf
 
-# Включаем PSRAM
+# Включаем PSRAM (обязательно для mipi_rgb)
 psram:
   mode: octal
   speed: 80MHz
@@ -17,26 +18,31 @@ api:
 wifi:
   ssid: "ваш_wi-fi"
   password: "ваш_пароль"
+  fast_connect: true
 
-# I2C для сенсора
+# I2C для сенсора GT911
 i2c:
   - id: bus_i2c
     sda: GPIO19
     scl: GPIO20
     frequency: 400kHz
 
+# Сенсор GT911
 touchscreen:
   - platform: gt911
     id: my_touch
     i2c_id: bus_i2c
     interrupt_pin: GPIO38
     address: 0x5D
+    on_touch:
+      then:
+        - logger.log: "Сенсор нажат!"
 
 # SPI для инициализации дисплея
 spi:
   - id: display_spi
-    clk_pin: GPIO48   # Исправлено согласно документации [citation:10]
-    mosi_pin: GPIO47  # Исправлено согласно документации [citation:10]
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
 
 # Настройка дисплея
 display:
@@ -45,20 +51,18 @@ display:
     model: GUITION-4848S040
     rotation: 0
     spi_id: display_spi
-    cs_pin: GPIO39    # Добавлен CS пин согласно документации [citation:10]
-    data_rate: 2MHz   # Параметр перенесен в блок display [citation:2]
+    cs_pin: GPIO39
+    data_rate: 2MHz
 
-# LVGL — создаём надпись "Привет"
+# LVGL - без стилей (стандартная тема)
 lvgl:
   displays:
     - my_display
   widgets:
     - label:
+        id: my_label
         align: CENTER
         text: "Привет"
-        style:
-          text_color: 0xFFFFFF
-          text_font: montserrat_40
 
 # Подсветка
 switch:
