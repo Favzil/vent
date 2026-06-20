@@ -62,7 +62,7 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ДИСПЛЕЙ (исправленный)
+# ДИСПЛЕЙ
 display:
   - platform: st7701s
     id: tft_display
@@ -71,8 +71,8 @@ display:
       height: 480
     spi_mode: MODE3
     data_rate: 2MHz
-    color_order: BGR           # ИЗМЕНЕНО
-    invert_colors: True        # ИЗМЕНЕНО
+    color_order: BGR
+    invert_colors: True
     cs_pin: GPIO39
     de_pin: GPIO18
     hsync_pin: GPIO16
@@ -103,14 +103,10 @@ touchscreen:
     id: tft_touch
     display: tft_display
 
-# LVGL (исправленный)
+# LVGL (исправленный, без fonts)
 lvgl:
   displays:
     - tft_display
-  fonts:
-    - montserrat_40:
-        bpp: 4
-        glyphs: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяПривет "
   widgets:
     - label:
         align: CENTER
