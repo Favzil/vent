@@ -72,7 +72,7 @@ display:
     spi_mode: MODE3
     data_rate: 2MHz
     color_order: BGR
-    invert_colors: True
+    invert_colors: False
     cs_pin: GPIO39
     de_pin: GPIO18
     hsync_pin: GPIO16
