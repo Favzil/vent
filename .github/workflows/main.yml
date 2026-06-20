@@ -16,10 +16,10 @@ jobs:
         run: |
           pip install esphome
 
-      # ★ УБИРАЕМ "|| true" — пусть ошибка остановит сборку ★
+      # ★ ПРАВИЛЬНОЕ ИМЯ ФАЙЛА ★
       - name: Compile firmware
         run: |
-          esphome compile vent.yaml
+          esphome compile openhasp_pastel.yaml
 
       - name: List all files
         run: |
