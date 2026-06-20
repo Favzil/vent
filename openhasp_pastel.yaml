@@ -24,46 +24,6 @@ font:
     size: 24
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?- '
 
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_65
-    size: 65
-    glyphs: 'Экономичный0123456789.,!?- '
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_28
-    size: 28
-    glyphs: '0123456789.: '
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_22
-    size: 22
-    glyphs: 'KhaKar-0320123456789.,!?- '
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_20
-    size: 20
-    glyphs: '0123456789%'
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_18
-    size: 18
-    glyphs: '\uF013\uF015\uF0E7'
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_14
-    size: 14
-    glyphs: '°C0123456789.,!?- '
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_12
-    size: 12
-    glyphs: 'Mon 28 Mar0123456789.,!?- '
-
-  - file: "fonts/montserrat.ttf"
-    id: montserrat_10
-    size: 10
-    glyphs: 'С улицы На улицу Из дома В дом Приточка Вытяжка0123456789%'
-
 # Реле
 switch:
   - platform: gpio
@@ -175,7 +135,7 @@ lvgl:
                   border_opa: 0%
                   radius: 8
                   text_color: 0xFFFFFF
-                  text_font: montserrat_22
+                  text_font: cyrillic_font_24
               - label:
                   id: Date
                   x: 310
@@ -186,7 +146,7 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_12
+                  text_font: cyrillic_font_24
 
         - obj:
             id: t-indoor
@@ -216,7 +176,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_14
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262141723_8sjefb8w2
                   x: 35
@@ -227,7 +187,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_22
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262141723_srplhrgb8
                   x: 2
@@ -238,7 +198,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
@@ -279,7 +239,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_14
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262306198_b9dnjbboi
                   x: 35
@@ -290,7 +250,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_22
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262306198_igmmcl5k8
                   x: 2
@@ -301,7 +261,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262306198_l8xm8o3gl
                   x: 2
@@ -342,7 +302,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_14
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262307812_3m3qdg397
                   x: 35
@@ -353,7 +313,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_22
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262307812_n406bgqc4
                   x: 2
@@ -364,7 +324,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262307812_cmiqci34b
                   x: 2
@@ -405,7 +365,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_14
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262308709_dnoiw7el6
                   x: 35
@@ -416,7 +376,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: montserrat_22
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262308709_5q85ngwas
                   x: 2
@@ -427,7 +387,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262308709_k5ilzmvnq
                   x: 2
@@ -493,7 +453,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_20
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_a6nmh00ld
                   x: 4
@@ -504,7 +464,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
 
         - obj:
             id: Vityazh-filter
@@ -559,7 +519,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_20
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_2lq5vokc6
                   x: 4
@@ -570,7 +530,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
 
         - label:
             id: Wi-Fi
@@ -579,7 +539,7 @@ lvgl:
             width: 50
             height: 33
             text: "\uF1EB"
-            text_font: montserrat_22
+            text_font: cyrillic_font_24
             text_align: CENTER
             text_color: 0x690B98
 
@@ -593,7 +553,7 @@ lvgl:
             text_color: 0xF1F5F9
             text_align: CENTER
             long_mode: CLIP
-            text_font: montserrat_28
+            text_font: cyrillic_font_40
 
         - textarea:
             id: Econom
@@ -612,7 +572,7 @@ lvgl:
             outline_opa: 0%
             shadow_opa: 0%
             text_color: 0x0EC852
-            text_font: montserrat_65
+            text_font: cyrillic_font_40
 
         - obj:
             id: widget_1781261697547_kzlml3d0h
@@ -645,7 +605,7 @@ lvgl:
                   width: 119
                   height: 16
                   text: "\uF013"
-                  text_font: montserrat_18
+                  text_font: cyrillic_font_24
                   text_align: CENTER
                   text_color: 0x8E9FB8
               - label:
@@ -658,7 +618,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_h7yh4d9zc
                   x: 30
@@ -669,7 +629,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: montserrat_10
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_w2phehbuq
                   x: 30
@@ -677,7 +637,7 @@ lvgl:
                   width: 119
                   height: 16
                   text: "\uF015"
-                  text_font: montserrat_18
+                  text_font: cyrillic_font_24
                   text_align: CENTER
                   text_color: 0x10B981
               - button:
@@ -715,7 +675,7 @@ lvgl:
                         width: 119
                         height: 16
                         text: "\uF0E7"
-                        text_font: montserrat_18
+                        text_font: cyrillic_font_24
                         text_align: CENTER
                         text_color: 0x8E9FB8
                     - label:
@@ -728,7 +688,7 @@ lvgl:
                         text_color: 0x8E9FB8
                         text_align: CENTER
                         long_mode: CLIP
-                        text_font: montserrat_10
+                        text_font: cyrillic_font_24
 
         - button:
             id: stop
@@ -743,9 +703,10 @@ lvgl:
             shadow_opa: 0%
             text_color: 0xFFFFFF
             text_opa: 100%
-            text_font: montserrat_26
+            text_font: cyrillic_font_40
             opa: 94%
             widgets:
               - label:
                   text: "СТОП"
                   text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
