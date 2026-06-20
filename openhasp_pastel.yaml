@@ -22,7 +22,13 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
+    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-°C '
+
+     - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_12
+    size: 24
     glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?- '
+
 
 # Реле
 switch:
@@ -135,7 +141,7 @@ lvgl:
                   border_opa: 0%
                   radius: 8
                   text_color: 0xFFFFFF
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_12
               - label:
                   id: Date
                   x: 310
@@ -198,7 +204,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_12
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
