@@ -13,9 +13,12 @@ psram:
 
 logger:
 
-# ★ ШРИФТ С ПОДДЕРЖКОЙ РУССКОГО ЯЗЫКА ★
+# ★ ЛОКАЛЬНЫЙ ШРИФТ С ПОДДЕРЖКОЙ РУССКОГО ЯЗЫКА ★
+# 1. Скачайте файл Roboto-Regular.ttf с https://fonts.google.com/specimen/Roboto
+# 2. Создайте папку "fonts" рядом с вашим YAML файлом
+# 3. Положите скачанный файл в папку "fonts"
 font:
-  - file: "https://github.com/google/fonts/raw/main/ofl/roboto/Roboto-Regular.ttf"
+  - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
     glyphs: |
@@ -97,4 +100,4 @@ lvgl:
               align: CENTER
               text: "Привет мир!"  # ★ РУССКИЙ ТЕКСТ ★
               text_color: 0x000000  # Чёрный цвет (из-за инверсии будет белым)
-              text_font: cyrillic_font_40  # ★ ИСПОЛЬЗУЕМ РУССКИЙ ШРИФТ ★
+              text_font: cyrillic_font_40  # ★ ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ШРИФТ ★
