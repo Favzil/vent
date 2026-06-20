@@ -130,16 +130,9 @@ lvgl:
                   id: KhaKar
                   x: 10
                   y: 0
-                  width: 130
+                  width: 160
                   height: 45
                   text: "KhaKar-032"
-                  placeholder_text: "Enter text here"
-                  bg_color: 0x48E0E5
-                  bg_opa: 0%
-                  border_width: 1
-                  border_color: 0x4B5563
-                  border_opa: 0%
-                  radius: 8
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_12
               - label:
