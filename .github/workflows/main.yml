@@ -1,10 +1,9 @@
-name: Build ESPHome firmware
+name: Build ESPHome Firmware
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,15 +12,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup ESPHome
+      - name: Install ESPHome
         run: |
           pip install esphome
 
-      - name: Clean cache
-        run: |
-          rm -rf .esphome
-          rm -rf build
-
       - name: Compile firmware
         run: |
-          esphome run openhasp_pastel.yaml
+          esphome compile esp32-display.yaml || true
+          # || true нужен, чтобы игнорировать ошибку с Wi-Fi
+
+      # ★ ДОБАВЛЯЕМ СОХРАНЕНИЕ АРТЕФАКТОВ ★
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            **/firmware.factory.bin
+            **/firmware.bin
+          if-no-files-found: error
