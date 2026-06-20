@@ -81,5 +81,5 @@ lvgl:
     - label:
         align: CENTER
         text: "Hello"
-        text_color: 0xFFFFFF  # Белый текст
+        text_color: 0x0000FF
         text_font: montserrat_40
