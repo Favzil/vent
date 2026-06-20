@@ -179,7 +179,7 @@ lvgl:
             y: 0
             width: 478
             height: 35
-            bg_color: 0xFF69B4
+            bg_color: 0xA00641
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -195,7 +195,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: Date
                   x: 240
@@ -235,7 +235,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262141723_8sjefb8w2
                   x: 35
@@ -246,7 +246,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262141723_srplhrgb8
                   x: 2
@@ -257,7 +257,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
@@ -297,7 +297,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262306198_b9dnjbboi
                   x: 35
@@ -319,7 +319,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_12
               - line:
                   id: widget_1781262306198_l8xm8o3gl
                   x: 2
@@ -359,7 +359,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262307812_3m3qdg397
                   x: 35
@@ -370,7 +370,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262307812_n406bgqc4
                   x: 2
@@ -381,7 +381,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_12
               - line:
                   id: widget_1781262307812_cmiqci34b
                   x: 2
@@ -421,7 +421,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262308709_dnoiw7el6
                   x: 35
@@ -432,7 +432,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262308709_5q85ngwas
                   x: 2
@@ -443,7 +443,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_12
               - line:
                   id: widget_1781262308709_k5ilzmvnq
                   x: 2
