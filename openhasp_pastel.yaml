@@ -62,7 +62,7 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ДИСПЛЕЙ
+# ДИСПЛЕЙ (чёрный фон, белый текст)
 display:
   - platform: mipi_rgb
     id: tft_display
@@ -71,15 +71,23 @@ display:
     cs_pin: GPIO39
     invert_colors: True
 
-# LVGL (исправленный)
+# ★ ИСПРАВЛЕННЫЙ БЛОК LVGL С ГОЛУБЫМ ФОНОМ ★
 lvgl:
   displays:
     - tft_display
   rotation: 180
-  # color_format УБРАН
   widgets:
-    - label:
+    # ★ ДОБАВЛЯЕМ КОНТЕЙНЕР НА ВЕСЬ ЭКРАН ★
+    - obj:
+        id: background_container
+        width: 480
+        height: 480
         align: CENTER
-        text: "Hello"      # Пока оставляем латиницу для теста
-        text_color: 0xFFFFFF  # Белый
-        text_font: montserrat_40
+        bg_color: 0x0000FF  # ★ ГОЛУБОЙ ФОН (инвертирован в жёлтый, но вы можете поменять) ★
+        # ★ ТЕКСТ ВНУТРИ КОНТЕЙНЕРА ★
+        widgets:
+          - label:
+              align: CENTER
+              text: "Привет"
+              text_color: 0x000000  # Белый текст (инвертировано)
+              text_font: montserrat_40
