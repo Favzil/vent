@@ -62,22 +62,24 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ★ ДИСПЛЕЙ С ПРАВИЛЬНЫМ ПОВОРОТОМ ★
+# ДИСПЛЕЙ (БЕЗ rotation)
 display:
   - platform: mipi_rgb
     id: tft_display
     model: GUITION-4848S040
-    rotation: 180          # ИСПРАВЛЯЕМ ПЕРЕВЁРНУТЫЙ ТЕКСТ
     spi_id: lcd_spi
     cs_pin: GPIO39
+    invert_colors: True   # Белый текст на чёрном фоне
+    # rotation УБРАН ОТСЮДА
 
-# ★ LVGL С ЧЁРНЫМ ФОНОМ И БЕЛЫМ ТЕКСТОМ ★
+# LVGL (rotation ПЕРЕМЕЩЁН СЮДА)
 lvgl:
   displays:
     - tft_display
+  rotation: 180            # ПОВОРОТ ЗДЕСЬ!
   widgets:
     - label:
         align: CENTER
-        text: "Привет"      # МОЖНО ВЕРНУТЬ КИРИЛЛИЦУ
-        text_color: 0x000000  # ЧЁРНЫЙ ТЕКСТ НА БЕЛОМ ФОНЕ
+        text: "Привет"
+        text_color: 0xFFFFFF  # Белый текст
         text_font: montserrat_40
