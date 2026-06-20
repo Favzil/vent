@@ -19,7 +19,7 @@ jobs:
       - name: Compile firmware
         run: |
           # ★ ЗДЕСЬ ВАШЕ ИМЯ ФАЙЛА ★
-          esphome compile vaent.yaml || true
+          esphome compile vent.yaml || true
           # || true нужен, чтобы игнорировать ошибку с Wi-Fi
 
       - name: Find and prepare firmware
@@ -53,35 +53,4 @@ jobs:
           path: |
             firmware.factory.bin
             firmware.bin
-          if-no-files-found: warnname: Build ESPHome Firmware
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install ESPHome
-        run: |
-          pip install esphome
-
-      - name: Compile firmware
-        run: |
-          esphome compile esp32-display.yaml || true
-          # || true нужен, чтобы игнорировать ошибку с Wi-Fi
-
-      # ★ ДОБАВЛЯЕМ СОХРАНЕНИЕ АРТЕФАКТОВ ★
-      - name: Upload firmware
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware
-          path: |
-            **/firmware.factory.bin
-            **/firmware.bin
-          if-no-files-found: error
+          if-no-files-found: warn
