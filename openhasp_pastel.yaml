@@ -543,8 +543,9 @@ lvgl:
             text_align: CENTER
             text_color: 0x690B98
 
+        # ★ ИЗМЕНЕНО: time → time_label (чтобы избежать конфликта с функцией time()) ★
         - label:
-            id: time
+            id: time_label
             x: 194
             y: 1
             width: 88
