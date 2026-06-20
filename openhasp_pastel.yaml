@@ -35,27 +35,48 @@ interval:
   - interval: 500ms
     then:
       - lambda: |-
-          while (id(uart_arduino).available()) {
-            char c = id(uart_arduino).read();
+          // Проверяем, есть ли данные в буфере UART
+          if (id(uart_arduino).available()) {
+            // Читаем данные в вектор
+            std::vector<uint8_t> data;
+            while (id(uart_arduino).available()) {
+              uint8_t byte;
+              if (id(uart_arduino).read_byte(byte)) {
+                data.push_back(byte);
+              }
+            }
             
-            if (c == '\n') {
-              std::string data = id(uart_buffer);
-              if (!data.empty()) {
-                ESP_LOGI("main", "Received: %s", data.c_str());
+            // Преобразуем в строку
+            std::string received(data.begin(), data.end());
+            
+            // Добавляем в буфер
+            id(uart_buffer) += received;
+            
+            // Проверяем, есть ли символ новой строки
+            size_t newline_pos = id(uart_buffer).find('\n');
+            if (newline_pos != std::string::npos) {
+              // Извлекаем строку до \n
+              std::string line = id(uart_buffer).substr(0, newline_pos);
+              // Удаляем обработанную часть из буфера
+              id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
+              
+              if (!line.empty()) {
+                ESP_LOGI("main", "Received: %s", line.c_str());
                 
-                data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
+                // Удаляем символ возврата каретки
+                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
                 
-                size_t space_pos = data.find(' ');
+                // Ожидаем формат: "Сб 20-июнь-2026 14:32"
+                size_t space_pos = line.find(' ');
                 if (space_pos != std::string::npos) {
-                  std::string date_part = data.substr(0, space_pos);
-                  std::string time_part = data.substr(space_pos + 1);
-                  id(Date).set_text(date_part);
-                  id(time_label).set_text(time_part);
+                  std::string date_part = line.substr(0, space_pos);
+                  std::string time_part = line.substr(space_pos + 1);
+                  
+                  // Обновляем тексты на дисплее
+                  id(Date).set_text(date_part.c_str());
+                  id(time_label).set_text(time_part.c_str());
                 }
               }
-              id(uart_buffer) = "";
-            } else {
-              id(uart_buffer) += c;
             }
           }
 
