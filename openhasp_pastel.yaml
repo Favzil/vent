@@ -71,7 +71,7 @@ display:
       height: 480
     spi_mode: MODE3
     data_rate: 2MHz
-    color_order: RGB
+    color_order: BGR
     invert_colors: True
     cs_pin: GPIO39
     de_pin: GPIO18
