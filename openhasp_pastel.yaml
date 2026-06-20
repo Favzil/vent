@@ -149,7 +149,7 @@ lvgl:
                   text_font: cyrillic_font_24
 
         - obj:
-            id: t-indoor
+            id: t_indoor
             x: 23
             y: 68
             width: 85
@@ -212,7 +212,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-outdoor
+            id: t_outdoor
             x: 140
             y: 68
             width: 85
@@ -275,7 +275,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-fromhome
+            id: t_fromhome
             x: 265
             y: 68
             width: 85
@@ -338,7 +338,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: t-tohome
+            id: t_tohome
             x: 380
             y: 68
             width: 85
@@ -401,7 +401,7 @@ lvgl:
                   line_rounded: true
 
         - obj:
-            id: Pritok-filter
+            id: Pritok_filter
             x: 16
             y: 300
             width: 100
@@ -467,7 +467,7 @@ lvgl:
                   text_font: cyrillic_font_24
 
         - obj:
-            id: Vityazh-filter
+            id: Vityazh_filter
             x: 365
             y: 300
             width: 100
@@ -533,7 +533,7 @@ lvgl:
                   text_font: cyrillic_font_24
 
         - label:
-            id: Wi-Fi
+            id: Wi_Fi
             x: 420
             y: 0
             width: 50
