@@ -13,6 +13,13 @@ psram:
 
 logger:
 
+# Глобальная переменная для хранения строки
+globals:
+  - id: uart_buffer
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+
 # UART для связи с Arduino
 uart:
   id: uart_arduino
@@ -22,34 +29,20 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
-
-# Обработка данных через UART
-sensor:
-  - platform: uart
-    id: uart_reader
-    uart_id: uart_arduino
-    name: "UART Reader"
-    update_interval: 1s
-    on_raw_value:
-      then:
-        - lambda: |-
-            std::string data = std::string(x.begin(), x.end());
-            // Удаляем символы перевода строки и возврата каретки
-            data.erase(std::remove(data.begin(), data.end(), '\n'), data.end());
-            data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
-            
-            if (data.length() > 0) {
-              ESP_LOGI("main", "Received: %s", data.c_str());
-              
-              // Ожидаем формат: "Сб 20-июнь-2026 14:32"
-              size_t space_pos = data.find(' ');
-              if (space_pos != std::string::npos) {
-                std::string date_part = data.substr(0, space_pos);
-                std::string time_part = data.substr(space_pos + 1);
-                id(Date).set_text(date_part);
-                id(time_label).set_text(time_part);
-              }
-            }
+  on_line:
+    then:
+      - lambda: |-
+          std::string data = x;
+          ESP_LOGI("main", "Received line: %s", data.c_str());
+          
+          // Ожидаем формат: "Сб 20-июнь-2026 14:32"
+          size_t space_pos = data.find(' ');
+          if (space_pos != std::string::npos) {
+            std::string date_part = data.substr(0, space_pos);
+            std::string time_part = data.substr(space_pos + 1);
+            id(Date).set_text(date_part);
+            id(time_label).set_text(time_part);
+          }
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
