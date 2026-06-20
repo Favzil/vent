@@ -16,32 +16,36 @@ logger:
 # UART для связи с Arduino
 uart:
   id: uart_arduino
-  tx_pin: GPIO43  # Пин TX ESP32 (подключите к RX Arduino)
-  rx_pin: GPIO44  # Пин RX ESP32 (подключите к TX Arduino)
+  tx_pin: GPIO43
+  rx_pin: GPIO44
   baud_rate: 115200
   stop_bits: 1
   data_bits: 8
   parity: NONE
 
-# Текстовый сенсор для получения времени
+# Текстовый сенсор через UART (правильный синтаксис)
 text_sensor:
-  - platform: uart
-    id: time_from_arduino
-    name: "Time from Arduino"
-    update_interval: 1s
-    on_value:
-      then:
-        - lambda: |-
-            std::string data = x;
-            // Ожидаем формат: "Сб 20-июнь-2026 14:32"
-            // Разделяем строку на дату и время
-            size_t space_pos = data.find(' ');
-            if (space_pos != std::string::npos) {
-              std::string date_part = data.substr(0, space_pos);
-              std::string time_part = data.substr(space_pos + 1);
-              id(Date).set_text(date_part);
-              id(time_label).set_text(time_part);
-            }
+  - platform: custom
+    lambda: |-
+      auto uart_sensor = new UARTTextSensor(id(uart_arduino));
+      App.register_component(uart_sensor);
+      return {uart_sensor};
+    text_sensors:
+      - id: time_from_arduino
+        name: "Time from Arduino"
+        on_value:
+          then:
+            - lambda: |-
+                std::string data = x;
+                ESP_LOGI("main", "Received: %s", data.c_str());
+                // Ожидаем формат: "Сб 20-июнь-2026 14:32"
+                size_t space_pos = data.find(' ');
+                if (space_pos != std::string::npos) {
+                  std::string date_part = data.substr(0, space_pos);
+                  std::string time_part = data.substr(space_pos + 1);
+                  id(Date).set_text(date_part);
+                  id(time_label).set_text(time_part);
+                }
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
