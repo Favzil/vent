@@ -20,39 +20,34 @@ jobs:
         run: |
           esphome compile vent.yaml || true
 
-      # ★ НОВЫЙ ШАГ: НАХОДИМ И КОПИРУЕМ ВСЕ .bin ФАЙЛЫ ★
-      - name: Find and copy firmware files
+      # ★ ПРОСТОЙ ШАГ: ПОКАЗЫВАЕМ ВСЕ ФАЙЛЫ ★
+      - name: List all files
         run: |
-          echo "🔍 Поиск всех .bin файлов в папке сборки..."
-          find . -name "*.bin" -type f -ls
+          echo "=== ВСЕ ФАЙЛЫ В ПРОЕКТЕ ==="
+          find . -type f -name "*.bin" -o -name "*.elf" -o -name "*.map" | sort
           
-          # Создаем папку для артефактов
-          mkdir -p firmware_artifacts
+          echo ""
+          echo "=== ПОЛНЫЙ СПИСОК ВСЕХ ФАЙЛОВ (первые 100) ==="
+          find . -type f | head -100
           
-          # Копируем ВСЕ найденные .bin файлы в одну папку
-          find . -name "*.bin" -type f -exec cp {} firmware_artifacts/ \;
+          echo ""
+          echo "=== ПРОВЕРКА ПАПКИ .esphome ==="
+          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ || echo "Папка не найдена"
           
-          # Переименовываем самый важный файл, если он есть
-          if [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin ]; then
-            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin firmware_artifacts/firmware.factory.bin
-            echo "✅ firmware.factory.bin найден!"
-          elif [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin ]; then
-            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin firmware_artifacts/firmware.bin
-            echo "✅ firmware.bin найден!"
-          else
-            echo "⚠️ Ищем firmware.bin в других местах..."
-            find . -name "firmware.bin" -exec cp {} firmware_artifacts/firmware.bin \; || true
-            find . -name "firmware.factory.bin" -exec cp {} firmware_artifacts/firmware.factory.bin \; || true
-          fi
-          
-          echo "📂 Содержимое папки с артефактами:"
-          ls -la firmware_artifacts/
+          echo ""
+          echo "=== ПОИСК firmware.bin ==="
+          find . -name "firmware.bin" -exec ls -la {} \;
+          find . -name "firmware.factory.bin" -exec ls -la {} \;
         shell: bash
 
-      # ★ ЗАГРУЖАЕМ ВСЮ ПАПКУ С АРТЕФАКТАМИ ★
+      # ★ ЗАГРУЖАЕМ АРТЕФАКТ (ЕСЛИ НАЙДЕТСЯ) ★
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
-          path: firmware_artifacts/
+          path: |
+            .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin
+            .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin
+            **/firmware.factory.bin
+            **/firmware.bin
           if-no-files-found: warn
