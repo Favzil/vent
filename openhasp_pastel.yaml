@@ -80,6 +80,6 @@ lvgl:
   widgets:
     - label:
         align: CENTER
-        text: "Привет"
+        text: "Hello"
         text_color: 0xFFFFFF  # Белый текст
         text_font: montserrat_40
