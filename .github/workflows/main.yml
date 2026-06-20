@@ -18,6 +18,61 @@ jobs:
 
       - name: Compile firmware
         run: |
+          # ★ ЗДЕСЬ ВАШЕ ИМЯ ФАЙЛА ★
+          esphome compile vaent.yaml || true
+          # || true нужен, чтобы игнорировать ошибку с Wi-Fi
+
+      - name: Find and prepare firmware
+        run: |
+          echo "🔍 Searching for firmware.bin files..."
+          
+          # Ищем все .bin файлы
+          find . -name "*.bin" -type f -ls
+          
+          # Копируем firmware.factory.bin в корень, если найден
+          if [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin ]; then
+            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin ./firmware.factory.bin
+            echo "✅ firmware.factory.bin скопирован!"
+          elif [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin ]; then
+            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin ./firmware.bin
+            echo "✅ firmware.bin скопирован!"
+          else
+            echo "⚠️ Попытка найти .bin в других местах..."
+            find . -name "firmware.factory.bin" -exec cp {} ./firmware.factory.bin \; 2>/dev/null || true
+            find . -name "firmware.bin" -exec cp {} ./firmware.bin \; 2>/dev/null || true
+          fi
+          
+          # Проверяем, что файл есть
+          ls -la *.bin 2>/dev/null || echo "❌ .bin файл не найден!"
+        shell: bash
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware
+          path: |
+            firmware.factory.bin
+            firmware.bin
+          if-no-files-found: warnname: Build ESPHome Firmware
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ESPHome
+        run: |
+          pip install esphome
+
+      - name: Compile firmware
+        run: |
           esphome compile esp32-display.yaml || true
           # || true нужен, чтобы игнорировать ошибку с Wi-Fi
 
