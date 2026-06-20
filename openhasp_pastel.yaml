@@ -65,9 +65,9 @@ interval:
                   std::string date_part = line.substr(0, space_pos);
                   std::string time_part = line.substr(space_pos + 1);
                   
-                  // Обновляем тексты на дисплее через lvgl.widgets
-                  lvgl.widgets.Date.set_text(date_part);
-                  lvgl.widgets.time_label.set_text(time_part);
+                  // Обновляем тексты на дисплее через LVGL API
+                  lv_label_set_text(id(Date), date_part.c_str());
+                  lv_label_set_text(id(time_label), time_part.c_str());
                 }
               }
             }
