@@ -13,29 +13,35 @@ psram:
 
 logger:
 
-# Время
-time:
-  - platform: sntp
-    id: my_time
-    timezone: "Europe/Moscow"
-    on_time_sync:
+# UART для связи с Arduino
+uart:
+  id: uart_arduino
+  tx_pin: GPIO43  # Пин TX ESP32 (подключите к RX Arduino)
+  rx_pin: GPIO44  # Пин RX ESP32 (подключите к TX Arduino)
+  baud_rate: 115200
+  stop_bits: 1
+  data_bits: 8
+  parity: NONE
+
+# Текстовый сенсор для получения времени
+text_sensor:
+  - platform: uart
+    id: time_from_arduino
+    name: "Time from Arduino"
+    update_interval: 1s
+    on_value:
       then:
         - lambda: |-
-            auto now = id(my_time).now();
-            if (!now.is_valid()) return;
-            
-            const char* weekdays[] = {"Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"};
-            const char* months[] = {"янв", "фев", "мар", "апр", "май", "июн", 
-                                    "июл", "авг", "сен", "окт", "ноя", "дек"};
-            
-            char buffer[32];
-            sprintf(buffer, "%s %02d-%s-%04d", 
-                    weekdays[now.day_of_week],
-                    now.day_of_month,
-                    months[now.month - 1],
-                    now.year);
-            
-            id(Date).set_text(buffer);
+            std::string data = x;
+            // Ожидаем формат: "Сб 20-июнь-2026 14:32"
+            // Разделяем строку на дату и время
+            size_t space_pos = data.find(' ');
+            if (space_pos != std::string::npos) {
+              std::string date_part = data.substr(0, space_pos);
+              std::string time_part = data.substr(space_pos + 1);
+              id(Date).set_text(date_part);
+              id(time_label).set_text(time_part);
+            }
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -156,9 +162,9 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: Date
-                  x: 260
+                  x: 240
                   y: 9
-                  width: 180
+                  width: 200
                   height: 20
                   text: "Сб 20-июнь-2026"
                   text_color: 0xEFF0F0
