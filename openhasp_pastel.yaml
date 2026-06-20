@@ -48,7 +48,7 @@ light:
     restore_mode: ALWAYS_ON
     default_transition_length: 0s
 
-# SPI (нужен для инициализации)
+# SPI
 spi:
   - id: lcd_spi
     clk_pin: GPIO48
@@ -62,22 +62,22 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ★ ГЛАВНОЕ: ИСПОЛЬЗУЕМ ГОТОВУЮ МОДЕЛЬ ★
+# ★ ДИСПЛЕЙ С ПРАВИЛЬНЫМ ПОВОРОТОМ ★
 display:
   - platform: mipi_rgb
     id: tft_display
     model: GUITION-4848S040
-    rotation: 0
+    rotation: 180          # ИСПРАВЛЯЕМ ПЕРЕВЁРНУТЫЙ ТЕКСТ
     spi_id: lcd_spi
     cs_pin: GPIO39
 
-# LVGL
+# ★ LVGL С ЧЁРНЫМ ФОНОМ И БЕЛЫМ ТЕКСТОМ ★
 lvgl:
   displays:
     - tft_display
   widgets:
     - label:
         align: CENTER
-        text: "Hello"
-        text_color: 0xFFFFFF
+        text: "Привет"      # МОЖНО ВЕРНУТЬ КИРИЛЛИЦУ
+        text_color: 0x000000  # ЧЁРНЫЙ ТЕКСТ НА БЕЛОМ ФОНЕ
         text_font: montserrat_40
