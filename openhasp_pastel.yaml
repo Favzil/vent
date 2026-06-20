@@ -37,20 +37,15 @@ interval:
       - lambda: |-
           // Проверяем, есть ли данные в буфере UART
           if (id(uart_arduino).available()) {
-            // Читаем данные в вектор
-            std::vector<uint8_t> data;
+            // Читаем данные по одному байту
             while (id(uart_arduino).available()) {
               uint8_t byte;
-              if (id(uart_arduino).read_byte(byte)) {
-                data.push_back(byte);
+              // Правильно: передаем указатель на byte
+              if (id(uart_arduino).read_byte(&byte)) {
+                // Добавляем символ в буфер
+                id(uart_buffer) += static_cast<char>(byte);
               }
             }
-            
-            // Преобразуем в строку
-            std::string received(data.begin(), data.end());
-            
-            // Добавляем в буфер
-            id(uart_buffer) += received;
             
             // Проверяем, есть ли символ новой строки
             size_t newline_pos = id(uart_buffer).find('\n');
@@ -73,8 +68,8 @@ interval:
                   std::string time_part = line.substr(space_pos + 1);
                   
                   // Обновляем тексты на дисплее
-                  id(Date).set_text(date_part.c_str());
-                  id(time_label).set_text(time_part.c_str());
+                  id(Date).set_text(date_part);
+                  id(time_label).set_text(time_part);
                 }
               }
             }
