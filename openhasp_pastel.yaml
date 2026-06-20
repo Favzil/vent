@@ -13,22 +13,40 @@ psram:
 
 logger:
 
+# Время
+time:
+  - platform: sntp
+    id: my_time
+    timezone: "Europe/Moscow"
+    on_time_sync:
+      then:
+        - lambda: |-
+            auto now = id(my_time).now();
+            if (!now.is_valid()) return;
+            
+            const char* weekdays[] = {"Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"};
+            const char* months[] = {"янв", "фев", "мар", "апр", "май", "июн", 
+                                    "июл", "авг", "сен", "окт", "ноя", "дек"};
+            
+            char buffer[32];
+            sprintf(buffer, "%s %02d-%s-%04d", 
+                    weekdays[now.day_of_week],
+                    now.day_of_month,
+                    months[now.month - 1],
+                    now.year);
+            
+            id(Date).set_text(buffer);
+
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
-
+  
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?- '
-
-  - file: "fonts/Roboto-Regular.ttf"
-    id: cyrillic_font_12
-    size: 24
-    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?- '
-
+    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя0123456789.,!?- ПнВтСрЧтПтСбВс янвфевмарапрмайиюниюлагсеноядек'
 
 # Реле
 switch:
@@ -113,40 +131,40 @@ lvgl:
               arc_color: 0x10B981
               arc_opa: 100%
               arc_width: 8
-
         - obj:
             id: Upscreen
             x: 1
             y: 0
             width: 478
             height: 35
-            bg_color: 0x2ACF85
+            bg_color: 0xFF69B4
             border_width: 1
             border_color: 0x4B5563
             radius: 8
             pad_all: 0
             widgets:
-              - textarea:
+              - label:
                   id: KhaKar
                   x: 10
-                  y: 0
+                  y: 5
                   width: 160
-                  height: 45
+                  height: 25
                   text: "KhaKar-032"
                   text_color: 0xFFFFFF
-                  text_font: cyrillic_font_12
+                  text_align: LEFT
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
               - label:
                   id: Date
-                  x: 310
+                  x: 260
                   y: 9
-                  width: 88
-                  height: 16
-                  text: "Mon 28 Mar"
+                  width: 180
+                  height: 20
+                  text: "Сб 20-июнь-2026"
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
         - obj:
             id: t_indoor
             x: 23
@@ -197,7 +215,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
@@ -209,7 +227,6 @@ lvgl:
                     - 129, 0
                   line_color: 0xF59E0B
                   line_rounded: true
-
         - obj:
             id: t_outdoor
             x: 140
@@ -272,7 +289,6 @@ lvgl:
                     - 129, 0
                   line_color: 0xF59E0B
                   line_rounded: true
-
         - obj:
             id: t_fromhome
             x: 265
@@ -335,7 +351,6 @@ lvgl:
                     - 129, 0
                   line_color: 0xF59E0B
                   line_rounded: true
-
         - obj:
             id: t_tohome
             x: 380
@@ -398,7 +413,6 @@ lvgl:
                     - 129, 0
                   line_color: 0xF59E0B
                   line_rounded: true
-
         - obj:
             id: Pritok_filter
             x: 16
@@ -464,7 +478,6 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
         - obj:
             id: Vityazh_filter
             x: 365
@@ -530,7 +543,6 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
         - label:
             id: Wi_Fi
             x: 420
@@ -541,8 +553,6 @@ lvgl:
             text_font: cyrillic_font_24
             text_align: CENTER
             text_color: 0x690B98
-
-        # ★ ИЗМЕНЕНО: time → time_label (чтобы избежать конфликта с функцией time()) ★
         - label:
             id: time_label
             x: 194
@@ -554,7 +564,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
-
         - textarea:
             id: Econom
             x: 3
@@ -573,7 +582,6 @@ lvgl:
             shadow_opa: 0%
             text_color: 0x0EC852
             text_font: cyrillic_font_40
-
         - obj:
             id: widget_1781261697547_kzlml3d0h
             x: 1
@@ -689,7 +697,6 @@ lvgl:
                         text_align: CENTER
                         long_mode: CLIP
                         text_font: cyrillic_font_24
-
         - button:
             id: stop
             x: 203
