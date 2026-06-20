@@ -18,39 +18,41 @@ jobs:
 
       - name: Compile firmware
         run: |
-          # ★ ЗДЕСЬ ВАШЕ ИМЯ ФАЙЛА ★
           esphome compile vent.yaml || true
-          # || true нужен, чтобы игнорировать ошибку с Wi-Fi
 
-      - name: Find and prepare firmware
+      # ★ НОВЫЙ ШАГ: НАХОДИМ И КОПИРУЕМ ВСЕ .bin ФАЙЛЫ ★
+      - name: Find and copy firmware files
         run: |
-          echo "🔍 Searching for firmware.bin files..."
-          
-          # Ищем все .bin файлы
+          echo "🔍 Поиск всех .bin файлов в папке сборки..."
           find . -name "*.bin" -type f -ls
           
-          # Копируем firmware.factory.bin в корень, если найден
+          # Создаем папку для артефактов
+          mkdir -p firmware_artifacts
+          
+          # Копируем ВСЕ найденные .bin файлы в одну папку
+          find . -name "*.bin" -type f -exec cp {} firmware_artifacts/ \;
+          
+          # Переименовываем самый важный файл, если он есть
           if [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin ]; then
-            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin ./firmware.factory.bin
-            echo "✅ firmware.factory.bin скопирован!"
+            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin firmware_artifacts/firmware.factory.bin
+            echo "✅ firmware.factory.bin найден!"
           elif [ -f .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin ]; then
-            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin ./firmware.bin
-            echo "✅ firmware.bin скопирован!"
+            cp .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin firmware_artifacts/firmware.bin
+            echo "✅ firmware.bin найден!"
           else
-            echo "⚠️ Попытка найти .bin в других местах..."
-            find . -name "firmware.factory.bin" -exec cp {} ./firmware.factory.bin \; 2>/dev/null || true
-            find . -name "firmware.bin" -exec cp {} ./firmware.bin \; 2>/dev/null || true
+            echo "⚠️ Ищем firmware.bin в других местах..."
+            find . -name "firmware.bin" -exec cp {} firmware_artifacts/firmware.bin \; || true
+            find . -name "firmware.factory.bin" -exec cp {} firmware_artifacts/firmware.factory.bin \; || true
           fi
           
-          # Проверяем, что файл есть
-          ls -la *.bin 2>/dev/null || echo "❌ .bin файл не найден!"
+          echo "📂 Содержимое папки с артефактами:"
+          ls -la firmware_artifacts/
         shell: bash
 
+      # ★ ЗАГРУЖАЕМ ВСЮ ПАПКУ С АРТЕФАКТАМИ ★
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
-          path: |
-            firmware.factory.bin
-            firmware.bin
+          path: firmware_artifacts/
           if-no-files-found: warn
