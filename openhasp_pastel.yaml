@@ -13,13 +13,6 @@ psram:
 
 logger:
 
-# ==========================================
-# УБРАНО ВСЁ, ЧТО СВЯЗАНО С ИНТЕРНЕТОМ
-# - wifi (удалён)
-# - api (удалён)
-# - ota (удалён)
-# ==========================================
-
 # Реле
 switch:
   - platform: gpio
@@ -69,7 +62,7 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ДИСПЛЕЙ
+# ДИСПЛЕЙ (исправленный)
 display:
   - platform: st7701s
     id: tft_display
@@ -78,8 +71,8 @@ display:
       height: 480
     spi_mode: MODE3
     data_rate: 2MHz
-    color_order: RGB
-    invert_colors: False
+    color_order: BGR           # ИЗМЕНЕНО
+    invert_colors: True        # ИЗМЕНЕНО
     cs_pin: GPIO39
     de_pin: GPIO18
     hsync_pin: GPIO16
@@ -110,10 +103,14 @@ touchscreen:
     id: tft_touch
     display: tft_display
 
-# LVGL
+# LVGL (исправленный)
 lvgl:
   displays:
     - tft_display
+  fonts:
+    - montserrat_40:
+        bpp: 4
+        glyphs: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяПривет "
   widgets:
     - label:
         align: CENTER
