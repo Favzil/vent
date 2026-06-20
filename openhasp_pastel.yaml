@@ -23,29 +23,25 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Текстовый сенсор через UART (правильный синтаксис)
+# Текстовый сенсор через UART с использованием on_line
 text_sensor:
-  - platform: custom
-    lambda: |-
-      auto uart_sensor = new UARTTextSensor(id(uart_arduino));
-      App.register_component(uart_sensor);
-      return {uart_sensor};
-    text_sensors:
-      - id: time_from_arduino
-        name: "Time from Arduino"
-        on_value:
-          then:
-            - lambda: |-
-                std::string data = x;
-                ESP_LOGI("main", "Received: %s", data.c_str());
-                // Ожидаем формат: "Сб 20-июнь-2026 14:32"
-                size_t space_pos = data.find(' ');
-                if (space_pos != std::string::npos) {
-                  std::string date_part = data.substr(0, space_pos);
-                  std::string time_part = data.substr(space_pos + 1);
-                  id(Date).set_text(date_part);
-                  id(time_label).set_text(time_part);
-                }
+  - platform: uart
+    id: time_from_arduino
+    name: "Time from Arduino"
+    update_interval: 1s
+    on_line:
+      then:
+        - lambda: |-
+            std::string data = x;
+            ESP_LOGI("main", "Received: %s", data.c_str());
+            // Ожидаем формат: "Сб 20-июнь-2026 14:32"
+            size_t space_pos = data.find(' ');
+            if (space_pos != std::string::npos) {
+              std::string date_part = data.substr(0, space_pos);
+              std::string time_part = data.substr(space_pos + 1);
+              id(Date).set_text(date_part);
+              id(time_label).set_text(time_part);
+            }
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
