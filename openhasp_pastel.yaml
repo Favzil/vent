@@ -13,7 +13,7 @@ psram:
 
 logger:
 
-# Реле (проверь пины!)
+# Реле
 switch:
   - platform: gpio
     name: "Реле 1"
@@ -31,7 +31,7 @@ switch:
       number: GPIO1
       inverted: true
 
-# Подсветка (ДОБАВЛЯЕМ ЯВНОЕ ВКЛЮЧЕНИЕ)
+# Подсветка
 output:
   - platform: ledc
     id: backlight_output
@@ -46,9 +46,9 @@ light:
     id: display_backlight
     output: backlight_output
     restore_mode: ALWAYS_ON
-    default_transition_length: 0s  # Мгновенное включение
+    default_transition_length: 0s
 
-# SPI
+# SPI (нужен для инициализации)
 spi:
   - id: lcd_spi
     clk_pin: GPIO48
@@ -62,44 +62,16 @@ i2c:
     number: GPIO45
     ignore_strapping_warning: true
 
-# ДИСПЛЕЙ (УПРОЩЁННЫЙ, БЕЗ init_sequence)
+# ★ ГЛАВНОЕ: ИСПОЛЬЗУЕМ ГОТОВУЮ МОДЕЛЬ ★
 display:
-  - platform: st7701s
+  - platform: mipi_rgb
     id: tft_display
-    dimensions:
-      width: 480
-      height: 480
-    spi_mode: MODE3
-    data_rate: 2MHz
-    color_order: BGR
-    invert_colors: False
+    model: GUITION-4848S040
+    rotation: 0
+    spi_id: lcd_spi
     cs_pin: GPIO39
-    de_pin: GPIO18
-    hsync_pin: GPIO16
-    vsync_pin: GPIO17
-    pclk_pin: GPIO21
-    pclk_frequency: 12MHz
-    pclk_inverted: False
-    hsync_pulse_width: 8
-    hsync_front_porch: 10
-    hsync_back_porch: 20
-    vsync_pulse_width: 8
-    vsync_front_porch: 10
-    vsync_back_porch: 10
-    update_interval: never
-    auto_clear_enabled: False
-    data_pins:
-      red: [GPIO11, GPIO12, GPIO13, GPIO14, GPIO0]
-      green: [GPIO8, GPIO20, GPIO3, GPIO46, GPIO9, GPIO10]
-      blue: [GPIO4, GPIO5, GPIO6, GPIO7, GPIO15]
 
-# Сенсор (ОТКЛЮЧАЕМ ДЛЯ ТЕСТА)
-# touchscreen:
-#   - platform: gt911
-#     id: tft_touch
-#     display: tft_display
-
-# LVGL (ПРОСТЕЙШИЙ ТЕКСТ)
+# LVGL
 lvgl:
   displays:
     - tft_display
