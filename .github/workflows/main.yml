@@ -16,31 +16,21 @@ jobs:
         run: |
           pip install esphome
 
+      # ★ УБИРАЕМ "|| true" — пусть ошибка остановит сборку ★
       - name: Compile firmware
         run: |
-          esphome compile vent.yaml || true
+          esphome compile vent.yaml
 
-      # ★ ПРОСТОЙ ШАГ: ПОКАЗЫВАЕМ ВСЕ ФАЙЛЫ ★
       - name: List all files
         run: |
-          echo "=== ВСЕ ФАЙЛЫ В ПРОЕКТЕ ==="
-          find . -type f -name "*.bin" -o -name "*.elf" -o -name "*.map" | sort
+          echo "=== ВСЕ .bin ФАЙЛЫ ==="
+          find . -name "*.bin" -type f -ls
           
           echo ""
-          echo "=== ПОЛНЫЙ СПИСОК ВСЕХ ФАЙЛОВ (первые 100) ==="
-          find . -type f | head -100
-          
-          echo ""
-          echo "=== ПРОВЕРКА ПАПКИ .esphome ==="
-          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ || echo "Папка не найдена"
-          
-          echo ""
-          echo "=== ПОИСК firmware.bin ==="
-          find . -name "firmware.bin" -exec ls -la {} \;
-          find . -name "firmware.factory.bin" -exec ls -la {} \;
+          echo "=== ПАПКА СБОРКИ ==="
+          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ || echo "❌ Папка не найдена"
         shell: bash
 
-      # ★ ЗАГРУЖАЕМ АРТЕФАКТ (ЕСЛИ НАЙДЕТСЯ) ★
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
@@ -48,6 +38,4 @@ jobs:
           path: |
             .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin
             .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin
-            **/firmware.factory.bin
-            **/firmware.bin
           if-no-files-found: warn
