@@ -16,43 +16,34 @@ jobs:
         run: |
           pip install esphome
 
-      # ★ КОМПИЛИРУЕМ БЕЗ "|| true", ЧТОБЫ УВИДЕТЬ ОШИБКУ ★
       - name: Compile firmware
-        id: compile
-        continue-on-error: true
         run: |
           esphome compile openhasp_pastel.yaml
-          echo "status=success" >> $GITHUB_OUTPUT
-        shell: bash
 
-      # ★ ЕСЛИ КОМПИЛЯЦИЯ НЕ УДАЛАСЬ - ПОКАЗЫВАЕМ ЛОГИ И ОСТАНАВЛИВАЕМ ★
-      - name: Check compilation status
-        if: steps.compile.outputs.status != 'success'
+      # ★ УНИВЕРСАЛЬНЫЙ ПОИСК .bin ФАЙЛОВ ★
+      - name: Find and prepare firmware
         run: |
-          echo "❌ Компиляция не удалась. Проверьте логи выше."
-          exit 1
-
-      # ★ ПОКАЗЫВАЕМ ВСЕ ФАЙЛЫ ★
-      - name: List all files
-        run: |
-          echo "=== ВСЕ .bin ФАЙЛЫ ==="
-          find . -name "*.bin" -type f -ls || echo "❌ .bin файлы не найдены"
+          echo "🔍 Поиск всех .bin файлов..."
+          find . -name "*.bin" -type f -ls
           
           echo ""
-          echo "=== ПОЛНЫЙ СПИСОК ФАЙЛОВ В ПАПКЕ .esphome ==="
-          find .esphome -type f 2>/dev/null | head -50 || echo "❌ Папка .esphome не найдена"
+          echo "🔍 Поиск firmware.factory.bin..."
+          find . -name "firmware.factory.bin" -type f -exec ls -la {} \;
+          
+          # Копируем ВСЕ найденные .bin файлы в корень
+          echo ""
+          echo "📂 Копирование всех .bin файлов в корень..."
+          find . -name "*.bin" -type f -exec cp {} ./ \; || true
           
           echo ""
-          echo "=== ПАПКА СБОРКИ ==="
-          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ 2>/dev/null || echo "❌ Папка сборки не найдена"
+          echo "📂 Содержимое корневой папки:"
+          ls -la *.bin 2>/dev/null || echo "❌ .bin файлы не найдены"
         shell: bash
 
-      # ★ ЗАГРУЖАЕМ АРТЕФАКТ, ЕСЛИ НАЙДЕН ★
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
           path: |
-            .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.factory.bin
-            .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/firmware.bin
+            *.bin
           if-no-files-found: warn
