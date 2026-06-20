@@ -35,20 +35,16 @@ interval:
   - interval: 500ms
     then:
       - lambda: |-
-          // Читаем все доступные данные из UART
           while (id(uart_arduino).available()) {
             char c = id(uart_arduino).read();
             
-            // Если получили символ новой строки - обрабатываем строку
             if (c == '\n') {
               std::string data = id(uart_buffer);
               if (!data.empty()) {
                 ESP_LOGI("main", "Received: %s", data.c_str());
                 
-                // Удаляем символ возврата каретки, если есть
                 data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
                 
-                // Ожидаем формат: "Сб 20-июнь-2026 14:32"
                 size_t space_pos = data.find(' ');
                 if (space_pos != std::string::npos) {
                   std::string date_part = data.substr(0, space_pos);
@@ -57,10 +53,8 @@ interval:
                   id(time_label).set_text(time_part);
                 }
               }
-              // Очищаем буфер для следующей строки
               id(uart_buffer) = "";
             } else {
-              // Добавляем символ в буфер
               id(uart_buffer) += c;
             }
           }
@@ -74,7 +68,7 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: '0123456789.,!?- ПнВтСрЧтПтСбВс янвфевмарапрмайиюниюлагсеноядек'
+    glyphs: '0123456789.,!?- '
 
 # Реле
 switch:
@@ -181,7 +175,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: Date
                   x: 240
@@ -192,7 +186,7 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
         - obj:
             id: t_indoor
             x: 23
@@ -221,7 +215,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262141723_8sjefb8w2
                   x: 35
@@ -232,7 +226,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262141723_srplhrgb8
                   x: 2
@@ -243,7 +237,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
@@ -283,7 +277,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262306198_b9dnjbboi
                   x: 35
@@ -294,7 +288,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262306198_igmmcl5k8
                   x: 2
@@ -305,7 +299,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - line:
                   id: widget_1781262306198_l8xm8o3gl
                   x: 2
@@ -345,7 +339,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262307812_3m3qdg397
                   x: 35
@@ -356,7 +350,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262307812_n406bgqc4
                   x: 2
@@ -367,7 +361,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - line:
                   id: widget_1781262307812_cmiqci34b
                   x: 2
@@ -407,7 +401,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262308709_dnoiw7el6
                   x: 35
@@ -418,7 +412,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781262308709_5q85ngwas
                   x: 2
@@ -429,7 +423,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - line:
                   id: widget_1781262308709_k5ilzmvnq
                   x: 2
@@ -494,7 +488,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781261697547_a6nmh00ld
                   x: 4
@@ -505,7 +499,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
         - obj:
             id: Vityazh_filter
             x: 365
@@ -559,7 +553,7 @@ lvgl:
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781261697547_2lq5vokc6
                   x: 4
@@ -570,7 +564,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
         - label:
             id: Wi_Fi
             x: 420
@@ -578,7 +572,7 @@ lvgl:
             width: 50
             height: 33
             text: "\uF1EB"
-            text_font: cyrillic_font_24
+            text_font: cyrillic_font_40
             text_align: CENTER
             text_color: 0x690B98
         - label:
@@ -641,7 +635,7 @@ lvgl:
                   width: 119
                   height: 16
                   text: "\uF013"
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
                   text_align: CENTER
                   text_color: 0x8E9FB8
               - label:
@@ -654,7 +648,7 @@ lvgl:
                   text_color: 0x8E9FB8
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781261697547_h7yh4d9zc
                   x: 30
@@ -665,7 +659,7 @@ lvgl:
                   text_color: 0x10B981
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
               - label:
                   id: widget_1781261697547_w2phehbuq
                   x: 30
@@ -673,7 +667,7 @@ lvgl:
                   width: 119
                   height: 16
                   text: "\uF015"
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
                   text_align: CENTER
                   text_color: 0x10B981
               - button:
@@ -711,7 +705,7 @@ lvgl:
                         width: 119
                         height: 16
                         text: "\uF0E7"
-                        text_font: cyrillic_font_24
+                        text_font: cyrillic_font_40
                         text_align: CENTER
                         text_color: 0x8E9FB8
                     - label:
@@ -724,7 +718,7 @@ lvgl:
                         text_color: 0x8E9FB8
                         text_align: CENTER
                         long_mode: CLIP
-                        text_font: cyrillic_font_24
+                        text_font: cyrillic_font_40
         - button:
             id: stop
             x: 203
