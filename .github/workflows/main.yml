@@ -16,21 +16,38 @@ jobs:
         run: |
           pip install esphome
 
-      # ★ ПРАВИЛЬНОЕ ИМЯ ФАЙЛА ★
+      # ★ КОМПИЛИРУЕМ БЕЗ "|| true", ЧТОБЫ УВИДЕТЬ ОШИБКУ ★
       - name: Compile firmware
+        id: compile
+        continue-on-error: true
         run: |
           esphome compile openhasp_pastel.yaml
+          echo "status=success" >> $GITHUB_OUTPUT
+        shell: bash
 
+      # ★ ЕСЛИ КОМПИЛЯЦИЯ НЕ УДАЛАСЬ - ПОКАЗЫВАЕМ ЛОГИ И ОСТАНАВЛИВАЕМ ★
+      - name: Check compilation status
+        if: steps.compile.outputs.status != 'success'
+        run: |
+          echo "❌ Компиляция не удалась. Проверьте логи выше."
+          exit 1
+
+      # ★ ПОКАЗЫВАЕМ ВСЕ ФАЙЛЫ ★
       - name: List all files
         run: |
           echo "=== ВСЕ .bin ФАЙЛЫ ==="
-          find . -name "*.bin" -type f -ls
+          find . -name "*.bin" -type f -ls || echo "❌ .bin файлы не найдены"
+          
+          echo ""
+          echo "=== ПОЛНЫЙ СПИСОК ФАЙЛОВ В ПАПКЕ .esphome ==="
+          find .esphome -type f 2>/dev/null | head -50 || echo "❌ Папка .esphome не найдена"
           
           echo ""
           echo "=== ПАПКА СБОРКИ ==="
-          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ || echo "❌ Папка не найдена"
+          ls -la .esphome/build/openhasp_pastel/.pioenvs/openhasp_pastel/ 2>/dev/null || echo "❌ Папка сборки не найдена"
         shell: bash
 
+      # ★ ЗАГРУЖАЕМ АРТЕФАКТ, ЕСЛИ НАЙДЕН ★
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
