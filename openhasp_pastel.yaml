@@ -13,16 +13,16 @@ psram:
 
 logger:
 
-# ★ ЛОКАЛЬНЫЙ ШРИФТ С ПОДДЕРЖКОЙ РУССКОГО ЯЗЫКА ★
-# 1. Скачайте файл Roboto-Regular.ttf с https://fonts.google.com/specimen/Roboto
-# 2. Создайте папку "fonts" рядом с вашим YAML файлом
-# 3. Положите скачанный файл в папку "fonts"
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
-    # ★ ВАЖНО: Все символы в ОДНУ СТРОКУ без переносов ★
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'
+
+  - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_24
+    size: 24
+    glyphs: 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?- '
 
 # Реле
 switch:
@@ -82,7 +82,7 @@ display:
     cs_pin: GPIO39
     invert_colors: True
 
-# ★ LVGL С ПОДДЕРЖКОЙ РУССКОГО ТЕКСТА ★
+# ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
   displays:
     - tft_display
@@ -93,11 +93,31 @@ lvgl:
         width: 480
         height: 480
         align: CENTER
-        bg_color: 0xFFFF00  # Жёлтый фон (даст голубой из-за инверсии)
+        bg_color: 0xFFFF00
         widgets:
+          # ★ "Привет Карим!" большим шрифтом сверху ★
           - label:
+              id: greeting
+              align: TOP_MID
+              y: 150
+              text: "Привет Карим!"
+              text_color: 0x000000
+              text_font: cyrillic_font_40
+          
+          # ★ "Я люблю вас!" чуть ниже ★
+          - label:
+              id: love_text
               align: CENTER
-              text: |Привет Карим!
-              Я люблю вас!!! # ★ РУССКИЙ ТЕКСТ ★
-              text_color: 0x000000  # Чёрный цвет (из-за инверсии будет белым)
-              text_font: cyrillic_font_40  # ★ ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ШРИФТ ★
+              y: 30
+              text: "Я люблю вас!"
+              text_color: 0x000000
+              text_font: cyrillic_font_40
+          
+          # ★ Добавим сердечко для красоты ★
+          - label:
+              id: heart
+              align: BOTTOM_MID
+              y: -100
+              text: "❤️"
+              text_color: 0x000000
+              text_font: cyrillic_font_40
