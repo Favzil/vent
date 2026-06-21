@@ -19,6 +19,10 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '""'
+  - id: current_page
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -30,8 +34,9 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Интервал для чтения данных из UART
+# Интервалы
 interval:
+  # Интервал для чтения данных из UART
   - interval: 500ms
     then:
       - lambda: |-
@@ -150,6 +155,7 @@ display:
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
+  id: lvgl_obj
   displays:
     - tft_display
   rotation: 180
@@ -628,7 +634,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom
@@ -653,7 +660,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim
@@ -976,7 +984,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom_modes
@@ -1001,7 +1010,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim_modes
@@ -1036,3 +1046,18 @@ lvgl:
                   text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
+
+# Переключение страниц через интервал
+interval:
+  - interval: 100ms
+    then:
+      - lambda: |-
+          static int last_page = -1;
+          if (id(current_page) != last_page) {
+            last_page = id(current_page);
+            if (last_page == 0) {
+              id(lvgl_obj)->set_page(0);
+            } else if (last_page == 1) {
+              id(lvgl_obj)->set_page(1);
+            }
+          }
