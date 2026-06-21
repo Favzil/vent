@@ -616,8 +616,8 @@ lvgl:
             text_color: 0xE053D6
             text_font: cyrillic_font_40
 
-       - button:
-            id: home
+        - button:
+            id: domoi
             x: 0
             y: 415
             width: 160
