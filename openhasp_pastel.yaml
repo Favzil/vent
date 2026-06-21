@@ -167,6 +167,12 @@ display:
     cs_pin: GPIO39
     invert_colors: True
 
+# on_boot для установки начальной страницы
+on_boot:
+  then:
+    - lambda: |-
+        id(current_page) = 0;
+
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
   displays:
@@ -1059,8 +1065,3 @@ lvgl:
                   text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
-
-# on_boot для установки начальной страницыon_boot:
-  then:
-    - lambda: |-
-        id(current_page) = 0;
