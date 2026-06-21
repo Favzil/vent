@@ -1003,7 +1003,8 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0                  y: 0
+                  x: 0
+                  y: 0
                   width: 398
                   height: 50
                   text: "КОНДИЦИОНЕР"
