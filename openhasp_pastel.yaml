@@ -633,7 +633,7 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
-                    lv_scr_load(id(main_page));
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom
@@ -659,7 +659,7 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
-                    lv_scr_load(id(modes_page));
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim
@@ -983,7 +983,7 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
-                    lv_scr_load(id(main_page));
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom_modes
@@ -1009,7 +1009,7 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
-                    lv_scr_load(id(modes_page));
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim_modes
@@ -1044,3 +1044,18 @@ lvgl:
                   text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
+
+# Переключение страниц по глобальной переменной
+interval:
+  - interval: 100ms
+    then:
+      - lambda: |-
+          static int last_page = -1;
+          if (id(current_page) != last_page) {
+            last_page = id(current_page);
+            if (last_page == 0) {
+              id(main_page).show();
+            } else if (last_page == 1) {
+              id(modes_page).show();
+            }
+          }
