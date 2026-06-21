@@ -149,14 +149,14 @@ display:
     invert_colors: True
 
 # ============================================
-# СЕНСОР ЭКРАНА (добавлен отладка)
+# СЕНСОР ЭКРАНА (GT911 с отладкой)
 # ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO16  # Проверьте этот пин!
+    interrupt_pin: GPIO16  # Проверьте этот пин в документации к экрану
     on_touch:
       then:
         - lambda: |-
@@ -170,8 +170,9 @@ touchscreen:
 lvgl:
   displays:
     - tft_display
+  touchscreens:  # ВАЖНО: множественное число!
+    - touchscreen_id: my_touchscreen
   rotation: 180
-  touchscreen: my_touchscreen  # <-- Привязываем сенсор к LVGL
   pages:
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
@@ -647,12 +648,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - if:
-                    condition:
-                      lvgl.page.is_showing: modes_page
-                    then:
-                      - lvgl.page.show:
-                          id: main_page
+                - lvgl.page.show:
+                    id: main_page
             widgets:
               - label:
                   id: dom
