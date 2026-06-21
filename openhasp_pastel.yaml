@@ -38,8 +38,14 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Интервал для чтения данных из UART
+# Интервалы
 interval:
+  - interval: 100ms
+    then:
+      - lambda: |-
+          if (id(press_timer) < 3000) {
+            id(press_timer) += 100;
+          }
   - interval: 500ms
     then:
       - lambda: |-
@@ -180,6 +186,7 @@ touchscreen:
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
+  id: lvgl_component
   displays:
     - tft_display
   touchscreens:
@@ -800,7 +807,7 @@ lvgl:
                       lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
                       ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
                       id(uart_arduino).write_string("MODE:STANDARD\n");
-                      id(lvgl).show_page("main_page");
+                      id(lvgl_component).show_page("main_page");
                     }
                     id(press_timer) = 0;
             widgets:
@@ -837,7 +844,7 @@ lvgl:
                       lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
                       ESP_LOGI("mode", "Активирован режим: ЭКОНОМИЧНЫЙ");
                       id(uart_arduino).write_string("MODE:ECONOM\n");
-                      id(lvgl).show_page("main_page");
+                      id(lvgl_component).show_page("main_page");
                     }
                     id(press_timer) = 0;
             widgets:
@@ -874,7 +881,7 @@ lvgl:
                       lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
                       ESP_LOGI("mode", "Активирован режим: ГОСТЕВОЙ");
                       id(uart_arduino).write_string("MODE:GUEST\n");
-                      id(lvgl).show_page("main_page");
+                      id(lvgl_component).show_page("main_page");
                     }
                     id(press_timer) = 0;
             widgets:
@@ -911,7 +918,7 @@ lvgl:
                       lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
                       ESP_LOGI("mode", "Активирован режим: КОНДИЦИОНЕР");
                       id(uart_arduino).write_string("MODE:CONDITIONER\n");
-                      id(lvgl).show_page("main_page");
+                      id(lvgl_component).show_page("main_page");
                     }
                     id(press_timer) = 0;
             widgets:
@@ -948,7 +955,7 @@ lvgl:
                       lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
                       ESP_LOGI("mode", "Активирован режим: ВЫСОКИЙ КПД");
                       id(uart_arduino).write_string("MODE:HIGH_EFFICIENCY\n");
-                      id(lvgl).show_page("main_page");
+                      id(lvgl_component).show_page("main_page");
                     }
                     id(press_timer) = 0;
             widgets:
