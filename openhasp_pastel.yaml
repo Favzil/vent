@@ -34,9 +34,9 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Интервалы
+# ЕДИНЫЙ БЛОК ИНТЕРВАЛОВ
 interval:
-  # Интервал для чтения данных из UART
+  # 1. Интервал для чтения данных из UART
   - interval: 500ms
     then:
       - lambda: |-
@@ -75,6 +75,20 @@ interval:
                   lv_label_set_text(id(time_label), time_part.c_str());
                 }
               }
+            }
+          }
+
+  # 2. Интервал для переключения страниц
+  - interval: 50ms
+    then:
+      - lambda: |-
+          static int last_page = -1;
+          if (id(current_page) != last_page) {
+            last_page = id(current_page);
+            if (last_page == 0) {
+              lv_scr_load(id(main_page));
+            } else if (last_page == 1) {
+              lv_scr_load(id(modes_page));
             }
           }
 
@@ -1046,22 +1060,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
 
-# Переключение страниц по глобальной переменной
-on_boot:
+# on_boot для установки начальной страницыon_boot:
   then:
     - lambda: |-
         id(current_page) = 0;
-
-interval:
-  - interval: 50ms
-    then:
-      - lambda: |-
-          static int last_page = -1;
-          if (id(current_page) != last_page) {
-            last_page = id(current_page);
-            if (last_page == 0) {
-              lv_scr_load(id(main_page));
-            } else if (last_page == 1) {
-              lv_scr_load(id(modes_page));
-            }
-          }
