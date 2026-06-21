@@ -700,7 +700,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   opa: 0%
         - button:
-            id: modes
+             id: modes
              x: 159
              y: 400
              width: 160
