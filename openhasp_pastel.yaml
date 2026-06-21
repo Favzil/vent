@@ -647,8 +647,7 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    id(current_page) = 0;
+                - lvgl.page.show: main_page
             widgets:
               - label:
                   id: dom
@@ -673,8 +672,7 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    id(current_page) = 1;
+                - lvgl.page.show: modes_page
             widgets:
               - label:
                   id: rezhim
@@ -997,8 +995,7 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    id(current_page) = 0;
+                - lvgl.page.show: main_page
             widgets:
               - label:
                   id: dom_modes
@@ -1023,8 +1020,7 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    id(current_page) = 1;
+                - lvgl.page.show: modes_page
             widgets:
               - label:
                   id: rezhim_modes
