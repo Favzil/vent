@@ -48,7 +48,7 @@ script:
     then:
       - lvgl.page.show:
           id: main_page
-          animation: FADE_ON
+          animation: FADE_IN
           time: 300ms
 
 # Интервалы
