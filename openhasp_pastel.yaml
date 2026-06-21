@@ -140,8 +140,8 @@ spi:
 # I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
-  sda: GPIO19
-  scl: GPIO45
+  sda: GPIO17
+  scl: GPIO18
 
 # ДИСПЛЕЙ
 display:
@@ -565,7 +565,7 @@ lvgl:
             shadow_color: 0x10B981
             shadow_opa: 0%
             pad_all: 0
-            scrollbar_mode: ACTIVE
+            scrollbar_mode: "ACTIVE"
             widgets:
               - arc:
                   id: widget_1781261697547_jcbrfzs59
