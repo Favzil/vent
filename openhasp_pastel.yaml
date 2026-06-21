@@ -156,7 +156,7 @@ touchscreen:
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO4  # Исправлено: используем свободный пин GPIO21, 04
+    interrupt_pin: GPIO5  # Исправлено: используем свободный пин GPIO21, 04 05
     on_touch:
       then:
         - lambda: |-
