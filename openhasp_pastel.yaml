@@ -156,8 +156,7 @@ touchscreen:
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO38  # Используем GPIO38 (пин подсветки, но он свободен для прерывания)
-    address: 0x5D  # Явно указываем адрес для стабильной работы
+    interrupt_pin: GPIO21  # Исправлено: используем свободный пин GPIO21
     on_touch:
       then:
         - lambda: |-
