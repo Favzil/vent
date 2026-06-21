@@ -12,6 +12,7 @@ psram:
   speed: 80MHz
 
 logger:
+  level: DEBUG
 
 # Глобальные переменные
 globals:
@@ -35,6 +36,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: page_switch_attempted
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -50,10 +55,23 @@ uart:
 script:
   - id: go_to_main
     then:
+      - logger.log: "Executing go_to_main script"
       - lvgl.page.show:
           id: main_page
           animation: FADE_IN
           time: 300ms
+      - logger.log: "Page switch command executed"
+
+# Скрипт для переключения на страницу режимов
+script:
+  - id: go_to_modes
+    then:
+      - logger.log: "Executing go_to_modes script"
+      - lvgl.page.show:
+          id: modes_page
+          animation: FADE_IN
+          time: 300ms
+      - logger.log: "Page switch to modes executed"
 
 # Интервалы
 interval:
@@ -63,43 +81,53 @@ interval:
           // Обработка долгого нажатия
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
+            ESP_LOGD("mode", "Timer: %d", id(press_timer));
             
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
               
+              ESP_LOGI("mode", "=== ACTIVATING MODE ===");
+              
               // Активируем режим в зависимости от active_mode_id
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
+                  ESP_LOGI("mode", "Setting text to: СТАНДАРТНЫЙ");
                   lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
                   id(uart_arduino).write_str("MODE:STANDARD\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
+                  ESP_LOGI("mode", "Setting text to: ЭКОНОМИЧНЫЙ");
                   lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
                   id(uart_arduino).write_str("MODE:ECONOM\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
+                  ESP_LOGI("mode", "Setting text to: ГОСТЕВОЙ");
                   lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
                   id(uart_arduino).write_str("MODE:GUEST\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
+                  ESP_LOGI("mode", "Setting text to: КОНДИЦИОНЕР");
                   lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
                   id(uart_arduino).write_str("MODE:CONDITIONER\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
+                  ESP_LOGI("mode", "Setting text to: ВЫСОКИЙ КПД");
                   lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
                   id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                   break;
               }
-              ESP_LOGI("mode", "Активирован режим: %s", id(selected_mode).c_str());
+              ESP_LOGI("mode", "Activated mode: %s", id(selected_mode).c_str());
               
               // Переключаем на главную страницу через скрипт
+              ESP_LOGI("mode", "=== SWITCHING TO MAIN PAGE ===");
               id(go_to_main).execute();
+              ESP_LOGI("mode", "=== SWITCH COMMAND SENT ===");
               
               id(active_mode_id) = 0;
             }
@@ -860,13 +888,14 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
-                    ESP_LOGI("mode", "Нажата кнопка СТАНДАРТНЫЙ");
+                    ESP_LOGI("mode", "Pressed STANDARD button");
             on_release:
               then:
                 - lambda: |-
                     if (id(press_timer) < 3000) {
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
+                      ESP_LOGI("mode", "Released STANDARD before timeout");
                     }
             widgets:
               - label:
@@ -896,13 +925,14 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 2;
                     id(mode_activated) = false;
-                    ESP_LOGI("mode", "Нажата кнопка ЭКОНОМИЧНЫЙ");
+                    ESP_LOGI("mode", "Pressed ECONOM button");
             on_release:
               then:
                 - lambda: |-
                     if (id(press_timer) < 3000) {
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
+                      ESP_LOGI("mode", "Released ECONOM before timeout");
                     }
             widgets:
               - label:
@@ -932,13 +962,14 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 3;
                     id(mode_activated) = false;
-                    ESP_LOGI("mode", "Нажата кнопка ГОСТЕВОЙ");
+                    ESP_LOGI("mode", "Pressed GUEST button");
             on_release:
               then:
                 - lambda: |-
                     if (id(press_timer) < 3000) {
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
+                      ESP_LOGI("mode", "Released GUEST before timeout");
                     }
             widgets:
               - label:
@@ -968,13 +999,14 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 4;
                     id(mode_activated) = false;
-                    ESP_LOGI("mode", "Нажата кнопка КОНДИЦИОНЕР");
+                    ESP_LOGI("mode", "Pressed CONDITIONER button");
             on_release:
               then:
                 - lambda: |-
                     if (id(press_timer) < 3000) {
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
+                      ESP_LOGI("mode", "Released CONDITIONER before timeout");
                     }
             widgets:
               - label:
@@ -1004,13 +1036,14 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 5;
                     id(mode_activated) = false;
-                    ESP_LOGI("mode", "Нажата кнопка ВЫСОКИЙ КПД");
+                    ESP_LOGI("mode", "Pressed EFFICIENCY button");
             on_release:
               then:
                 - lambda: |-
                     if (id(press_timer) < 3000) {
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
+                      ESP_LOGI("mode", "Released EFFICIENCY before timeout");
                     }
             widgets:
               - label:
