@@ -1,6 +1,10 @@
 esphome:
   name: esp32-display
   friendly_name: "4848s040"
+  on_boot:
+    then:
+      - lambda: |-
+          id(current_page) = 0;
 
 esp32:
   variant: esp32s3
@@ -166,12 +170,6 @@ display:
     spi_id: lcd_spi
     cs_pin: GPIO39
     invert_colors: True
-
-# on_boot для установки начальной страницы
-on_boot:
-  then:
-    - lambda: |-
-        id(current_page) = 0;
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
