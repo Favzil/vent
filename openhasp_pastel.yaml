@@ -628,7 +628,12 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - if:
+                    condition:
+                      lvgl.page.is_showing: modes_page
+                    then:
+                      - lvgl.page.show:
+                          id: main_page
             widgets:
               - label:
                   id: dom
@@ -653,7 +658,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lvgl.page.show:
+                    id: modes_page
             widgets:
               - label:
                   id: rezhim
@@ -976,7 +982,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lvgl.page.show:
+                    id: main_page
             widgets:
               - label:
                   id: dom_modes
@@ -1001,7 +1008,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lvgl.page.show:
+                    id: modes_page
             widgets:
               - label:
                   id: rezhim_modes
