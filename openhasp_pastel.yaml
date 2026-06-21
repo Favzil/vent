@@ -254,7 +254,7 @@ lvgl:
                   y: 22
                   width: 50
                   height: 15
-                  text: "С улицы\n"
+                  text: "С улицы"
                   text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
@@ -316,7 +316,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "На улицу\n"
+                  text: "На улицу"
                   text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
@@ -378,7 +378,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "Из дома\n"
+                  text: "Из дома"
                   text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
@@ -440,7 +440,7 @@ lvgl:
                   y: 22
                   width: 45
                   height: 15
-                  text: "В дом\n"
+                  text: "В дом"
                   text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
@@ -516,7 +516,7 @@ lvgl:
                   y: 84
                   width: 92
                   height: 12
-                  text: "Приточка\n"
+                  text: "Приточка"
                   text_color: 0x000000
                   text_align: CENTER
                   long_mode: CLIP
@@ -755,53 +755,214 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
-        # Кнопки режимов
-        - btnmatrix:
-            id: modes_matrix
-            x: 20
+        # Кнопки режимов (используем обычные кнопки вместо btnmatrix)
+        - button:
+            id: mode_econom
+            x: 30
             y: 150
-            width: 440
-            height: 200
-            bg_color: 0x1F2937
-            bg_opa: 50%
-            border_width: 2
-            border_color: 0x4B5563
-            radius: 12
-            pad_all: 10
-            pad_top: 10
-            pad_bottom: 10
-            pad_left: 10
-            pad_right: 10
-            btn_width: 100
-            btn_height: 40
-            btn_bg_color: 0x374151
-            btn_border_width: 1
-            btn_border_color: 0x6B7280
-            btn_radius: 8
-            btn_pad_all: 5
-            btn_text_color: 0xFFFFFF
-            btn_text_font: cyrillic_font_24
-            btn_bg_color_checked: 0x10B981
-            btn_text_color_checked: 0x000000
-            one_check: true
-            map:
-              - "Эконом"
-              - "Комфорт"
-              - "Турбо"
-              - "Ночной"
-              - "Влажность"
-              - "Обогрев"
-              - "Охлаждение"
-              - "Вентиляция"
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
             on_click:
               then:
                 - lambda: |-
-                    int btn_id = x;
-                    const char* modes[] = {"Эконом", "Комфорт", "Турбо", "Ночной", "Влажность", "Обогрев", "Охлаждение", "Вентиляция"};
-                    if (btn_id >= 0 && btn_id < 8) {
-                      ESP_LOGI("modes", "Выбран режим: %s", modes[btn_id]);
-                      // Здесь можно добавить логику управления
-                    }
+                    ESP_LOGI("mode", "Выбран режим: Эконом");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Эконом"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_comfort
+            x: 230
+            y: 150
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Комфорт");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Комфорт"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_turbo
+            x: 30
+            y: 215
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Турбо");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Турбо"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_night
+            x: 230
+            y: 215
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Ночной");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Ночной"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_humidity
+            x: 30
+            y: 280
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Влажность");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Влажность"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_heating
+            x: 230
+            y: 280
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Обогрев");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Обогрев"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_cooling
+            x: 30
+            y: 345
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Охлаждение");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Охлаждение"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
+            id: mode_ventilation
+            x: 230
+            y: 345
+            width: 180
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("mode", "Выбран режим: Вентиляция");
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 180
+                  height: 50
+                  text: "Вентиляция"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
 
         # Нижняя панель с кнопками (дублируется с главной)
         - button:
