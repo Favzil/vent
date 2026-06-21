@@ -806,8 +806,8 @@ lvgl:
                       id(selected_mode) = "СТАНДАРТНЫЙ";
                       lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
                       ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
-                      id(uart_arduino).write_string("MODE:STANDARD\n");
-                      id(lvgl_component).show_page("main_page");
+                      id(uart_arduino).write_str("MODE:STANDARD\n");
+                      id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
             widgets:
@@ -843,8 +843,8 @@ lvgl:
                       id(selected_mode) = "ЭКОНОМИЧНЫЙ";
                       lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
                       ESP_LOGI("mode", "Активирован режим: ЭКОНОМИЧНЫЙ");
-                      id(uart_arduino).write_string("MODE:ECONOM\n");
-                      id(lvgl_component).show_page("main_page");
+                      id(uart_arduino).write_str("MODE:ECONOM\n");
+                      id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
             widgets:
@@ -880,8 +880,8 @@ lvgl:
                       id(selected_mode) = "ГОСТЕВОЙ";
                       lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
                       ESP_LOGI("mode", "Активирован режим: ГОСТЕВОЙ");
-                      id(uart_arduino).write_string("MODE:GUEST\n");
-                      id(lvgl_component).show_page("main_page");
+                      id(uart_arduino).write_str("MODE:GUEST\n");
+                      id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
             widgets:
@@ -917,8 +917,8 @@ lvgl:
                       id(selected_mode) = "КОНДИЦИОНЕР";
                       lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
                       ESP_LOGI("mode", "Активирован режим: КОНДИЦИОНЕР");
-                      id(uart_arduino).write_string("MODE:CONDITIONER\n");
-                      id(lvgl_component).show_page("main_page");
+                      id(uart_arduino).write_str("MODE:CONDITIONER\n");
+                      id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
             widgets:
@@ -954,8 +954,8 @@ lvgl:
                       id(selected_mode) = "ВЫСОКИЙ КПД";
                       lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
                       ESP_LOGI("mode", "Активирован режим: ВЫСОКИЙ КПД");
-                      id(uart_arduino).write_string("MODE:HIGH_EFFICIENCY\n");
-                      id(lvgl_component).show_page("main_page");
+                      id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
+                      id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
             widgets:
