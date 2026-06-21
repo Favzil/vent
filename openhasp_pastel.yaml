@@ -136,7 +136,6 @@ i2c:
   id: touchscreen_bus
   sda: GPIO19
   scl: GPIO45
-  scan: true  # Включим сканирование для отладки
 
 # ДИСПЛЕЙ
 display:
@@ -148,15 +147,19 @@ display:
     invert_colors: True
 
 # ============================================
-# СЕНСОР ЭКРАНА (GT911) - БЕЗ INTERRUPT_PIN!
+# СЕНСОР ЭКРАНА (GT911) с коррекцией ориентации
 # ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    address: 0x5D  # Стандартный адрес GT911
-    # interrupt_pin НЕ УКАЗЫВАЕМ - он не нужен!
+    address: 0x5D
+    # Коррекция ориентации на 180 градусов
+    rotation: 180
+    # Альтернативно, можно использовать mirror_x и mirror_y:
+    # mirror_x: true
+    # mirror_y: true
     on_touch:
       then:
         - lambda: |-
