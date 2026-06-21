@@ -82,8 +82,8 @@ interval:
                   break;
               }
               ESP_LOGI("mode", "Активирован режим: %s", id(selected_mode).c_str());
-              // Переключаем на главную страницу через lvgl.page.show
-              id(lvgl_component).show_page(0);
+              // Переключаем на главную страницу (индекс 0, без анимации)
+              id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 0);
               id(active_mode_id) = 0;
             }
           }
