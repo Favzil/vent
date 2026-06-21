@@ -228,9 +228,9 @@ lvgl:
               - label:
                   id: znakgradussulicy
                   x: 60
-                  y: 15
+                  y: 10
                   width: 20
-                  height: 15
+                  height: 26
                   text: "°C"
                   text_color: 0x000000
                   text_align: LEFT
@@ -249,9 +249,9 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: widget_1781262141723_srplhrgb8
-                  x: 6
+                  x: 10
                   y: 22
-                  width: 45
+                  width: 50
                   height: 15
                   text: "С улицы\n"
                   text_color: 0x000000
@@ -267,7 +267,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0xF59E0B
+                  line_color: 0x1A79FF
                   line_rounded: true
         - obj:
             id: t_outdoor
@@ -292,7 +292,7 @@ lvgl:
                   x: 60
                   y: 22
                   width: 20
-                  height: 15
+                  height: 26
                   text: "°C"
                   text_color: 0x000000
                   text_align: LEFT
@@ -311,7 +311,7 @@ lvgl:
                   text_font: cyrillic_font_12
               - label:
                   id: widget_1781262306198_igmmcl5k8
-                  x: 2
+                  x: 10
                   y: 22
                   width: 45
                   height: 15
@@ -329,7 +329,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0xF59E0B
+                  line_color: 0x1A79FF
                   line_rounded: true
         - obj:
             id: t_fromhome
@@ -354,7 +354,7 @@ lvgl:
                   x: 60
                   y: 22
                   width: 20
-                  height: 15
+                  height: 26
                   text: "°C"
                   text_color: 0x000000
                   text_align: LEFT
@@ -373,7 +373,7 @@ lvgl:
                   text_font: cyrillic_font_12
               - label:
                   id: widget_1781262307812_n406bgqc4
-                  x: 2
+                  x: 10
                   y: 22
                   width: 45
                   height: 15
@@ -391,7 +391,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0xF59E0B
+                  line_color: 0x1A79FF
                   line_rounded: true
         - obj:
             id: t_tohome
@@ -416,7 +416,7 @@ lvgl:
                   x: 60
                   y: 15
                   width: 20
-                  height: 15
+                  height: 26
                   text: "°C"
                   text_color: 0x000000
                   text_align: LEFT
@@ -461,7 +461,7 @@ lvgl:
             y: 300
             width: 100
             height: 100
-            bg_color: 0x070E1B
+            bg_color: 0xF3FFB6
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -482,15 +482,15 @@ lvgl:
                   value: 72
                   min_value: 0
                   max_value: 100
-                  adjustable: false
+                  adjustable: true
                   start_angle: 135
                   end_angle: 45
-                  arc_color: 0x10B981
+                  arc_color: 0xE053D6
                   arc_width: 10
                   arc_opa: 20%
                   arc_rounded: true
                   indicator:
-                    arc_color: 0x10B981
+                    arc_color: 0xE053D6
                     arc_width: 10
                     arc_opa: 100%
                     arc_rounded: true
@@ -505,10 +505,10 @@ lvgl:
                   width: 92
                   height: 24
                   text: "72%"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_a6nmh00ld
                   x: 4
@@ -516,17 +516,17 @@ lvgl:
                   width: 92
                   height: 12
                   text: "Приточка\n"
-                  text_color: 0x10B981
+                  text_color: 0x000000
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_12
         - obj:
             id: Vityazh_filter
             x: 365
             y: 300
             width: 100
             height: 100
-            bg_color: 0x070E1B
+            bg_color: 0xF3FFB6
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -550,12 +550,12 @@ lvgl:
                   adjustable: false
                   start_angle: 135
                   end_angle: 45
-                  arc_color: 0x10B981
+                  arc_color: 0xE053D6
                   arc_width: 10
                   arc_opa: 20%
                   arc_rounded: true
                   indicator:
-                    arc_color: 0x10B981
+                    arc_color: 0xE053D6
                     arc_width: 10
                     arc_opa: 100%
                     arc_rounded: true
@@ -570,10 +570,10 @@ lvgl:
                   width: 92
                   height: 24
                   text: "72%"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_2lq5vokc6
                   x: 4
@@ -581,20 +581,11 @@ lvgl:
                   width: 92
                   height: 12
                   text: "Вытяжка"
-                  text_color: 0x10B981
+                  text_color: 0x000000
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
-        - label:
-            id: Wi_Fi
-            x: 420
-            y: 0
-            width: 50
-            height: 33
-            text: "\uF1EB"
-            text_font: cyrillic_font_40
-            text_align: CENTER
-            text_color: 0x690B98
+                  text_font: cyrillic_font_12
+        
         - label:
             id: time_label
             x: 194
@@ -605,7 +596,7 @@ lvgl:
             text_color: 0xF1F5F9
             text_align: CENTER
             long_mode: CLIP
-            text_font: cyrillic_font_40
+            text_font: cyrillic_font_24
         - textarea:
             id: Econom
             x: 3
@@ -622,7 +613,7 @@ lvgl:
             radius: 8
             outline_opa: 0%
             shadow_opa: 0%
-            text_color: 0x0EC852
+            text_color: 0xE053D6
             text_font: cyrillic_font_40
         - obj:
             id: widget_1781261697547_kzlml3d0h
