@@ -90,9 +90,9 @@ interval:
           if (id(current_page) != last_page) {
             last_page = id(current_page);
             if (last_page == 0) {
-              lv_scr_load(id(main_page));
+              id(main_page)->show();
             } else if (last_page == 1) {
-              lv_scr_load(id(modes_page));
+              id(modes_page)->show();
             }
           }
 
