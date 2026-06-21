@@ -154,7 +154,8 @@ lvgl:
     - tft_display
   rotation: 180
   pages:
-    - id: canvas_9
+    # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
+    - id: main_page
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
@@ -624,19 +625,22 @@ lvgl:
             height: 65
             bg_color: 0xF713B7
             bg_opa: 100%    
-            opa: 100%   
+            opa: 100%
+            on_click:
+              then:
+                - lvgl.page.show: main_page
             widgets:
-             - label:
-                 id: dom
-                 x: 0
-                 y: 0
-                 width: 119
-                 height: 26
-                 text: "Дом"
-                 text_color: 0x000000
-                 text_align: CENTER
-                 long_mode: CLIP
-                 text_font: cyrillic_font_24
+              - label:
+                  id: dom
+                  x: 0
+                  y: 0
+                  width: 119
+                  height: 26
+                  text: "Дом"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
                  
         - button:
             id: modes
@@ -646,22 +650,212 @@ lvgl:
             height: 65
             bg_color: 0xF713B7
             bg_opa: 100%    
-            opa: 100%   
+            opa: 100%
+            on_click:
+              then:
+                - lvgl.page.show: modes_page
             widgets:
-             - label:
-                 id: rezhim
-                 x: 0
-                 y: 0
-                 width: 119
-                 height: 26
-                 text: "Режимы"
-                 text_color: 0x000000
-                 text_align: CENTER
-                 long_mode: CLIP
-                 text_font: cyrillic_font_24
+              - label:
+                  id: rezhim
+                  x: 0
+                  y: 0
+                  width: 119
+                  height: 26
+                  text: "Режимы"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
           
         - button:
             id: stop
+            x: 203
+            y: 310
+            width: 75
+            height: 65
+            bg_color: 0xEFF0F0
+            bg_opa: 0%
+            border_opa: 0%
+            outline_opa: 0%
+            shadow_opa: 0%
+            text_color: 0xFFFFFF
+            text_opa: 100%
+            text_font: cyrillic_font_40
+            opa: 94%
+            widgets:
+              - label:
+                  text: "СТОП"
+                  text_align: CENTER
+                  text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
+
+    # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
+    - id: modes_page
+      bg_color: 0x111827
+      bg_opa: 100%
+      pad_all: 0
+      widgets:
+        # Верхняя панель (дублируется с главной)
+        - obj:
+            id: Upscreen_modes
+            x: 1
+            y: 0
+            width: 478
+            height: 35
+            bg_color: 0xF713B7
+            border_width: 1
+            border_color: 0x4B5563
+            radius: 8
+            pad_all: 0
+            widgets:
+              - label:
+                  id: KhaKar_modes
+                  x: 10
+                  y: 5
+                  width: 160
+                  height: 25
+                  text: "KhaKar-032"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
+              - label:
+                  id: Date_modes
+                  x: 280
+                  y: 9
+                  width: 200
+                  height: 20
+                  text: "Сб 20-июнь-2026"
+                  text_color: 0xEFF0F0
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_12
+              - label:
+                  id: time_label_modes
+                  x: 194
+                  y: 1
+                  width: 88
+                  height: 32
+                  text: "14:32"
+                  text_color: 0xF1F5F9
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
+
+        # Заголовок страницы режимов
+        - label:
+            id: modes_title
+            x: 40
+            y: 80
+            width: 400
+            height: 50
+            text: "ВЫБОР РЕЖИМА"
+            text_color: 0x10B981
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_40
+
+        # Кнопки режимов
+        - btnmatrix:
+            id: modes_matrix
+            x: 20
+            y: 150
+            width: 440
+            height: 200
+            bg_color: 0x1F2937
+            bg_opa: 50%
+            border_width: 2
+            border_color: 0x4B5563
+            radius: 12
+            pad_all: 10
+            pad_top: 10
+            pad_bottom: 10
+            pad_left: 10
+            pad_right: 10
+            btn_width: 100
+            btn_height: 40
+            btn_bg_color: 0x374151
+            btn_border_width: 1
+            btn_border_color: 0x6B7280
+            btn_radius: 8
+            btn_pad_all: 5
+            btn_text_color: 0xFFFFFF
+            btn_text_font: cyrillic_font_24
+            btn_bg_color_checked: 0x10B981
+            btn_text_color_checked: 0x000000
+            one_check: true
+            map:
+              - "Эконом"
+              - "Комфорт"
+              - "Турбо"
+              - "Ночной"
+              - "Влажность"
+              - "Обогрев"
+              - "Охлаждение"
+              - "Вентиляция"
+            on_click:
+              then:
+                - lambda: |-
+                    int btn_id = x;
+                    const char* modes[] = {"Эконом", "Комфорт", "Турбо", "Ночной", "Влажность", "Обогрев", "Охлаждение", "Вентиляция"};
+                    if (btn_id >= 0 && btn_id < 8) {
+                      ESP_LOGI("modes", "Выбран режим: %s", modes[btn_id]);
+                      // Здесь можно добавить логику управления
+                    }
+
+        # Нижняя панель с кнопками (дублируется с главной)
+        - button:
+            id: domoi_modes
+            x: 0
+            y: 415
+            width: 160
+            height: 65
+            bg_color: 0xF713B7
+            bg_opa: 100%    
+            opa: 100%
+            on_click:
+              then:
+                - lvgl.page.show: main_page
+            widgets:
+              - label:
+                  id: dom_modes
+                  x: 0
+                  y: 0
+                  width: 119
+                  height: 26
+                  text: "Дом"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
+                 
+        - button:
+            id: modes_modes
+            x: 159
+            y: 415
+            width: 160
+            height: 65
+            bg_color: 0xF713B7
+            bg_opa: 100%    
+            opa: 100%
+            on_click:
+              then:
+                - lvgl.page.show: modes_page
+            widgets:
+              - label:
+                  id: rezhim_modes
+                  x: 0
+                  y: 0
+                  width: 119
+                  height: 26
+                  text: "Режимы"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
+          
+        - button:
+            id: stop_modes
             x: 203
             y: 310
             width: 75
