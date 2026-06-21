@@ -148,11 +148,30 @@ display:
     cs_pin: GPIO39
     invert_colors: True
 
+# ============================================
+# СЕНСОР ЭКРАНА (добавлен отладка)
+# ============================================
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    display: tft_display
+    i2c_id: touchscreen_bus
+    interrupt_pin: GPIO16  # Проверьте этот пин!
+    on_touch:
+      then:
+        - lambda: |-
+            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+    on_release:
+      then:
+        - lambda: |-
+            ESP_LOGI("touch", "Released");
+
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
   displays:
     - tft_display
   rotation: 180
+  touchscreen: my_touchscreen  # <-- Привязываем сенсор к LVGL
   pages:
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
