@@ -179,7 +179,7 @@ lvgl:
             y: 0
             width: 478
             height: 35
-            bg_color: 0xA00641
+            bg_color: 0xF713B7
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -198,7 +198,7 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: Date
-                  x: 240
+                  x: 280
                   y: 9
                   width: 200
                   height: 20
@@ -206,14 +206,14 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
         - obj:
             id: t_indoor
             x: 23
             y: 68
             width: 85
             height: 80
-            bg_color: 0x070E1B
+            bg_color: 0xF0E37E
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -232,7 +232,7 @@ lvgl:
                   width: 20
                   height: 15
                   text: "°C"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -243,7 +243,7 @@ lvgl:
                   width: 45
                   height: 25
                   text: "23.5"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -254,10 +254,10 @@ lvgl:
                   width: 45
                   height: 15
                   text: "С улицы\n"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_12
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
@@ -275,7 +275,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x070E1B
+            bg_color: 0xF0E37E
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -294,7 +294,7 @@ lvgl:
                   width: 20
                   height: 15
                   text: "°C"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -305,10 +305,10 @@ lvgl:
                   width: 45
                   height: 25
                   text: "23.5"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_12
               - label:
                   id: widget_1781262306198_igmmcl5k8
                   x: 2
@@ -316,7 +316,7 @@ lvgl:
                   width: 45
                   height: 15
                   text: "На улицу\n"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
@@ -337,7 +337,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x070E1B
+            bg_color: 0xF0E37E
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -356,7 +356,7 @@ lvgl:
                   width: 20
                   height: 15
                   text: "°C"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -367,10 +367,10 @@ lvgl:
                   width: 45
                   height: 25
                   text: "23.5"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_12
               - label:
                   id: widget_1781262307812_n406bgqc4
                   x: 2
@@ -378,7 +378,7 @@ lvgl:
                   width: 45
                   height: 15
                   text: "Из дома\n"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
@@ -399,7 +399,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x070E1B
+            bg_color: 0xF0E37E
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -418,7 +418,7 @@ lvgl:
                   width: 20
                   height: 15
                   text: "°C"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -429,7 +429,7 @@ lvgl:
                   width: 45
                   height: 25
                   text: "23.5"
-                  text_color: 0xF1F5F9
+                  text_color: 0x000000
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -440,7 +440,7 @@ lvgl:
                   width: 45
                   height: 15
                   text: "В дом\n"
-                  text_color: 0x8E9FB8
+                  text_color: 0x000000
                   text_align: RIGHT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
