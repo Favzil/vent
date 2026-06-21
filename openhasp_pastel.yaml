@@ -31,6 +31,10 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: mode_activated
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -42,6 +46,15 @@ uart:
   data_bits: 8
   parity: NONE
 
+# Скрипт для переключения на главную страницу
+script:
+  - id: go_to_main
+    then:
+      - lvgl.page.show:
+          id: main_page
+          animation: FADE_IN
+          time: 300ms
+
 # Интервалы
 interval:
   - interval: 100ms
@@ -51,8 +64,10 @@ interval:
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
             
-            if (id(press_timer) >= 3000) {
+            if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
+              id(mode_activated) = true;
+              
               // Активируем режим в зависимости от active_mode_id
               switch(id(active_mode_id)) {
                 case 1:
@@ -83,9 +98,8 @@ interval:
               }
               ESP_LOGI("mode", "Активирован режим: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу через LVGL компонент
-              // main_page - это первая страница (индекс 0)
-              id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_FADE_IN, 300);
+              // Переключаем на главную страницу через скрипт
+              id(go_to_main).execute();
               
               id(active_mode_id) = 0;
             }
@@ -845,6 +859,7 @@ lvgl:
                 - lambda: |-
                     id(press_timer) = 100;
                     id(active_mode_id) = 1;
+                    id(mode_activated) = false;
                     ESP_LOGI("mode", "Нажата кнопка СТАНДАРТНЫЙ");
             on_release:
               then:
@@ -880,6 +895,7 @@ lvgl:
                 - lambda: |-
                     id(press_timer) = 100;
                     id(active_mode_id) = 2;
+                    id(mode_activated) = false;
                     ESP_LOGI("mode", "Нажата кнопка ЭКОНОМИЧНЫЙ");
             on_release:
               then:
@@ -915,6 +931,7 @@ lvgl:
                 - lambda: |-
                     id(press_timer) = 100;
                     id(active_mode_id) = 3;
+                    id(mode_activated) = false;
                     ESP_LOGI("mode", "Нажата кнопка ГОСТЕВОЙ");
             on_release:
               then:
@@ -950,6 +967,7 @@ lvgl:
                 - lambda: |-
                     id(press_timer) = 100;
                     id(active_mode_id) = 4;
+                    id(mode_activated) = false;
                     ESP_LOGI("mode", "Нажата кнопка КОНДИЦИОНЕР");
             on_release:
               then:
@@ -985,6 +1003,7 @@ lvgl:
                 - lambda: |-
                     id(press_timer) = 100;
                     id(active_mode_id) = 5;
+                    id(mode_activated) = false;
                     ESP_LOGI("mode", "Нажата кнопка ВЫСОКИЙ КПД");
             on_release:
               then:
