@@ -27,6 +27,14 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: is_pressed
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: mode_activated
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -43,8 +51,16 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
-          if (id(press_timer) < 3000) {
+          // Увеличиваем таймер только если кнопка нажата и режим еще не активирован
+          if (id(is_pressed) && !id(mode_activated)) {
             id(press_timer) += 100;
+            
+            // Если прошло 3 секунды - активируем режим
+            if (id(press_timer) >= 3000) {
+              id(mode_activated) = true;
+              // Здесь будет отправка команды через UART
+              // Конкретная команда будет отправлена в on_release
+            }
           }
   - interval: 500ms
     then:
@@ -799,17 +815,22 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 0;
+                    id(is_pressed) = true;
+                    id(mode_activated) = false;
+                    ESP_LOGI("mode", "Нажата кнопка СТАНДАРТНЫЙ");
             on_release:
               then:
                 - lambda: |-
-                    if (id(press_timer) >= 3000) {
+                    id(is_pressed) = false;
+                    if (id(mode_activated)) {
+                      ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
                       id(selected_mode) = "СТАНДАРТНЫЙ";
                       lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
-                      ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
                       id(uart_arduino).write_str("MODE:STANDARD\n");
                       id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
+                    id(mode_activated) = false;
             widgets:
               - label:
                   x: 0
@@ -836,17 +857,22 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 0;
+                    id(is_pressed) = true;
+                    id(mode_activated) = false;
+                    ESP_LOGI("mode", "Нажата кнопка ЭКОНОМИЧНЫЙ");
             on_release:
               then:
                 - lambda: |-
-                    if (id(press_timer) >= 3000) {
+                    id(is_pressed) = false;
+                    if (id(mode_activated)) {
+                      ESP_LOGI("mode", "Активирован режим: ЭКОНОМИЧНЫЙ");
                       id(selected_mode) = "ЭКОНОМИЧНЫЙ";
                       lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
-                      ESP_LOGI("mode", "Активирован режим: ЭКОНОМИЧНЫЙ");
                       id(uart_arduino).write_str("MODE:ECONOM\n");
                       id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
+                    id(mode_activated) = false;
             widgets:
               - label:
                   x: 0
@@ -873,17 +899,22 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 0;
+                    id(is_pressed) = true;
+                    id(mode_activated) = false;
+                    ESP_LOGI("mode", "Нажата кнопка ГОСТЕВОЙ");
             on_release:
               then:
                 - lambda: |-
-                    if (id(press_timer) >= 3000) {
+                    id(is_pressed) = false;
+                    if (id(mode_activated)) {
+                      ESP_LOGI("mode", "Активирован режим: ГОСТЕВОЙ");
                       id(selected_mode) = "ГОСТЕВОЙ";
                       lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
-                      ESP_LOGI("mode", "Активирован режим: ГОСТЕВОЙ");
                       id(uart_arduino).write_str("MODE:GUEST\n");
                       id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
+                    id(mode_activated) = false;
             widgets:
               - label:
                   x: 0
@@ -910,17 +941,22 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 0;
+                    id(is_pressed) = true;
+                    id(mode_activated) = false;
+                    ESP_LOGI("mode", "Нажата кнопка КОНДИЦИОНЕР");
             on_release:
               then:
                 - lambda: |-
-                    if (id(press_timer) >= 3000) {
+                    id(is_pressed) = false;
+                    if (id(mode_activated)) {
+                      ESP_LOGI("mode", "Активирован режим: КОНДИЦИОНЕР");
                       id(selected_mode) = "КОНДИЦИОНЕР";
                       lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
-                      ESP_LOGI("mode", "Активирован режим: КОНДИЦИОНЕР");
                       id(uart_arduino).write_str("MODE:CONDITIONER\n");
                       id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
+                    id(mode_activated) = false;
             widgets:
               - label:
                   x: 0
@@ -947,17 +983,22 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 0;
+                    id(is_pressed) = true;
+                    id(mode_activated) = false;
+                    ESP_LOGI("mode", "Нажата кнопка ВЫСОКИЙ КПД");
             on_release:
               then:
                 - lambda: |-
-                    if (id(press_timer) >= 3000) {
+                    id(is_pressed) = false;
+                    if (id(mode_activated)) {
+                      ESP_LOGI("mode", "Активирован режим: ВЫСОКИЙ КПД");
                       id(selected_mode) = "ВЫСОКИЙ КПД";
                       lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
-                      ESP_LOGI("mode", "Активирован режим: ВЫСОКИЙ КПД");
                       id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                       id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_NONE, 50);
                     }
                     id(press_timer) = 0;
+                    id(mode_activated) = false;
             widgets:
               - label:
                   x: 0
