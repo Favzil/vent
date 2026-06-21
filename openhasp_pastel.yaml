@@ -748,5 +748,6 @@ lvgl:
             widgets:
               - label:
                   text: "СТОП"
+                  text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
