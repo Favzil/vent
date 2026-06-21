@@ -150,14 +150,14 @@ display:
 
 # ============================================
 # СЕНСОР ЭКРАНА (GT911 с отладкой)
-# Пин INTERRUPT изменен на GPIO9 (обычно используется для GT911 на этом экране)
 # ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO9  # Изменено с GPIO16 на GPIO9 (проверьте документацию!)
+    interrupt_pin: GPIO38  # Используем GPIO38 (пин подсветки, но он свободен для прерывания)
+    address: 0x5D  # Явно указываем адрес для стабильной работы
     on_touch:
       then:
         - lambda: |-
