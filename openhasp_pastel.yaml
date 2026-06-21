@@ -31,10 +31,6 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
-  - id: main_page_index
-    type: int
-    restore_value: no
-    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -87,8 +83,9 @@ interval:
               }
               ESP_LOGI("mode", "Активирован режим: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу через LVGL API
-              lv_scr_load_anim(lv_obj_get_parent(id(Econom)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+              // Переключаем на главную страницу через LVGL компонент
+              // main_page - это первая страница (индекс 0)
+              id(lvgl_component).show_page(0, LV_SCR_LOAD_ANIM_FADE_IN, 300);
               
               id(active_mode_id) = 0;
             }
