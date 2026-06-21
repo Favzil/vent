@@ -125,19 +125,18 @@ light:
     restore_mode: ALWAYS_ON
     default_transition_length: 0s
 
-# SPI
+# SPI для дисплея
 spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
 
-# I2C
+# I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
   sda: GPIO19
-  scl:
-    number: GPIO45
-    ignore_strapping_warning: true
+  scl: GPIO45
+  scan: true  # Включим сканирование для отладки
 
 # ДИСПЛЕЙ
 display:
@@ -149,14 +148,15 @@ display:
     invert_colors: True
 
 # ============================================
-# СЕНСОР ЭКРАНА (GT911 с отладкой)
+# СЕНСОР ЭКРАНА (GT911) - БЕЗ INTERRUPT_PIN!
 # ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO18  # Исправлено: используем свободный пин GPIO21, 04 05 06 07 08 015  018
+    address: 0x5D  # Стандартный адрес GT911
+    # interrupt_pin НЕ УКАЗЫВАЕМ - он не нужен!
     on_touch:
       then:
         - lambda: |-
