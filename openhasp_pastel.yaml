@@ -140,8 +140,8 @@ spi:
 # I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
-  sda: GPIO17
-  scl: GPIO18
+  sda: GPIO19
+  scl: GPIO45
 
 # ДИСПЛЕЙ
 display:
@@ -797,13 +797,13 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_long_press:
+            on_press:
+              min_time: 3000ms
               then:
                 - lambda: |-
                     ESP_LOGI("mode", "Выбран режим: СТАНДАРТНЫЙ");
                     id(current_mode) = "СТАНДАРТНЫЙ";
                     lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
-                    // Отправка команды по UART
                     id(uart_arduino).write_string("MODE_STANDARD\n");
                 - lvgl.page.show:
                     id: main_page
@@ -830,7 +830,8 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_long_press:
+            on_press:
+              min_time: 3000ms
               then:
                 - lambda: |-
                     ESP_LOGI("mode", "Выбран режим: ЭКОНОМИЧНЫЙ");
@@ -862,7 +863,8 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_long_press:
+            on_press:
+              min_time: 3000ms
               then:
                 - lambda: |-
                     ESP_LOGI("mode", "Выбран режим: ГОСТЕВОЙ");
@@ -894,7 +896,8 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_long_press:
+            on_press:
+              min_time: 3000ms
               then:
                 - lambda: |-
                     ESP_LOGI("mode", "Выбран режим: КОНДИЦИОНЕР");
@@ -926,7 +929,8 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_long_press:
+            on_press:
+              min_time: 3000ms
               then:
                 - lambda: |-
                     ESP_LOGI("mode", "Выбран режим: ВЫСОКИЙ КПД");
