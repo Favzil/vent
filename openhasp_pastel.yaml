@@ -36,10 +36,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: page_switch_attempted
-    type: bool
-    restore_value: no
-    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -51,7 +47,7 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Скрипт для переключения на главную страницу
+# Скрипты для переключения страниц
 script:
   - id: go_to_main
     then:
@@ -61,9 +57,6 @@ script:
           animation: FADE_IN
           time: 300ms
       - logger.log: "Page switch command executed"
-
-# Скрипт для переключения на страницу режимов
-script:
   - id: go_to_modes
     then:
       - logger.log: "Executing go_to_modes script"
@@ -1010,8 +1003,7 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
+                  x: 0                  y: 0
                   width: 398
                   height: 50
                   text: "КОНДИЦИОНЕР"
