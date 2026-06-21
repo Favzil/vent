@@ -150,13 +150,14 @@ display:
 
 # ============================================
 # СЕНСОР ЭКРАНА (GT911 с отладкой)
+# Пин INTERRUPT изменен на GPIO9 (обычно используется для GT911 на этом экране)
 # ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
     display: tft_display
     i2c_id: touchscreen_bus
-    interrupt_pin: GPIO16  # Проверьте этот пин в документации к экрану
+    interrupt_pin: GPIO9  # Изменено с GPIO16 на GPIO9 (проверьте документацию!)
     on_touch:
       then:
         - lambda: |-
@@ -170,7 +171,7 @@ touchscreen:
 lvgl:
   displays:
     - tft_display
-  touchscreens:  # ВАЖНО: множественное число!
+  touchscreens:
     - touchscreen_id: my_touchscreen
   rotation: 180
   pages:
