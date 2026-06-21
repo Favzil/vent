@@ -19,7 +19,7 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '""'
-  - id: current_mode
+  - id: selected_mode
     type: std::string
     restore_value: no
     initial_value: '"СТАНДАРТНЫЙ"'
@@ -565,7 +565,7 @@ lvgl:
             shadow_color: 0x10B981
             shadow_opa: 0%
             pad_all: 0
-            scrollbar_mode: "ACTIVE"
+            scrollbar_mode: ACTIVE
             widgets:
               - arc:
                   id: widget_1781261697547_jcbrfzs59
@@ -772,183 +772,166 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Заголовок страницы режимов
-        - label:
-            id: modes_title
-            x: 40
-            y: 60
-            width: 400
-            height: 40
-            text: "ВЫБОР РЕЖИМА"
-            text_color: 0x10B981
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_24
-
-        # Кнопки режимов в один столбик с шрифтом 40
+        # Кнопки режимов в один столбик
         - button:
             id: mode_standard
             x: 40
-            y: 110
-            width: 400
-            height: 45
+            y: 60
+            width: 398
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_press:
-              min_time: 3000ms
+            on_long_press:
+              min_length: 3000ms
               then:
                 - lambda: |-
-                    ESP_LOGI("mode", "Выбран режим: СТАНДАРТНЫЙ");
-                    id(current_mode) = "СТАНДАРТНЫЙ";
+                    id(selected_mode) = "СТАНДАРТНЫЙ";
                     lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
-                    id(uart_arduino).write_string("MODE_STANDARD\n");
+                    ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
+                    // Отправка команды по UART
+                    id(uart_arduino).write_string("MODE:STANDARD\n");
                 - lvgl.page.show:
                     id: main_page
             widgets:
               - label:
                   x: 0
                   y: 0
-                  width: 400
-                  height: 45
+                  width: 398
+                  height: 50
                   text: "СТАНДАРТНЫЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  long_mode: CLIP
                   text_font: cyrillic_font_40
 
         - button:
             id: mode_econom
             x: 40
-            y: 165
-            width: 400
-            height: 45
+            y: 120
+            width: 398
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_press:
-              min_time: 3000ms
+            on_long_press:
+              min_length: 3000ms
               then:
                 - lambda: |-
-                    ESP_LOGI("mode", "Выбран режим: ЭКОНОМИЧНЫЙ");
-                    id(current_mode) = "ЭКОНОМИЧНЫЙ";
+                    id(selected_mode) = "ЭКОНОМИЧНЫЙ";
                     lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
-                    id(uart_arduino).write_string("MODE_ECONOM\n");
+                    ESP_LOGI("mode", "Активирован режим: ЭКОНОМИЧНЫЙ");
+                    id(uart_arduino).write_string("MODE:ECONOM\n");
                 - lvgl.page.show:
                     id: main_page
             widgets:
               - label:
                   x: 0
                   y: 0
-                  width: 400
-                  height: 45
+                  width: 398
+                  height: 50
                   text: "ЭКОНОМИЧНЫЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  long_mode: CLIP
                   text_font: cyrillic_font_40
 
         - button:
             id: mode_guest
             x: 40
-            y: 220
-            width: 400
-            height: 45
+            y: 180
+            width: 398
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_press:
-              min_time: 3000ms
+            on_long_press:
+              min_length: 3000ms
               then:
                 - lambda: |-
-                    ESP_LOGI("mode", "Выбран режим: ГОСТЕВОЙ");
-                    id(current_mode) = "ГОСТЕВОЙ";
+                    id(selected_mode) = "ГОСТЕВОЙ";
                     lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
-                    id(uart_arduino).write_string("MODE_GUEST\n");
+                    ESP_LOGI("mode", "Активирован режим: ГОСТЕВОЙ");
+                    id(uart_arduino).write_string("MODE:GUEST\n");
                 - lvgl.page.show:
                     id: main_page
             widgets:
               - label:
                   x: 0
                   y: 0
-                  width: 400
-                  height: 45
+                  width: 398
+                  height: 50
                   text: "ГОСТЕВОЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  long_mode: CLIP
                   text_font: cyrillic_font_40
 
         - button:
             id: mode_conditioner
             x: 40
-            y: 275
-            width: 400
-            height: 45
+            y: 240
+            width: 398
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_press:
-              min_time: 3000ms
+            on_long_press:
+              min_length: 3000ms
               then:
                 - lambda: |-
-                    ESP_LOGI("mode", "Выбран режим: КОНДИЦИОНЕР");
-                    id(current_mode) = "КОНДИЦИОНЕР";
+                    id(selected_mode) = "КОНДИЦИОНЕР";
                     lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
-                    id(uart_arduino).write_string("MODE_CONDITIONER\n");
+                    ESP_LOGI("mode", "Активирован режим: КОНДИЦИОНЕР");
+                    id(uart_arduino).write_string("MODE:CONDITIONER\n");
                 - lvgl.page.show:
                     id: main_page
             widgets:
               - label:
                   x: 0
                   y: 0
-                  width: 400
-                  height: 45
+                  width: 398
+                  height: 50
                   text: "КОНДИЦИОНЕР"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  long_mode: CLIP
                   text_font: cyrillic_font_40
 
         - button:
-            id: mode_high_efficiency
+            id: mode_efficiency
             x: 40
-            y: 330
-            width: 400
-            height: 45
+            y: 300
+            width: 398
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            on_press:
-              min_time: 3000ms
+            on_long_press:
+              min_length: 3000ms
               then:
                 - lambda: |-
-                    ESP_LOGI("mode", "Выбран режим: ВЫСОКИЙ КПД");
-                    id(current_mode) = "ВЫСОКИЙ КПД";
+                    id(selected_mode) = "ВЫСОКИЙ КПД";
                     lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
-                    id(uart_arduino).write_string("MODE_HIGH_EFFICIENCY\n");
+                    ESP_LOGI("mode", "Активирован режим: ВЫСОКИЙ КПД");
+                    id(uart_arduino).write_string("MODE:HIGH_EFFICIENCY\n");
                 - lvgl.page.show:
                     id: main_page
             widgets:
               - label:
                   x: 0
                   y: 0
-                  width: 400
-                  height: 45
+                  width: 398
+                  height: 50
                   text: "ВЫСОКИЙ КПД"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  long_mode: CLIP
                   text_font: cyrillic_font_40
 
         # Нижняя панель с кнопками (дублируется с главной)
