@@ -19,6 +19,10 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '""'
+  - id: current_page
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -628,7 +632,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    lv_scr_load(id(main_page));
             widgets:
               - label:
                   id: dom
@@ -653,7 +658,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    lv_scr_load(id(modes_page));
             widgets:
               - label:
                   id: rezhim
@@ -755,7 +761,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
-        # Кнопки режимов (используем обычные кнопки вместо btnmatrix)
+        # Кнопки режимов
         - button:
             id: mode_econom
             x: 30
@@ -976,7 +982,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    lv_scr_load(id(main_page));
             widgets:
               - label:
                   id: dom_modes
@@ -1001,7 +1008,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    lv_scr_load(id(modes_page));
             widgets:
               - label:
                   id: rezhim_modes
