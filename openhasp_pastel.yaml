@@ -619,10 +619,11 @@ lvgl:
         - button:
             id: modes
             x: 159
-            y: 400
+            y: 415
             width: 160
             height: 65
-            bg_opa: 0%    # прозрачный фон
+            bg_color: 0xF713B7
+            bg_opa: 100%    
             opa: 100%   
             widgets:
              - label:
@@ -630,12 +631,12 @@ lvgl:
                  x: 0
                  y: 0
                  width: 119
-                 height: 14
+                 height: 26
                  text: "Режимы"
                  text_color: 0x000000
                  text_align: CENTER
                  long_mode: CLIP
-                 text_font: cyrillic_font_12
+                 text_font: cyrillic_font_24
           
         - button:
             id: stop
