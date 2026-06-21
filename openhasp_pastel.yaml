@@ -791,7 +791,6 @@ lvgl:
                     id(selected_mode) = "СТАНДАРТНЫЙ";
                     lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
                     ESP_LOGI("mode", "Активирован режим: СТАНДАРТНЫЙ");
-                    // Отправка команды по UART
                     id(uart_arduino).write_string("MODE:STANDARD\n");
                 - lvgl.page.show:
                     id: main_page
