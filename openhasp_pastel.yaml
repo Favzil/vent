@@ -27,6 +27,10 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: lvgl_component
+    type: esphome::lvgl::LVGLComponent*
+    restore_value: no
+    initial_value: 'nullptr'
 
 # UART для связи с Arduino
 uart:
@@ -89,10 +93,11 @@ interval:
           static int last_page = -1;
           if (id(current_page) != last_page) {
             last_page = id(current_page);
+            auto pages = id(lvgl_component)->get_pages();
             if (last_page == 0) {
-              id(main_page)->show();
+              lv_scr_load(pages[0]);
             } else if (last_page == 1) {
-              id(modes_page)->show();
+              lv_scr_load(pages[1]);
             }
           }
 
@@ -173,6 +178,7 @@ display:
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
+  id: lvgl_component
   displays:
     - tft_display
   rotation: 180
