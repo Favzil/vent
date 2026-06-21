@@ -77,20 +77,6 @@ interval:
               }
             }
           }
-  
-  # Интервал для переключения страниц
-  - interval: 100ms
-    then:
-      - lambda: |-
-          static int last_page = -1;
-          if (id(current_page) != last_page) {
-            last_page = id(current_page);
-            if (last_page == 0) {
-              id(main_page).show();
-            } else if (last_page == 1) {
-              id(modes_page).show();
-            }
-          }
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -647,7 +633,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom
@@ -672,7 +659,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim
@@ -995,7 +983,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: main_page
+                - lambda: |-
+                    id(current_page) = 0;
             widgets:
               - label:
                   id: dom_modes
@@ -1020,7 +1009,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lvgl.page.show: modes_page
+                - lambda: |-
+                    id(current_page) = 1;
             widgets:
               - label:
                   id: rezhim_modes
@@ -1055,3 +1045,23 @@ lvgl:
                   text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
+
+# Переключение страниц по глобальной переменной
+on_boot:
+  then:
+    - lambda: |-
+        id(current_page) = 0;
+
+interval:
+  - interval: 50ms
+    then:
+      - lambda: |-
+          static int last_page = -1;
+          if (id(current_page) != last_page) {
+            last_page = id(current_page);
+            if (last_page == 0) {
+              lv_scr_load(id(main_page));
+            } else if (last_page == 1) {
+              lv_scr_load(id(modes_page));
+            }
+          }
