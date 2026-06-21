@@ -617,26 +617,26 @@ lvgl:
             text_font: cyrillic_font_40
        
         - button:
-             id: modes
-             x: 159
-             y: 400
-             width: 160
-             height: 65
-             bg_color: 0x4F46E5
-             text_color: 0xFFFFFF
-             opa: 0%
-             widgets:
-               - label:
-                   id: rezhim
-                   x: 0
-                   y: 0
-                   width: 119
-                   height: 14
-                   text: "Режимы"
-                   text_color: 0x000000
-                   text_align: CENTER
-                   long_mode: CLIP
-                   text_font: cyrillic_font_12
+            id: modes
+            x: 159
+            y: 400
+            width: 160
+            height: 65
+            bg_opa: 0%    # прозрачный фон
+            opa: 100%   
+            widgets:
+             - label:
+                 id: rezhim
+                 x: 0
+                 y: 0
+                 width: 119
+                 height: 14
+                 text: "Режимы"
+                 text_color: 0x000000
+                 text_align: CENTER
+                 long_mode: CLIP
+                 text_font: cyrillic_font_12
+          
         - button:
             id: stop
             x: 203
