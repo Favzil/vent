@@ -36,6 +36,18 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: idle_timer
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: is_sleeping
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: previous_page
+    type: int
+    restore_value: no
+    initial_value: '0'  # 0 - main, 1 - modes
 
 # UART для связи с Arduino
 uart:
@@ -52,6 +64,32 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
+          // Таймер бездействия - только если не в режиме сна
+          if (!id(is_sleeping)) {
+            id(idle_timer) += 100;
+            
+            // Через 60 секунд бездействия переходим в режим сна
+            if (id(idle_timer) >= 60000) {
+              id(is_sleeping) = true;
+              id(idle_timer) = 0;
+              
+              // Запоминаем текущую страницу
+              lv_obj_t *current_scr = lv_scr_act();
+              if (current_scr == id(main_page)) {
+                id(previous_page) = 0;
+              } else if (current_scr == id(modes_page)) {
+                id(previous_page) = 1;
+              }
+              
+              // Показываем страницу сна
+              lvgl.page.show:
+                id: sleep_page
+              
+              ESP_LOGI("sleep", "Entering sleep mode");
+            }
+          }
+          
+          // Обработка нажатия для режимов
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
             
@@ -239,10 +277,31 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+            
+            // Если в режиме сна - выходим из сна
+            if (id(is_sleeping)) {
+              id(is_sleeping) = false;
+              id(idle_timer) = 0;
+              
+              // Возвращаемся на предыдущую страницу
+              if (id(previous_page) == 0) {
+                lvgl.page.show:
+                  id: main_page
+              } else {
+                lvgl.page.show:
+                  id: modes_page
+              }
+              
+              ESP_LOGI("sleep", "Exiting sleep mode");
+            }
     on_release:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Released");
+            // Сбрасываем таймер бездействия при отпускании
+            if (!id(is_sleeping)) {
+              id(idle_timer) = 0;
+            }
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -253,6 +312,62 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
+    # ========== СТРАНИЦА СНА (ЗАСТАВКА) ==========
+    - id: sleep_page
+      bg_color: 0x000000
+      bg_opa: 100%
+      pad_all: 0
+      widgets:
+        # Фоновое изображение на весь экран
+        - image:
+            id: sleep_background
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            src: background_image
+            align: CENTER
+            opa: 100%
+        
+        # Часы на заставке (крупно)
+        - label:
+            id: sleep_time
+            x: 0
+            y: 340
+            width: 480
+            height: 80
+            text: "14:32"
+            text_color: 0xFFFFFF
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_40
+        
+        # Дата на заставке
+        - label:
+            id: sleep_date
+            x: 0
+            y: 395
+            width: 480
+            height: 30
+            text: "Сб 20-июнь-2026"
+            text_color: 0xCCCCCC
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_24
+        
+        # Текст "Нажмите для выхода"
+        - label:
+            id: sleep_hint
+            x: 0
+            y: 430
+            width: 480
+            height: 30
+            text: "Нажмите для выхода"
+            text_color: 0x888888
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_12
+
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
       bg_color: 0x111827
