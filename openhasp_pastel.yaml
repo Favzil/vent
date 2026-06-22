@@ -61,7 +61,7 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
-              // Получаем указатель на главную страницу через LVGL
+              // Получаем указатель на главную страницу
               lv_obj_t *main_page = lv_obj_get_parent(id(Econom));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -74,44 +74,24 @@ interval:
                   id(uart_arduino).write_str("MODE:STANDARD\n");
                   break;
                 case 2:
-                  id(selected_mode) = "ЭКОНОМ";
-                  lv_label_set_text(id(Econom), "ЭКОНОМ");
+                  id(selected_mode) = "ЭКОНОМИЧНЫЙ";
+                  lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
                   id(uart_arduino).write_str("MODE:ECONOM\n");
                   break;
                 case 3:
-                  id(selected_mode) = "КОМФОРТ";
-                  lv_label_set_text(id(Econom), "КОМФОРТ");
-                  id(uart_arduino).write_str("MODE:COMFORT\n");
+                  id(selected_mode) = "ГОСТЕВОЙ";
+                  lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
+                  id(uart_arduino).write_str("MODE:GUEST\n");
                   break;
                 case 4:
-                  id(selected_mode) = "ТУРБО";
-                  lv_label_set_text(id(Econom), "ТУРБО");
-                  id(uart_arduino).write_str("MODE:TURBO\n");
+                  id(selected_mode) = "КОНДИЦИОНЕР";
+                  lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
+                  id(uart_arduino).write_str("MODE:CONDITIONER\n");
                   break;
                 case 5:
-                  id(selected_mode) = "НОЧНОЙ";
-                  lv_label_set_text(id(Econom), "НОЧНОЙ");
-                  id(uart_arduino).write_str("MODE:NIGHT\n");
-                  break;
-                case 6:
-                  id(selected_mode) = "ВЛАЖНОСТЬ";
-                  lv_label_set_text(id(Econom), "ВЛАЖНОСТЬ");
-                  id(uart_arduino).write_str("MODE:HUMIDITY\n");
-                  break;
-                case 7:
-                  id(selected_mode) = "ОБОГРЕВ";
-                  lv_label_set_text(id(Econom), "ОБОГРЕВ");
-                  id(uart_arduino).write_str("MODE:HEATING\n");
-                  break;
-                case 8:
-                  id(selected_mode) = "ОХЛАЖДЕНИЕ";
-                  lv_label_set_text(id(Econom), "ОХЛАЖДЕНИЕ");
-                  id(uart_arduino).write_str("MODE:COOLING\n");
-                  break;
-                case 9:
-                  id(selected_mode) = "ВЕНТИЛЯЦИЯ";
-                  lv_label_set_text(id(Econom), "ВЕНТИЛЯЦИЯ");
-                  id(uart_arduino).write_str("MODE:VENTILATION\n");
+                  id(selected_mode) = "ВЫСОКИЙ КПД";
+                  lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
+                  id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                   break;
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
@@ -132,7 +112,6 @@ interval:
       - lambda: |-
           // Проверяем, есть ли данные в буфере UART
           if (id(uart_arduino).available()) {
-            // Читаем данные по одному байту
             while (id(uart_arduino).available()) {
               uint8_t byte;
               if (id(uart_arduino).read_byte(&byte)) {
@@ -140,27 +119,20 @@ interval:
               }
             }
             
-            // Проверяем, есть ли символ новой строки
             size_t newline_pos = id(uart_buffer).find('\n');
             if (newline_pos != std::string::npos) {
-              // Извлекаем строку до \n
               std::string line = id(uart_buffer).substr(0, newline_pos);
-              // Удаляем обработанную часть из буфера
               id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
               
               if (!line.empty()) {
                 ESP_LOGI("main", "Received: %s", line.c_str());
-                
-                // Удаляем символ возврата каретки
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
                 
-                // Ожидаем формат: "Сб 20-июнь-2026 14:32"
                 size_t space_pos = line.find(' ');
                 if (space_pos != std::string::npos) {
                   std::string date_part = line.substr(0, space_pos);
                   std::string time_part = line.substr(space_pos + 1);
                   
-                  // Обновляем тексты на дисплее через LVGL API
                   lv_label_set_text(id(Date), date_part.c_str());
                   lv_label_set_text(id(time_label), time_part.c_str());
                   lv_label_set_text(id(Date_modes), date_part.c_str());
@@ -244,7 +216,7 @@ display:
     invert_colors: True
 
 # ============================================
-# СЕНСОР ЭКРАНА (GT911) с коррекцией ориентации через transform
+# СЕНСОР ЭКРАНА (GT911)
 # ============================================
 touchscreen:
   - platform: gt911
@@ -252,7 +224,6 @@ touchscreen:
     display: tft_display
     i2c_id: touchscreen_bus
     address: 0x5D
-    # Поворот на 180 градусов через отражение по осям
     transform:
       mirror_x: true
       mirror_y: true
@@ -272,7 +243,7 @@ lvgl:
     - tft_display
   touchscreens:
     - my_touchscreen
-  rotation: 180  # Поворот интерфейса на 180 градусов
+  rotation: 180
   pages:
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
@@ -811,13 +782,13 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
 
-    # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
+    # ========== СТРАНИЦА 2 (РЕЖИМЫ) - ОДИН СТОЛБИК ==========
     - id: modes_page
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Верхняя панель (дублируется с главной)
+        # Верхняя панель
         - obj:
             id: Upscreen_modes
             x: 1
@@ -864,26 +835,48 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Заголовок страницы режимов
-        - label:
-            id: modes_title
+        # Кнопки режимов в один столбик с шрифтом 40
+        - button:
+            id: mode_standard
             x: 40
-            y: 80
-            width: 400
-            height: 50
-            text: "ВЫБОР РЕЖИМА"
-            text_color: 0x10B981
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_40
+            y: 60
+            width: 398
+            height: 55
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_press:
+              then:
+                - lambda: |-
+                    id(press_timer) = 100;
+                    id(active_mode_id) = 1;
+                    id(mode_activated) = false;
+            on_release:
+              then:
+                - lambda: |-
+                    if (id(press_timer) < 3000) {
+                      id(press_timer) = 0;
+                      id(active_mode_id) = 0;
+                    }
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 398
+                  height: 55
+                  text: "СТАНДАРТНЫЙ"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_40
 
-        # Кнопки режимов (с поддержкой долгого нажатия)
         - button:
             id: mode_econom
-            x: 30
-            y: 150
-            width: 180
-            height: 50
+            x: 40
+            y: 125
+            width: 398
+            height: 55
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -906,19 +899,19 @@ lvgl:
               - label:
                   x: 0
                   y: 0
-                  width: 180
-                  height: 50
-                  text: "ЭКОНОМ"
+                  width: 398
+                  height: 55
+                  text: "ЭКОНОМИЧНЫЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
 
         - button:
-            id: mode_comfort
-            x: 230
-            y: 150
-            width: 180
-            height: 50
+            id: mode_guest
+            x: 40
+            y: 190
+            width: 398
+            height: 55
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -941,19 +934,19 @@ lvgl:
               - label:
                   x: 0
                   y: 0
-                  width: 180
-                  height: 50
-                  text: "КОМФОРТ"
+                  width: 398
+                  height: 55
+                  text: "ГОСТЕВОЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
 
         - button:
-            id: mode_turbo
-            x: 30
-            y: 215
-            width: 180
-            height: 50
+            id: mode_conditioner
+            x: 40
+            y: 255
+            width: 398
+            height: 55
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -976,19 +969,19 @@ lvgl:
               - label:
                   x: 0
                   y: 0
-                  width: 180
-                  height: 50
-                  text: "ТУРБО"
+                  width: 398
+                  height: 55
+                  text: "КОНДИЦИОНЕР"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
 
         - button:
-            id: mode_night
-            x: 230
-            y: 215
-            width: 180
-            height: 50
+            id: mode_efficiency
+            x: 40
+            y: 320
+            width: 398
+            height: 55
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -1011,154 +1004,14 @@ lvgl:
               - label:
                   x: 0
                   y: 0
-                  width: 180
-                  height: 50
-                  text: "НОЧНОЙ"
+                  width: 398
+                  height: 55
+                  text: "ВЫСОКИЙ КПД"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_40
 
-        - button:
-            id: mode_humidity
-            x: 30
-            y: 280
-            width: 180
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 6;
-                    id(mode_activated) = false;
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 180
-                  height: 50
-                  text: "ВЛАЖНОСТЬ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_24
-
-        - button:
-            id: mode_heating
-            x: 230
-            y: 280
-            width: 180
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 7;
-                    id(mode_activated) = false;
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 180
-                  height: 50
-                  text: "ОБОГРЕВ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_24
-
-        - button:
-            id: mode_cooling
-            x: 30
-            y: 345
-            width: 180
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 8;
-                    id(mode_activated) = false;
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 180
-                  height: 50
-                  text: "ОХЛАЖДЕНИЕ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_24
-
-        - button:
-            id: mode_ventilation
-            x: 230
-            y: 345
-            width: 180
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 9;
-                    id(mode_activated) = false;
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 180
-                  height: 50
-                  text: "ВЕНТИЛЯЦИЯ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_24
-
-        # Нижняя панель с кнопками (дублируется с главной)
+        # Нижняя панель с кнопками
         - button:
             id: domoi_modes
             x: 0
