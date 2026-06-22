@@ -36,6 +36,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: switch_pending
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -46,6 +50,16 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
+
+# Скрипт для переключения на главную страницу
+script:
+  - id: go_to_main
+    then:
+      - delay: 300ms
+      - lvgl.page.show:
+          id: main_page
+          animation: FADE_IN
+          time: 300ms
 
 # Интервалы
 interval:
@@ -60,12 +74,6 @@ interval:
               id(mode_activated) = true;
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
-              
-              // Получаем указатель на главную страницу через LVGL
-              lv_obj_t *main_page = lv_obj_get_parent(id(Econom));
-              if (main_page == nullptr) {
-                main_page = lv_scr_act();
-              }
               
               switch(id(active_mode_id)) {
                 case 1:
@@ -96,11 +104,9 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу
-              if (main_page != nullptr) {
-                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("mode", "Switched to main page");
-              }
+              // Запускаем скрипт переключения на главную страницу
+              id(go_to_main).execute();
+              ESP_LOGI("mode", "Page switch script executed");
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
