@@ -113,9 +113,7 @@ interval:
               
               if (id(sleep_page_obj) != nullptr) {
                 lv_scr_load_anim(id(sleep_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("sleep", "Entering sleep mode, sleep_page_obj: %p", id(sleep_page_obj));
-              } else {
-                ESP_LOGE("sleep", "sleep_page_obj is null!");
+                ESP_LOGI("sleep", "Entering sleep mode");
               }
             }
           }
@@ -166,7 +164,6 @@ interval:
               
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("mode", "Switched to main page");
               }
               
               id(active_mode_id) = 0;
@@ -310,31 +307,23 @@ touchscreen:
                      id(touch_counter), touch.x, touch.y, 
                      id(is_sleeping) ? "true" : "false");
             
-            // Если в режиме сна - выходим из сна
             if (id(is_sleeping)) {
               ESP_LOGI("sleep", "EXITING SLEEP MODE VIA TOUCH!");
               id(is_sleeping) = false;
               id(idle_timer) = 0;
               
-              // Показываем предыдущую страницу
               if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
                 lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("sleep", "Loaded main page");
               } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
                 lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("sleep", "Loaded modes page");
-              } else {
-                ESP_LOGE("sleep", "No page to load!");
               }
             } else {
-              // Сбрасываем таймер бездействия при касании
               id(idle_timer) = 0;
-              ESP_LOGI("touch", "Reset idle timer");
             }
     on_release:
       then:
         - lambda: |-
-            ESP_LOGI("touch", "Released at x=%d, y=%d", touch.x, touch.y);
+            ESP_LOGI("touch", "Released");
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -354,9 +343,8 @@ lvgl:
         then:
           - lambda: |-
               id(sleep_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Sleep page loaded: %p", id(sleep_page_obj));
+              ESP_LOGI("lvgl", "Sleep page loaded");
       widgets:
-        # Фоновое изображение
         - image:
             id: sleep_background
             x: 0
@@ -366,8 +354,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-        
-        # Часы
         - label:
             id: sleep_time
             x: 0
@@ -379,8 +365,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
-        
-        # Дата
         - label:
             id: sleep_date
             x: 0
@@ -392,8 +376,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_24
-        
-        # Подсказка
         - label:
             id: sleep_hint
             x: 0
@@ -417,9 +399,8 @@ lvgl:
               id(main_page_obj) = lv_scr_act();
               id(is_sleeping) = false;
               id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Main page loaded: %p", id(main_page_obj));
+              ESP_LOGI("lvgl", "Main page loaded");
       widgets:
-        # Фоновое изображение
         - image:
             id: background_image_widget
             x: 0
@@ -966,9 +947,8 @@ lvgl:
               id(modes_page_obj) = lv_scr_act();
               id(is_sleeping) = false;
               id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Modes page loaded: %p", id(modes_page_obj));
+              ESP_LOGI("lvgl", "Modes page loaded");
       widgets:
-        # Верхняя панель
         - obj:
             id: Upscreen_modes
             x: 1
@@ -993,7 +973,8 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: Date_modes                  x: 280
+                  id: Date_modes
+                  x: 280
                   y: 9
                   width: 200
                   height: 20
@@ -1014,7 +995,6 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов с долгим нажатием
         - button:
             id: mode_standard
             x: 40
@@ -1190,7 +1170,6 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками
         - button:
             id: domoi_modes
             x: 0
