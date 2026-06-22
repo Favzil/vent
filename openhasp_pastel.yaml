@@ -149,7 +149,6 @@ image:
     id: background_image
     type: RGB565
     resize: 480x480
-    invert_colors: true
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -222,7 +221,7 @@ display:
     model: GUITION-4848S040
     spi_id: lcd_spi
     cs_pin: GPIO39
-    invert_colors: True
+    invert_colors: False
 
 # ============================================
 # СЕНСОР ЭКРАНА (GT911)
