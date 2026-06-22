@@ -102,9 +102,8 @@ interval:
               ESP_LOGI("mode", "Activated mode: %s", id(selected_mode).c_str());
               
               // Показываем главный экран, скрываем экран режимов
-              lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
               lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
-              lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
+              lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
               
               id(main_screen_visible) = true;
               id(active_mode_id) = 0;
@@ -148,6 +147,8 @@ interval:
                   // Обновляем тексты на дисплее через LVGL API
                   lv_label_set_text(id(Date), date_part.c_str());
                   lv_label_set_text(id(time_label), time_part.c_str());
+                  lv_label_set_text(id(Date_modes), date_part.c_str());
+                  lv_label_set_text(id(time_label_modes), time_part.c_str());
                 }
               }
             }
@@ -723,9 +724,8 @@ lvgl:
                     then:
                       - lambda: |-
                           // Показываем главный экран, скрываем экран режимов
-                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
                           lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
                           id(main_screen_visible) = true;
                   widgets:
                     - label:
@@ -753,9 +753,8 @@ lvgl:
                     then:
                       - lambda: |-
                           // Показываем экран режимов, скрываем главный экран
-                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, false);
                           lv_obj_clear_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
                           id(main_screen_visible) = false;
                   widgets:
                     - label:
@@ -1042,9 +1041,8 @@ lvgl:
                     then:
                       - lambda: |-
                           // Показываем главный экран, скрываем экран режимов
-                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
                           lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
                           id(main_screen_visible) = true;
                   widgets:
                     - label:
@@ -1072,9 +1070,8 @@ lvgl:
                     then:
                       - lambda: |-
                           // Показываем экран режимов, скрываем главный экран
-                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, false);
                           lv_obj_clear_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
                           id(main_screen_visible) = false;
                   widgets:
                     - label:
