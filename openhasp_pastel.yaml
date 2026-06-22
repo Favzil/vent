@@ -36,38 +36,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: idle_timer
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: is_sleeping
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: previous_page
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: sleep_page_obj
-    type: lv_obj_t*
-    restore_value: no
-    initial_value: 'nullptr'
-  - id: main_page_obj
-    type: lv_obj_t*
-    restore_value: no
-    initial_value: 'nullptr'
-  - id: modes_page_obj
-    type: lv_obj_t*
-    restore_value: no
-    initial_value: 'nullptr'
-  - id: startup_done
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: touch_counter
-    type: int
-    restore_value: no
-    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -84,41 +52,6 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
-          // Инициализация при старте
-          if (!id(startup_done)) {
-            if (id(main_page_obj) != nullptr) {
-              lv_scr_load(id(main_page_obj));
-              id(is_sleeping) = false;
-              id(idle_timer) = 0;
-            }
-            id(startup_done) = true;
-            ESP_LOGI("init", "Startup complete");
-            return;
-          }
-          
-          // Таймер бездействия
-          if (!id(is_sleeping)) {
-            id(idle_timer) += 100;
-            
-            if (id(idle_timer) >= 60000) {
-              id(is_sleeping) = true;
-              id(idle_timer) = 0;
-              
-              lv_obj_t *current_scr = lv_scr_act();
-              if (current_scr == id(main_page_obj)) {
-                id(previous_page) = 0;
-              } else if (current_scr == id(modes_page_obj)) {
-                id(previous_page) = 1;
-              }
-              
-              if (id(sleep_page_obj) != nullptr) {
-                lv_scr_load_anim(id(sleep_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("sleep", "Entering sleep mode");
-              }
-            }
-          }
-          
-          // Обработка нажатия для режимов
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
             
@@ -128,6 +61,7 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
+              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -162,8 +96,12 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
+              // Переключаем на главную страницу
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                ESP_LOGI("mode", "Switched to main page");
+              } else {
+                ESP_LOGE("mode", "main_page is null!");
               }
               
               id(active_mode_id) = 0;
@@ -200,8 +138,6 @@ interval:
                   lv_label_set_text(id(time_label), time_part.c_str());
                   lv_label_set_text(id(Date_modes), date_part.c_str());
                   lv_label_set_text(id(time_label_modes), time_part.c_str());
-                  lv_label_set_text(id(sleep_time), time_part.c_str());
-                  lv_label_set_text(id(sleep_date), date_part.c_str());
                 }
               }
             }
@@ -302,24 +238,7 @@ touchscreen:
     on_touch:
       then:
         - lambda: |-
-            id(touch_counter)++;
-            ESP_LOGI("touch", "TOUCH #%d at x=%d, y=%d, is_sleeping=%s", 
-                     id(touch_counter), touch.x, touch.y, 
-                     id(is_sleeping) ? "true" : "false");
-            
-            if (id(is_sleeping)) {
-              ESP_LOGI("sleep", "EXITING SLEEP MODE VIA TOUCH!");
-              id(is_sleeping) = false;
-              id(idle_timer) = 0;
-              
-              if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
-                lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-              } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
-                lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-              }
-            } else {
-              id(idle_timer) = 0;
-            }
+            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
     on_release:
       then:
         - lambda: |-
@@ -334,73 +253,13 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
-    # ========== СТРАНИЦА СНА (ЗАСТАВКА) ==========
-    - id: sleep_page
-      bg_color: 0x000000
-      bg_opa: 100%
-      pad_all: 0
-      on_load:
-        then:
-          - lambda: |-
-              id(sleep_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Sleep page loaded");
-      widgets:
-        - image:
-            id: sleep_background
-            x: 0
-            y: 0
-            width: 480
-            height: 480
-            src: background_image
-            align: CENTER
-            opa: 100%
-        - label:
-            id: sleep_time
-            x: 0
-            y: 340
-            width: 480
-            height: 80
-            text: "14:32"
-            text_color: 0xFFFFFF
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_40
-        - label:
-            id: sleep_date
-            x: 0
-            y: 395
-            width: 480
-            height: 30
-            text: "Сб 20-июнь-2026"
-            text_color: 0xCCCCCC
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_24
-        - label:
-            id: sleep_hint
-            x: 0
-            y: 430
-            width: 480
-            height: 30
-            text: "Нажмите для выхода"
-            text_color: 0x888888
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_12
-
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
-      on_load:
-        then:
-          - lambda: |-
-              id(main_page_obj) = lv_scr_act();
-              id(is_sleeping) = false;
-              id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Main page loaded");
       widgets:
+        # Фоновое изображение
         - image:
             id: background_image_widget
             x: 0
@@ -941,14 +800,8 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
-      on_load:
-        then:
-          - lambda: |-
-              id(modes_page_obj) = lv_scr_act();
-              id(is_sleeping) = false;
-              id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Modes page loaded");
       widgets:
+        # Верхняя панель
         - obj:
             id: Upscreen_modes
             x: 1
@@ -995,6 +848,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
+        # Кнопки режимов с долгим нажатием
         - button:
             id: mode_standard
             x: 40
@@ -1170,6 +1024,7 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
+        # Нижняя панель с кнопками
         - button:
             id: domoi_modes
             x: 0
