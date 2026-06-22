@@ -211,8 +211,8 @@ spi:
 # I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
-  sda: GPIO18
-  scl: GPIO8
+  sda: GPIO19
+  scl: GPIO45
 
 # ДИСПЛЕЙ
 display:
