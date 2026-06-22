@@ -61,7 +61,7 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
-              // Получаем указатель на главную страницу
+              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(Econom));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -782,7 +782,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_font: cyrillic_font_40
 
-    # ========== СТРАНИЦА 2 (РЕЖИМЫ) - ОДИН СТОЛБИК ==========
+    # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
       bg_color: 0x111827
       bg_opa: 100%
@@ -835,13 +835,13 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов в один столбик с шрифтом 40
+        # Кнопки режимов с долгим нажатием
         - button:
             id: mode_standard
             x: 40
             y: 60
             width: 398
-            height: 55
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -865,18 +865,18 @@ lvgl:
                   x: 0
                   y: 0
                   width: 398
-                  height: 55
+                  height: 50
                   text: "СТАНДАРТНЫЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
 
         - button:
             id: mode_econom
             x: 40
-            y: 125
+            y: 120
             width: 398
-            height: 55
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -900,18 +900,18 @@ lvgl:
                   x: 0
                   y: 0
                   width: 398
-                  height: 55
+                  height: 50
                   text: "ЭКОНОМИЧНЫЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
 
         - button:
             id: mode_guest
             x: 40
-            y: 190
+            y: 180
             width: 398
-            height: 55
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -935,18 +935,18 @@ lvgl:
                   x: 0
                   y: 0
                   width: 398
-                  height: 55
+                  height: 50
                   text: "ГОСТЕВОЙ"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
 
         - button:
             id: mode_conditioner
             x: 40
-            y: 255
+            y: 240
             width: 398
-            height: 55
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -970,18 +970,18 @@ lvgl:
                   x: 0
                   y: 0
                   width: 398
-                  height: 55
+                  height: 50
                   text: "КОНДИЦИОНЕР"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
 
         - button:
             id: mode_efficiency
             x: 40
-            y: 320
+            y: 300
             width: 398
-            height: 55
+            height: 50
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
@@ -1005,11 +1005,11 @@ lvgl:
                   x: 0
                   y: 0
                   width: 398
-                  height: 55
+                  height: 50
                   text: "ВЫСОКИЙ КПД"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_40
+                  text_font: cyrillic_font_24
 
         # Нижняя панель с кнопками
         - button:
