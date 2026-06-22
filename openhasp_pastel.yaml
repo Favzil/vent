@@ -36,12 +36,16 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  # НОВЫЕ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗАСТАВКИ
   - id: inactivity_timer
     type: int
     restore_value: no
     initial_value: '0'
   - id: screensaver_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  # Добавляем флаг для игнорирования первого касания при пробуждении
+  - id: wakeup_touch
     type: bool
     restore_value: no
     initial_value: 'false'
@@ -58,7 +62,6 @@ uart:
 
 # ИНТЕРВАЛЫ
 interval:
-  # Таймер бездействия для заставки (каждые 500 мс)
   - interval: 500ms
     then:
       - lambda: |-
@@ -67,13 +70,13 @@ interval:
             if (id(inactivity_timer) >= 30000) {
               ESP_LOGI("screensaver", "Activating screensaver");
               id(screensaver_active) = true;
-              // Показываем страницу заставки через LVGL API
+              // Показываем страницу заставки
               lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+              // Выключаем подсветку
               id(display_backlight).turn_off();
             }
           }
   
-  # Таймер для обработки нажатий (каждые 100 мс)
   - interval: 100ms
     then:
       - lambda: |-
@@ -86,7 +89,6 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
-              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -121,7 +123,6 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
@@ -134,7 +135,6 @@ interval:
             }
           }
   
-  # Чтение UART (каждые 500 мс)
   - interval: 500ms
     then:
       - lambda: |-
@@ -264,24 +264,30 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
-        - if:
-            condition:
-              lambda: 'return id(screensaver_active);'
-            then:
-              - lambda: |-
-                  ESP_LOGI("touch", "Waking up from screensaver");
-                  id(screensaver_active) = false;
-                  id(inactivity_timer) = 0;
-              - light.turn_on: display_backlight
-              - lambda: |-
-                  // Показываем главную страницу через LVGL API
-                  lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
-                  if (main_page != nullptr) {
-                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                  }
-            else:
-              - lambda: |-
-                  id(inactivity_timer) = 0;
+            
+            // Проверяем, активна ли заставка
+            if (id(screensaver_active)) {
+              ESP_LOGI("touch", "Waking up from screensaver");
+              
+              // Включаем подсветку
+              id(display_backlight).turn_on();
+              
+              // Сбрасываем флаги
+              id(screensaver_active) = false;
+              id(inactivity_timer) = 0;
+              
+              // Показываем главную страницу через LVGL API
+              lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
+              if (main_page != nullptr) {
+                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                ESP_LOGI("touch", "Main page loaded");
+              } else {
+                ESP_LOGE("touch", "main_page is null!");
+              }
+            } else {
+              // Если заставка не активна - просто сбрасываем таймер
+              id(inactivity_timer) = 0;
+            }
     on_release:
       then:
         - lambda: |-
@@ -296,13 +302,12 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
-    # ========== СТРАНИЦА ЗАСТАВКИ (НОВАЯ) ==========
+    # ========== СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
       bg_color: 0x000000
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Используем существующее изображение
         - image:
             id: screensaver_image
             x: 0
@@ -313,7 +318,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Затемняющий слой (чтобы текст был читаемым)
         - obj:
             id: screensaver_overlay
             x: 0
@@ -324,7 +328,6 @@ lvgl:
             bg_opa: 40%
             border_width: 0
         
-        # Текст "Нажмите на экран"
         - label:
             id: screensaver_text
             x: 0
@@ -337,7 +340,6 @@ lvgl:
             text_font: cyrillic_font_24
             opa: 100%
         
-        # Анимационный индикатор (кружок)
         - spinner:
             id: screensaver_spinner
             x: 215
@@ -359,7 +361,6 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение
         - image:
             id: background_image_widget
             x: 0
@@ -1010,7 +1011,7 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0                 
+                  x: 0
                   y: 0
                   width: 398
                   height: 50
