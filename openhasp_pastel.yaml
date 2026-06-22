@@ -47,7 +47,7 @@ globals:
   - id: previous_page
     type: int
     restore_value: no
-    initial_value: '0'  # 0 - main, 1 - modes
+    initial_value: '0'
   - id: sleep_page_obj
     type: lv_obj_t*
     restore_value: no
@@ -60,10 +60,6 @@ globals:
     type: lv_obj_t*
     restore_value: no
     initial_value: 'nullptr'
-  - id: pages_initialized
-    type: bool
-    restore_value: no
-    initial_value: 'false'
   - id: startup_done
     type: bool
     restore_value: no
@@ -84,28 +80,26 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
-          // Инициализация при старте - показываем главную страницу
+          // Инициализация при старте
           if (!id(startup_done)) {
-            // Убеждаемся, что главная страница активна
             if (id(main_page_obj) != nullptr) {
               lv_scr_load(id(main_page_obj));
+              id(is_sleeping) = false;
+              id(idle_timer) = 0;
             }
             id(startup_done) = true;
-            id(pages_initialized) = true;
-            ESP_LOGI("init", "Startup complete, main page loaded");
+            ESP_LOGI("init", "Startup complete");
             return;
           }
           
-          // Таймер бездействия - только если не в режиме сна
+          // Таймер бездействия
           if (!id(is_sleeping)) {
             id(idle_timer) += 100;
             
-            // Через 60 секунд бездействия переходим в режим сна
             if (id(idle_timer) >= 60000) {
               id(is_sleeping) = true;
               id(idle_timer) = 0;
               
-              // Запоминаем текущую страницу
               lv_obj_t *current_scr = lv_scr_act();
               if (current_scr == id(main_page_obj)) {
                 id(previous_page) = 0;
@@ -113,7 +107,6 @@ interval:
                 id(previous_page) = 1;
               }
               
-              // Показываем страницу сна
               if (id(sleep_page_obj) != nullptr) {
                 lv_scr_load_anim(id(sleep_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               }
@@ -132,7 +125,6 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
-              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -167,12 +159,9 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
-              } else {
-                ESP_LOGE("mode", "main_page is null!");
               }
               
               id(active_mode_id) = 0;
@@ -209,8 +198,6 @@ interval:
                   lv_label_set_text(id(time_label), time_part.c_str());
                   lv_label_set_text(id(Date_modes), date_part.c_str());
                   lv_label_set_text(id(time_label_modes), time_part.c_str());
-                  
-                  // Обновляем время на странице сна
                   lv_label_set_text(id(sleep_time), time_part.c_str());
                   lv_label_set_text(id(sleep_date), date_part.c_str());
                 }
@@ -320,23 +307,21 @@ touchscreen:
               id(is_sleeping) = false;
               id(idle_timer) = 0;
               
-              // Возвращаемся на предыдущую страницу
               if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
                 lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
                 lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               }
               
-              ESP_LOGI("sleep", "Exiting sleep mode");
+              ESP_LOGI("sleep", "Exited sleep mode via touch");
+            } else {
+              // Сбрасываем таймер бездействия при касании
+              id(idle_timer) = 0;
             }
     on_release:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Released");
-            // Сбрасываем таймер бездействия при отпускании
-            if (!id(is_sleeping)) {
-              id(idle_timer) = 0;
-            }
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -356,9 +341,9 @@ lvgl:
         then:
           - lambda: |-
               id(sleep_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Sleep page loaded: %p", id(sleep_page_obj));
+              ESP_LOGI("lvgl", "Sleep page loaded");
       widgets:
-        # Фоновое изображение на весь экран
+        # Фоновое изображение
         - image:
             id: sleep_background
             x: 0
@@ -369,7 +354,7 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Часы на заставке (крупно)
+        # Часы
         - label:
             id: sleep_time
             x: 0
@@ -382,7 +367,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
         
-        # Дата на заставке
+        # Дата
         - label:
             id: sleep_date
             x: 0
@@ -395,7 +380,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_24
         
-        # Текст "Нажмите для выхода"
+        # Подсказка
         - label:
             id: sleep_hint
             x: 0
@@ -407,36 +392,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_12
-        
-        # НЕВИДИМАЯ КНОПКА ДЛЯ ВЫХОДА ИЗ РЕЖИМА СНА
-        - button:
-            id: sleep_exit_btn
-            x: 0
-            y: 0
-            width: 480
-            height: 480
-            bg_color: 0x000000
-            bg_opa: 0%
-            border_opa: 0%
-            outline_opa: 0%
-            shadow_opa: 0%
-            opa: 0%
-            on_click:
-              then:
-                - lambda: |-
-                    ESP_LOGI("sleep", "Sleep exit button clicked!");
-                    // Выходим из режима сна
-                    id(is_sleeping) = false;
-                    id(idle_timer) = 0;
-                    
-                    // Возвращаемся на предыдущую страницу
-                    if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
-                      lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                    } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
-                      lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                    }
-                    
-                    ESP_LOGI("sleep", "Exited sleep mode");
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
@@ -447,11 +402,9 @@ lvgl:
         then:
           - lambda: |-
               id(main_page_obj) = lv_scr_act();
-              id(pages_initialized) = true;
-              // При загрузке главной страницы - выходим из режима сна
               id(is_sleeping) = false;
               id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Main page loaded: %p", id(main_page_obj));
+              ESP_LOGI("lvgl", "Main page loaded");
       widgets:
         # Фоновое изображение
         - image:
@@ -998,10 +951,9 @@ lvgl:
         then:
           - lambda: |-
               id(modes_page_obj) = lv_scr_act();
-              // При загрузке страницы режимов - выходим из режима сна
               id(is_sleeping) = false;
               id(idle_timer) = 0;
-              ESP_LOGI("lvgl", "Modes page loaded: %p", id(modes_page_obj));
+              ESP_LOGI("lvgl", "Modes page loaded");
       widgets:
         # Верхняя панель
         - obj:
