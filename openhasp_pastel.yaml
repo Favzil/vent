@@ -75,15 +75,14 @@ interval:
               
               // Запоминаем текущую страницу
               lv_obj_t *current_scr = lv_scr_act();
-              if (current_scr == id(main_page)) {
+              if (current_scr == id(main_page).get_page()) {
                 id(previous_page) = 0;
-              } else if (current_scr == id(modes_page)) {
+              } else if (current_scr == id(modes_page).get_page()) {
                 id(previous_page) = 1;
               }
               
               // Показываем страницу сна
-              lvgl.page.show:
-                id: sleep_page
+              id(lvgl_component).set_page(id(sleep_page));
               
               ESP_LOGI("sleep", "Entering sleep mode");
             }
@@ -176,6 +175,10 @@ interval:
                   lv_label_set_text(id(time_label), time_part.c_str());
                   lv_label_set_text(id(Date_modes), date_part.c_str());
                   lv_label_set_text(id(time_label_modes), time_part.c_str());
+                  
+                  // Обновляем время на странице сна
+                  lv_label_set_text(id(sleep_time), time_part.c_str());
+                  lv_label_set_text(id(sleep_date), date_part.c_str());
                 }
               }
             }
@@ -285,11 +288,9 @@ touchscreen:
               
               // Возвращаемся на предыдущую страницу
               if (id(previous_page) == 0) {
-                lvgl.page.show:
-                  id: main_page
+                id(lvgl_component).set_page(id(main_page));
               } else {
-                lvgl.page.show:
-                  id: modes_page
+                id(lvgl_component).set_page(id(modes_page));
               }
               
               ESP_LOGI("sleep", "Exiting sleep mode");
