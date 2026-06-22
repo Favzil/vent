@@ -67,9 +67,8 @@ interval:
             if (id(inactivity_timer) >= 30000) {
               ESP_LOGI("screensaver", "Activating screensaver");
               id(screensaver_active) = true;
-              // Используем прямое API LVGL для переключения страницы
-              lvgl.page.show:
-                id: screensaver_page
+              // Показываем страницу заставки через LVGL API
+              lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               id(display_backlight).turn_off();
             }
           }
@@ -274,8 +273,12 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
               - light.turn_on: display_backlight
-              - lvgl.page.show:
-                  id: main_page
+              - lambda: |-
+                  // Показываем главную страницу через LVGL API
+                  lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
+                  if (main_page != nullptr) {
+                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                  }
             else:
               - lambda: |-
                   id(inactivity_timer) = 0;
@@ -1007,8 +1010,7 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
+                  x: 0                  y: 0
                   width: 398
                   height: 50
                   text: "ЭКОНОМИЧНЫЙ"
