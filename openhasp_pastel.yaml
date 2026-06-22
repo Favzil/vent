@@ -36,10 +36,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: switch_in_progress
+  - id: main_screen_visible
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: 'true'
 
 # UART для связи с Arduino
 uart:
@@ -51,43 +51,18 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Скрипт для переключения на главную страницу с задержкой
-script:
-  - id: go_to_main
-    then:
-      - logger.log: "Starting page switch to main"
-      - delay: 500ms
-      - logger.log: "Executing lvgl.page.show main_page"
-      - lvgl.page.show:
-          id: main_page
-          animation: FADE_IN
-          time: 300ms
-      - logger.log: "Page switch to main completed"
-  - id: go_to_modes
-    then:
-      - logger.log: "Starting page switch to modes"
-      - delay: 500ms
-      - logger.log: "Executing lvgl.page.show modes_page"
-      - lvgl.page.show:
-          id: modes_page
-          animation: FADE_IN
-          time: 300ms
-      - logger.log: "Page switch to modes completed"
-
 # Интервалы
 interval:
   - interval: 100ms
     then:
       - lambda: |-
           // Обработка долгого нажатия
-          if (id(press_timer) > 0 && !id(switch_in_progress)) {
+          if (id(press_timer) > 0) {
             id(press_timer) += 100;
-            ESP_LOGD("mode", "Timer: %d", id(press_timer));
             
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
-              id(switch_in_progress) = true;
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
@@ -126,14 +101,14 @@ interval:
               }
               ESP_LOGI("mode", "Activated mode: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу через скрипт с задержкой
-              ESP_LOGI("mode", "=== SWITCHING TO MAIN PAGE ===");
-              id(go_to_main).execute();
+              // Показываем главный экран, скрываем экран режимов
+              lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
+              lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
+              lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
               
+              id(main_screen_visible) = true;
               id(active_mode_id) = 0;
-              
-              // Сброс флагов через 2 секунды
-              id(switch_in_progress) = false;
+              id(mode_activated) = false;
             }
           }
           
@@ -173,8 +148,6 @@ interval:
                   // Обновляем тексты на дисплее через LVGL API
                   lv_label_set_text(id(Date), date_part.c_str());
                   lv_label_set_text(id(time_label), time_part.c_str());
-                  lv_label_set_text(id(Date_modes), date_part.c_str());
-                  lv_label_set_text(id(time_label_modes), time_part.c_str());
                 }
               }
             }
@@ -284,586 +257,431 @@ lvgl:
     - my_touchscreen
   rotation: 180  # Поворот интерфейса на 180 градусов
   pages:
-    # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
+    # ========== ЕДИНАЯ СТРАНИЦА ==========
     - id: main_page
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
       widgets:
-        - spinner:
-            id: widget_1781427523533_f22zs1tti
-            x: 163
-            y: 285
-            width: 155
-            height: 115
-            spin_time: 1000ms
-            arc_length: 60deg
-            arc_width: 15
-            arc_color: 0x10B981
-            indicator:
-              arc_color: 0x10B981
-              arc_opa: 100%
-              arc_width: 8
+        # ГЛАВНЫЙ ЭКРАН (ВСЕГДА ВИДИМ)
         - obj:
-            id: Upscreen
-            x: 1
-            y: 0
-            width: 478
-            height: 35
-            bg_color: 0xF713B7
-            border_width: 1
-            border_color: 0x4B5563
-            radius: 8
-            pad_all: 0
-            widgets:
-              - label:
-                  id: KhaKar
-                  x: 10
-                  y: 5
-                  width: 160
-                  height: 25
-                  text: "KhaKar-032"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: Date
-                  x: 280
-                  y: 9
-                  width: 200
-                  height: 20
-                  text: "Сб 20-июнь-2026"
-                  text_color: 0xEFF0F0
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-        - obj:
-            id: t_indoor
-            x: 23
-            y: 68
-            width: 85
-            height: 80
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: znakgradussulicy
-                  x: 60
-                  y: 10
-                  width: 20
-                  height: 26
-                  text: "°C"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: gradussulicy
-                  x: 35
-                  y: 37
-                  width: 45
-                  height: 25
-                  text: "23.5"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262141723_srplhrgb8
-                  x: 10
-                  y: 22
-                  width: 50
-                  height: 15
-                  text: "С улицы"
-                  text_color: 0x000000
-                  text_align: RIGHT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262141723_w1ztx4tjt
-                  x: 2
-                  y: 62
-                  width: 80
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x1A79FF
-                  line_rounded: true
-        - obj:
-            id: t_outdoor
-            x: 140
-            y: 68
-            width: 85
-            height: 80
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262306198_2zgbqa3dx
-                  x: 60
-                  y: 22
-                  width: 20
-                  height: 26
-                  text: "°C"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262306198_b9dnjbboi
-                  x: 35
-                  y: 37
-                  width: 45
-                  height: 25
-                  text: "23.5"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - label:
-                  id: widget_1781262306198_igmmcl5k8
-                  x: 10
-                  y: 22
-                  width: 45
-                  height: 15
-                  text: "На улицу"
-                  text_color: 0x000000
-                  text_align: RIGHT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262306198_l8xm8o3gl
-                  x: 2
-                  y: 62
-                  width: 80
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x1A79FF
-                  line_rounded: true
-        - obj:
-            id: t_fromhome
-            x: 265
-            y: 68
-            width: 85
-            height: 80
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262307812_ou8uo1mfn
-                  x: 60
-                  y: 22
-                  width: 20
-                  height: 26
-                  text: "°C"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262307812_3m3qdg397
-                  x: 35
-                  y: 37
-                  width: 45
-                  height: 25
-                  text: "23.5"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - label:
-                  id: widget_1781262307812_n406bgqc4
-                  x: 10
-                  y: 22
-                  width: 45
-                  height: 15
-                  text: "Из дома"
-                  text_color: 0x000000
-                  text_align: RIGHT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262307812_cmiqci34b
-                  x: 2
-                  y: 62
-                  width: 80
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x1A79FF
-                  line_rounded: true
-        - obj:
-            id: t_tohome
-            x: 380
-            y: 68
-            width: 85
-            height: 80
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262308709_71wbrk8p9
-                  x: 60
-                  y: 15
-                  width: 20
-                  height: 26
-                  text: "°C"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262308709_dnoiw7el6
-                  x: 35
-                  y: 37
-                  width: 45
-                  height: 25
-                  text: "23.5"
-                  text_color: 0x000000
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: textvdom
-                  x: 2
-                  y: 22
-                  width: 45
-                  height: 15
-                  text: "В дом"
-                  text_color: 0x000000
-                  text_align: RIGHT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: linevdom
-                  x: 2
-                  y: 62
-                  width: 80
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x1A79FF
-                  line_rounded: true
-        - obj:
-            id: Pritok_filter
-            x: 16
-            y: 300
-            width: 100
-            height: 100
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0x10B981
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - arc:
-                  id: widget_1781261697547_smtgd7w9q
-                  x: 4
-                  y: 4
-                  width: 92
-                  height: 80
-                  value: 72
-                  min_value: 0
-                  max_value: 100
-                  adjustable: true
-                  start_angle: 135
-                  end_angle: 45
-                  arc_color: 0xE053D6
-                  arc_width: 10
-                  arc_opa: 20%
-                  arc_rounded: true
-                  indicator:
-                    arc_color: 0xE053D6
-                    arc_width: 10
-                    arc_opa: 100%
-                    arc_rounded: true
-                  knob:
-                    bg_opa: 0%
-                  bg_opa: 0%
-                  border_width: 0
-              - label:
-                  id: lv_label_0
-                  x: 4
-                  y: 32
-                  width: 92
-                  height: 24
-                  text: "72%"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781261697547_a6nmh00ld
-                  x: 4
-                  y: 84
-                  width: 92
-                  height: 12
-                  text: "Приточка"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-        - obj:
-            id: Vityazh_filter
-            x: 365
-            y: 300
-            width: 100
-            height: 100
-            bg_color: 0xF3FFB6
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            shadow_color: 0x10B981
-            shadow_opa: 0%
-            pad_all: 0
-            scrollbar_mode: ACTIVE
-            widgets:
-              - arc:
-                  id: widget_1781261697547_jcbrfzs59
-                  x: 4
-                  y: 4
-                  width: 92
-                  height: 80
-                  value: 72
-                  min_value: 0
-                  max_value: 100
-                  adjustable: false
-                  start_angle: 135
-                  end_angle: 45
-                  arc_color: 0xE053D6
-                  arc_width: 10
-                  arc_opa: 20%
-                  arc_rounded: true
-                  indicator:
-                    arc_color: 0xE053D6
-                    arc_width: 10
-                    arc_opa: 100%
-                    arc_rounded: true
-                  knob:
-                    bg_opa: 0%
-                  bg_opa: 0%
-                  border_width: 0
-              - label:
-                  id: widget_1781261697547_036jpjyoc
-                  x: 4
-                  y: 32
-                  width: 92
-                  height: 24
-                  text: "72%"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781261697547_2lq5vokc6
-                  x: 4
-                  y: 84
-                  width: 92
-                  height: 12
-                  text: "Вытяжка"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-        
-        - label:
-            id: time_label
-            x: 194
-            y: 1
-            width: 88
-            height: 32
-            text: "14:32"
-            text_color: 0xF1F5F9
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_24
-        - textarea:
-            id: Econom
-            x: 3
-            y: 0
-            width: 430
-            height: 100
-            align: CENTER
-            text: "СТАНДАРТНЫЙ"
-            bg_color: 0x1F2937
-            bg_opa: 0%
-            border_width: 1
-            border_color: 0x4B5563
-            border_opa: 0%
-            radius: 8
-            outline_opa: 0%
-            shadow_opa: 0%
-            text_color: 0xE053D6
-            text_font: cyrillic_font_40
-
-        - button:
-            id: domoi
+            id: main_screen
             x: 0
-            y: 415
-            width: 160
-            height: 65
-            bg_color: 0xF713B7
-            bg_opa: 100%    
-            opa: 100%
-            on_click:
-              then:
-                - lvgl.page.show:
-                    id: main_page
-            widgets:
-              - label:
-                  id: dom
-                  x: 0
-                  y: 0
-                  width: 119
-                  height: 26
-                  text: "Дом"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-                 
-        - button:
-            id: modes
-            x: 159
-            y: 415
-            width: 160
-            height: 65
-            bg_color: 0xF713B7
-            bg_opa: 100%    
-            opa: 100%
-            on_click:
-              then:
-                - lvgl.page.show:
-                    id: modes_page
-            widgets:
-              - label:
-                  id: rezhim
-                  x: 0
-                  y: 0
-                  width: 119
-                  height: 26
-                  text: "Режимы"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-          
-        - button:
-            id: stop
-            x: 203
-            y: 310
-            width: 75
-            height: 65
-            bg_color: 0xEFF0F0
-            bg_opa: 0%
-            border_opa: 0%
-            outline_opa: 0%
-            shadow_opa: 0%
-            text_color: 0xFFFFFF
-            text_opa: 100%
-            text_font: cyrillic_font_40
-            opa: 94%
-            widgets:
-              - label:
-                  text: "СТОП"
-                  text_align: CENTER
-                  text_color: 0xFFFFFF
-                  text_font: cyrillic_font_40
-
-    # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
-    - id: modes_page
-      bg_color: 0x111827
-      bg_opa: 100%
-      pad_all: 0
-      widgets:
-        # Верхняя панель (дублируется с главной)
-        - obj:
-            id: Upscreen_modes
-            x: 1
             y: 0
-            width: 478
-            height: 35
-            bg_color: 0xF713B7
-            border_width: 1
-            border_color: 0x4B5563
-            radius: 8
+            width: 480
+            height: 480
+            bg_opa: 0%
             pad_all: 0
             widgets:
+              - spinner:
+                  id: widget_1781427523533_f22zs1tti
+                  x: 163
+                  y: 285
+                  width: 155
+                  height: 115
+                  spin_time: 1000ms
+                  arc_length: 60deg
+                  arc_width: 15
+                  arc_color: 0x10B981
+                  indicator:
+                    arc_color: 0x10B981
+                    arc_opa: 100%
+                    arc_width: 8
+              - obj:
+                  id: Upscreen
+                  x: 1
+                  y: 0
+                  width: 478
+                  height: 35
+                  bg_color: 0xF713B7
+                  border_width: 1
+                  border_color: 0x4B5563
+                  radius: 8
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        id: KhaKar
+                        x: 10
+                        y: 5
+                        width: 160
+                        height: 25
+                        text: "KhaKar-032"
+                        text_color: 0xFFFFFF
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        id: Date
+                        x: 280
+                        y: 9
+                        width: 200
+                        height: 20
+                        text: "Сб 20-июнь-2026"
+                        text_color: 0xEFF0F0
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+              - obj:
+                  id: t_indoor
+                  x: 23
+                  y: 68
+                  width: 85
+                  height: 80
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0xF59E0B
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  widgets:
+                    - label:
+                        id: znakgradussulicy
+                        x: 60
+                        y: 10
+                        width: 20
+                        height: 26
+                        text: "°C"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        id: gradussulicy
+                        x: 35
+                        y: 37
+                        width: 45
+                        height: 25
+                        text: "23.5"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 10
+                        y: 22
+                        width: 50
+                        height: 15
+                        text: "С улицы"
+                        text_color: 0x000000
+                        text_align: RIGHT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - line:
+                        x: 2
+                        y: 62
+                        width: 80
+                        height: 10
+                        points:
+                          - 0, 0
+                          - 129, 0
+                        line_color: 0x1A79FF
+                        line_rounded: true
+              - obj:
+                  id: t_outdoor
+                  x: 140
+                  y: 68
+                  width: 85
+                  height: 80
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0xF59E0B
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  widgets:
+                    - label:
+                        x: 60
+                        y: 22
+                        width: 20
+                        height: 26
+                        text: "°C"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 35
+                        y: 37
+                        width: 45
+                        height: 25
+                        text: "23.5"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - label:
+                        x: 10
+                        y: 22
+                        width: 45
+                        height: 15
+                        text: "На улицу"
+                        text_color: 0x000000
+                        text_align: RIGHT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - line:
+                        x: 2
+                        y: 62
+                        width: 80
+                        height: 10
+                        points:
+                          - 0, 0
+                          - 129, 0
+                        line_color: 0x1A79FF
+                        line_rounded: true
+              - obj:
+                  id: t_fromhome
+                  x: 265
+                  y: 68
+                  width: 85
+                  height: 80
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0xF59E0B
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  widgets:
+                    - label:
+                        x: 60
+                        y: 22
+                        width: 20
+                        height: 26
+                        text: "°C"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 35
+                        y: 37
+                        width: 45
+                        height: 25
+                        text: "23.5"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - label:
+                        x: 10
+                        y: 22
+                        width: 45
+                        height: 15
+                        text: "Из дома"
+                        text_color: 0x000000
+                        text_align: RIGHT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - line:
+                        x: 2
+                        y: 62
+                        width: 80
+                        height: 10
+                        points:
+                          - 0, 0
+                          - 129, 0
+                        line_color: 0x1A79FF
+                        line_rounded: true
+              - obj:
+                  id: t_tohome
+                  x: 380
+                  y: 68
+                  width: 85
+                  height: 80
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0xF59E0B
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  widgets:
+                    - label:
+                        x: 60
+                        y: 15
+                        width: 20
+                        height: 26
+                        text: "°C"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 35
+                        y: 37
+                        width: 45
+                        height: 25
+                        text: "23.5"
+                        text_color: 0x000000
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 2
+                        y: 22
+                        width: 45
+                        height: 15
+                        text: "В дом"
+                        text_color: 0x000000
+                        text_align: RIGHT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - line:
+                        x: 2
+                        y: 62
+                        width: 80
+                        height: 10
+                        points:
+                          - 0, 0
+                          - 129, 0
+                        line_color: 0x1A79FF
+                        line_rounded: true
+              - obj:
+                  id: Pritok_filter
+                  x: 16
+                  y: 300
+                  width: 100
+                  height: 100
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0x10B981
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  widgets:
+                    - arc:
+                        x: 4
+                        y: 4
+                        width: 92
+                        height: 80
+                        value: 72
+                        min_value: 0
+                        max_value: 100
+                        adjustable: true
+                        start_angle: 135
+                        end_angle: 45
+                        arc_color: 0xE053D6
+                        arc_width: 10
+                        arc_opa: 20%
+                        arc_rounded: true
+                        indicator:
+                          arc_color: 0xE053D6
+                          arc_width: 10
+                          arc_opa: 100%
+                          arc_rounded: true
+                        knob:
+                          bg_opa: 0%
+                        bg_opa: 0%
+                        border_width: 0
+                    - label:
+                        x: 4
+                        y: 32
+                        width: 92
+                        height: 24
+                        text: "72%"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 4
+                        y: 84
+                        width: 92
+                        height: 12
+                        text: "Приточка"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+              - obj:
+                  id: Vityazh_filter
+                  x: 365
+                  y: 300
+                  width: 100
+                  height: 100
+                  bg_color: 0xF3FFB6
+                  bg_opa: 95%
+                  border_width: 1
+                  border_color: 0x162038
+                  border_opa: 20%
+                  radius: 16
+                  shadow_width: 0
+                  shadow_color: 0x10B981
+                  shadow_opa: 0%
+                  pad_all: 0
+                  scrollbar_mode: ACTIVE
+                  widgets:
+                    - arc:
+                        x: 4
+                        y: 4
+                        width: 92
+                        height: 80
+                        value: 72
+                        min_value: 0
+                        max_value: 100
+                        adjustable: false
+                        start_angle: 135
+                        end_angle: 45
+                        arc_color: 0xE053D6
+                        arc_width: 10
+                        arc_opa: 20%
+                        arc_rounded: true
+                        indicator:
+                          arc_color: 0xE053D6
+                          arc_width: 10
+                          arc_opa: 100%
+                          arc_rounded: true
+                        knob:
+                          bg_opa: 0%
+                        bg_opa: 0%
+                        border_width: 0
+                    - label:
+                        x: 4
+                        y: 32
+                        width: 92
+                        height: 24
+                        text: "72%"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        x: 4
+                        y: 84
+                        width: 92
+                        height: 12
+                        text: "Вытяжка"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+              
               - label:
-                  id: KhaKar_modes
-                  x: 10
-                  y: 5
-                  width: 160
-                  height: 25
-                  text: "KhaKar-032"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: Date_modes
-                  x: 280
-                  y: 9
-                  width: 200
-                  height: 20
-                  text: "Сб 20-июнь-2026"
-                  text_color: 0xEFF0F0
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - label:
-                  id: time_label_modes
+                  id: time_label
                   x: 194
                   y: 1
                   width: 88
@@ -873,264 +691,422 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
-        # Кнопки режимов в один столбик
-        - button:
-            id: mode_standard
-            x: 40
-            y: 60
-            width: 398
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 1;
-                    id(mode_activated) = false;
-                    ESP_LOGI("mode", "Pressed STANDARD button");
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                      ESP_LOGI("mode", "Released STANDARD before timeout");
-                    }
-            widgets:
-              - label:
-                  x: 0
+              - textarea:
+                  id: Econom
+                  x: 3
                   y: 0
-                  width: 398
-                  height: 50
+                  width: 430
+                  height: 100
+                  align: CENTER
                   text: "СТАНДАРТНЫЙ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
+                  bg_color: 0x1F2937
+                  bg_opa: 0%
+                  border_width: 1
+                  border_color: 0x4B5563
+                  border_opa: 0%
+                  radius: 8
+                  outline_opa: 0%
+                  shadow_opa: 0%
+                  text_color: 0xE053D6
                   text_font: cyrillic_font_40
 
-        - button:
-            id: mode_econom
-            x: 40
-            y: 120
-            width: 398
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 2;
-                    id(mode_activated) = false;
-                    ESP_LOGI("mode", "Pressed ECONOM button");
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                      ESP_LOGI("mode", "Released ECONOM before timeout");
-                    }
-            widgets:
-              - label:
+              - button:
+                  id: domoi
                   x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ЭКОНОМИЧНЫЙ"
+                  y: 415
+                  width: 160
+                  height: 65
+                  bg_color: 0xF713B7
+                  bg_opa: 100%    
+                  opa: 100%
+                  on_click:
+                    then:
+                      - lambda: |-
+                          // Показываем главный экран, скрываем экран режимов
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
+                          lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          id(main_screen_visible) = true;
+                  widgets:
+                    - label:
+                        id: dom
+                        x: 0
+                        y: 0
+                        width: 119
+                        height: 26
+                        text: "Дом"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                       
+              - button:
+                  id: modes
+                  x: 159
+                  y: 415
+                  width: 160
+                  height: 65
+                  bg_color: 0xF713B7
+                  bg_opa: 100%    
+                  opa: 100%
+                  on_click:
+                    then:
+                      - lambda: |-
+                          // Показываем экран режимов, скрываем главный экран
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, false);
+                          lv_obj_clear_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          id(main_screen_visible) = false;
+                  widgets:
+                    - label:
+                        id: rezhim
+                        x: 0
+                        y: 0
+                        width: 119
+                        height: 26
+                        text: "Режимы"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                
+              - button:
+                  id: stop
+                  x: 203
+                  y: 310
+                  width: 75
+                  height: 65
+                  bg_color: 0xEFF0F0
+                  bg_opa: 0%
+                  border_opa: 0%
+                  outline_opa: 0%
+                  shadow_opa: 0%
                   text_color: 0xFFFFFF
-                  text_align: CENTER
+                  text_opa: 100%
                   text_font: cyrillic_font_40
+                  opa: 94%
+                  widgets:
+                    - label:
+                        text: "СТОП"
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        text_font: cyrillic_font_40
 
-        - button:
-            id: mode_guest
-            x: 40
-            y: 180
-            width: 398
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 3;
-                    id(mode_activated) = false;
-                    ESP_LOGI("mode", "Pressed GUEST button");
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                      ESP_LOGI("mode", "Released GUEST before timeout");
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ГОСТЕВОЙ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_40
-
-        - button:
-            id: mode_conditioner
-            x: 40
-            y: 240
-            width: 398
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 4;
-                    id(mode_activated) = false;
-                    ESP_LOGI("mode", "Pressed CONDITIONER button");
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                      ESP_LOGI("mode", "Released CONDITIONER before timeout");
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "КОНДИЦИОНЕР"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_40
-
-        - button:
-            id: mode_efficiency
-            x: 40
-            y: 300
-            width: 398
-            height: 50
-            bg_color: 0x374151
-            bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
-            radius: 8
-            on_press:
-              then:
-                - lambda: |-
-                    id(press_timer) = 100;
-                    id(active_mode_id) = 5;
-                    id(mode_activated) = false;
-                    ESP_LOGI("mode", "Pressed EFFICIENCY button");
-            on_release:
-              then:
-                - lambda: |-
-                    if (id(press_timer) < 3000) {
-                      id(press_timer) = 0;
-                      id(active_mode_id) = 0;
-                      ESP_LOGI("mode", "Released EFFICIENCY before timeout");
-                    }
-            widgets:
-              - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ВЫСОКИЙ КПД"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_40
-
-        # Нижняя панель с кнопками (дублируется с главной)
-        - button:
-            id: domoi_modes
+        # ЭКРАН РЕЖИМОВ (СКРЫТ ПО УМОЛЧАНИЮ)
+        - obj:
+            id: modes_screen
             x: 0
-            y: 415
-            width: 160
-            height: 65
-            bg_color: 0xF713B7
-            bg_opa: 100%    
-            opa: 100%
-            on_click:
-              then:
-                - lvgl.page.show:
-                    id: main_page
-            widgets:
-              - label:
-                  id: dom_modes
-                  x: 0
-                  y: 0
-                  width: 119
-                  height: 26
-                  text: "Дом"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-                 
-        - button:
-            id: modes_modes
-            x: 159
-            y: 415
-            width: 160
-            height: 65
-            bg_color: 0xF713B7
-            bg_opa: 100%    
-            opa: 100%
-            on_click:
-              then:
-                - lvgl.page.show:
-                    id: modes_page
-            widgets:
-              - label:
-                  id: rezhim_modes
-                  x: 0
-                  y: 0
-                  width: 119
-                  height: 26
-                  text: "Режимы"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-          
-        - button:
-            id: stop_modes
-            x: 203
-            y: 310
-            width: 75
-            height: 65
-            bg_color: 0xEFF0F0
+            y: 0
+            width: 480
+            height: 480
             bg_opa: 0%
-            border_opa: 0%
-            outline_opa: 0%
-            shadow_opa: 0%
-            text_color: 0xFFFFFF
-            text_opa: 100%
-            text_font: cyrillic_font_40
-            opa: 94%
+            pad_all: 0
+            hidden: true
             widgets:
-              - label:
-                  text: "СТОП"
-                  text_align: CENTER
+              - obj:
+                  id: Upscreen_modes
+                  x: 1
+                  y: 0
+                  width: 478
+                  height: 35
+                  bg_color: 0xF713B7
+                  border_width: 1
+                  border_color: 0x4B5563
+                  radius: 8
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        id: KhaKar_modes
+                        x: 10
+                        y: 5
+                        width: 160
+                        height: 25
+                        text: "KhaKar-032"
+                        text_color: 0xFFFFFF
+                        text_align: LEFT
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                    - label:
+                        id: Date_modes
+                        x: 280
+                        y: 9
+                        width: 200
+                        height: 20
+                        text: "Сб 20-июнь-2026"
+                        text_color: 0xEFF0F0
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_12
+                    - label:
+                        id: time_label_modes
+                        x: 194
+                        y: 1
+                        width: 88
+                        height: 32
+                        text: "14:32"
+                        text_color: 0xF1F5F9
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+
+              - button:
+                  id: mode_standard
+                  x: 40
+                  y: 60
+                  width: 398
+                  height: 50
+                  bg_color: 0x374151
+                  bg_opa: 100%
+                  border_width: 1
+                  border_color: 0x6B7280
+                  radius: 8
+                  on_press:
+                    then:
+                      - lambda: |-
+                          id(press_timer) = 100;
+                          id(active_mode_id) = 1;
+                          id(mode_activated) = false;
+                          ESP_LOGI("mode", "Pressed STANDARD button");
+                  on_release:
+                    then:
+                      - lambda: |-
+                          if (id(press_timer) < 3000) {
+                            id(press_timer) = 0;
+                            id(active_mode_id) = 0;
+                          }
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        width: 398
+                        height: 50
+                        text: "СТАНДАРТНЫЙ"
+                        text_color: 0xFFFFFF
+                        text_align: CENTER
+                        text_font: cyrillic_font_40
+
+              - button:
+                  id: mode_econom
+                  x: 40
+                  y: 120
+                  width: 398
+                  height: 50
+                  bg_color: 0x374151
+                  bg_opa: 100%
+                  border_width: 1
+                  border_color: 0x6B7280
+                  radius: 8
+                  on_press:
+                    then:
+                      - lambda: |-
+                          id(press_timer) = 100;
+                          id(active_mode_id) = 2;
+                          id(mode_activated) = false;
+                          ESP_LOGI("mode", "Pressed ECONOM button");
+                  on_release:
+                    then:
+                      - lambda: |-
+                          if (id(press_timer) < 3000) {
+                            id(press_timer) = 0;
+                            id(active_mode_id) = 0;
+                          }
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        width: 398
+                        height: 50
+                        text: "ЭКОНОМИЧНЫЙ"
+                        text_color: 0xFFFFFF
+                        text_align: CENTER
+                        text_font: cyrillic_font_40
+
+              - button:
+                  id: mode_guest
+                  x: 40
+                  y: 180
+                  width: 398
+                  height: 50
+                  bg_color: 0x374151
+                  bg_opa: 100%
+                  border_width: 1
+                  border_color: 0x6B7280
+                  radius: 8
+                  on_press:
+                    then:
+                      - lambda: |-
+                          id(press_timer) = 100;
+                          id(active_mode_id) = 3;
+                          id(mode_activated) = false;
+                          ESP_LOGI("mode", "Pressed GUEST button");
+                  on_release:
+                    then:
+                      - lambda: |-
+                          if (id(press_timer) < 3000) {
+                            id(press_timer) = 0;
+                            id(active_mode_id) = 0;
+                          }
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        width: 398
+                        height: 50
+                        text: "ГОСТЕВОЙ"
+                        text_color: 0xFFFFFF
+                        text_align: CENTER
+                        text_font: cyrillic_font_40
+
+              - button:
+                  id: mode_conditioner
+                  x: 40
+                  y: 240
+                  width: 398
+                  height: 50
+                  bg_color: 0x374151
+                  bg_opa: 100%
+                  border_width: 1
+                  border_color: 0x6B7280
+                  radius: 8
+                  on_press:
+                    then:
+                      - lambda: |-
+                          id(press_timer) = 100;
+                          id(active_mode_id) = 4;
+                          id(mode_activated) = false;
+                          ESP_LOGI("mode", "Pressed CONDITIONER button");
+                  on_release:
+                    then:
+                      - lambda: |-
+                          if (id(press_timer) < 3000) {
+                            id(press_timer) = 0;
+                            id(active_mode_id) = 0;
+                          }
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        width: 398
+                        height: 50
+                        text: "КОНДИЦИОНЕР"
+                        text_color: 0xFFFFFF
+                        text_align: CENTER
+                        text_font: cyrillic_font_40
+
+              - button:
+                  id: mode_efficiency
+                  x: 40
+                  y: 300
+                  width: 398
+                  height: 50
+                  bg_color: 0x374151
+                  bg_opa: 100%
+                  border_width: 1
+                  border_color: 0x6B7280
+                  radius: 8
+                  on_press:
+                    then:
+                      - lambda: |-
+                          id(press_timer) = 100;
+                          id(active_mode_id) = 5;
+                          id(mode_activated) = false;
+                          ESP_LOGI("mode", "Pressed EFFICIENCY button");
+                  on_release:
+                    then:
+                      - lambda: |-
+                          if (id(press_timer) < 3000) {
+                            id(press_timer) = 0;
+                            id(active_mode_id) = 0;
+                          }
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        width: 398
+                        height: 50
+                        text: "ВЫСОКИЙ КПД"
+                        text_color: 0xFFFFFF
+                        text_align: CENTER
+                        text_font: cyrillic_font_40
+
+              - button:
+                  id: domoi_modes
+                  x: 0
+                  y: 415
+                  width: 160
+                  height: 65
+                  bg_color: 0xF713B7
+                  bg_opa: 100%    
+                  opa: 100%
+                  on_click:
+                    then:
+                      - lambda: |-
+                          // Показываем главный экран, скрываем экран режимов
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, false);
+                          lv_obj_clear_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN);
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          id(main_screen_visible) = true;
+                  widgets:
+                    - label:
+                        id: dom_modes
+                        x: 0
+                        y: 0
+                        width: 119
+                        height: 26
+                        text: "Дом"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                       
+              - button:
+                  id: modes_modes
+                  x: 159
+                  y: 415
+                  width: 160
+                  height: 65
+                  bg_color: 0xF713B7
+                  bg_opa: 100%    
+                  opa: 100%
+                  on_click:
+                    then:
+                      - lambda: |-
+                          // Показываем экран режимов, скрываем главный экран
+                          lv_obj_add_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN, false);
+                          lv_obj_clear_flag(id(modes_screen), LV_OBJ_FLAG_HIDDEN);
+                          lv_obj_add_flag(id(main_screen), LV_OBJ_FLAG_HIDDEN, true);
+                          id(main_screen_visible) = false;
+                  widgets:
+                    - label:
+                        id: rezhim_modes
+                        x: 0
+                        y: 0
+                        width: 119
+                        height: 26
+                        text: "Режимы"
+                        text_color: 0x000000
+                        text_align: CENTER
+                        long_mode: CLIP
+                        text_font: cyrillic_font_24
+                
+              - button:
+                  id: stop_modes
+                  x: 203
+                  y: 310
+                  width: 75
+                  height: 65
+                  bg_color: 0xEFF0F0
+                  bg_opa: 0%
+                  border_opa: 0%
+                  outline_opa: 0%
+                  shadow_opa: 0%
                   text_color: 0xFFFFFF
+                  text_opa: 100%
                   text_font: cyrillic_font_40
+                  opa: 94%
+                  widgets:
+                    - label:
+                        text: "СТОП"
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        text_font: cyrillic_font_40
