@@ -36,7 +36,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  # НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗАСТАВКИ
   - id: inactivity_timer
     type: int
     restore_value: no
@@ -58,7 +57,6 @@ uart:
 
 # Интервалы
 interval:
-  # НОВЫЙ ИНТЕРВАЛ ДЛЯ ЗАСТАВКИ
   - interval: 500ms
     then:
       - if:
@@ -73,7 +71,8 @@ interval:
                 }
             - lvgl.page.show:
                 id: screensaver_page
-            - light.turn_off: display_backlight
+            # НЕ ВЫКЛЮЧАЕМ ПОДСВЕТКУ!
+            # - light.turn_off: display_backlight
   
   - interval: 100ms
     then:
@@ -87,7 +86,6 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
-              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -122,7 +120,6 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
@@ -272,7 +269,6 @@ touchscreen:
                   ESP_LOGI("touch", "Waking up from screensaver");
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
-              - light.turn_on: display_backlight
               - lvgl.page.show:
                   id: main_page
             else:
@@ -292,60 +288,37 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
-    # ========== НОВАЯ СТРАНИЦА ЗАСТАВКИ ==========
+    # ========== СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
       bg_color: 0x000000
       bg_opa: 100%
       pad_all: 0
       widgets:
-        - image:
-            id: screensaver_image
-            x: 0
-            y: 0
-            width: 480
-            height: 480
-            src: background_image
-            align: CENTER
-            opa: 100%
-        
+        # ЧЕРНЫЙ ФОН (вместо выключения подсветки)
         - obj:
-            id: screensaver_overlay
+            id: black_background
             x: 0
             y: 0
             width: 480
             height: 480
             bg_color: 0x000000
-            bg_opa: 40%
+            bg_opa: 100%
             border_width: 0
         
+        # Маленькая подсказка в углу
         - label:
-            id: screensaver_text
+            id: screensaver_hint
             x: 0
-            y: 350
+            y: 450
             width: 480
-            height: 50
-            text: "Нажмите на экран"
-            text_color: 0xFFFFFF
+            height: 30
+            text: "Нажмите для выхода"
+            text_color: 0x333333
             text_align: CENTER
-            text_font: cyrillic_font_24
-            opa: 100%
+            text_font: cyrillic_font_12
+            opa: 50%
         
-        - spinner:
-            id: screensaver_spinner
-            x: 215
-            y: 230
-            width: 50
-            height: 50
-            spin_time: 2000ms
-            arc_length: 90deg
-            arc_width: 3
-            arc_color: 0x44A37E
-            indicator:
-              arc_color: 0x44A37E
-              arc_opa: 100%
-              arc_width: 3
-        
-        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ
+        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ (ВО ВСЮ СТРАНИЦУ)
         - button:
             id: wakeup_button
             x: 0
@@ -368,7 +341,6 @@ lvgl:
                           ESP_LOGI("wakeup", "Waking up from screensaver via button");
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
-                      - light.turn_on: display_backlight
                       - lvgl.page.show:
                           id: main_page
 
@@ -1046,8 +1018,7 @@ lvgl:
             height: 50
             bg_color: 0x374151
             bg_opa: 100%
-            border_width: 1
-            border_color: 0x6B7280
+            border_width: 1            border_color: 0x6B7280
             radius: 8
             on_press:
               then:
