@@ -36,6 +36,14 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: main_page_obj
+    type: lv_obj_t*
+    restore_value: no
+    initial_value: 'nullptr'
+  - id: modes_page_obj
+    type: lv_obj_t*
+    restore_value: no
+    initial_value: 'nullptr'
 
 # UART для связи с Arduino
 uart:
@@ -64,31 +72,39 @@ interval:
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
-                  lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
+                  lv_label_set_text(id(mode_display), "СТАНДАРТНЫЙ");
                   id(uart_arduino).write_str("MODE:STANDARD\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
-                  lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
+                  lv_label_set_text(id(mode_display), "ЭКОНОМИЧНЫЙ");
                   id(uart_arduino).write_str("MODE:ECONOM\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
-                  lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
+                  lv_label_set_text(id(mode_display), "ГОСТЕВОЙ");
                   id(uart_arduino).write_str("MODE:GUEST\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
-                  lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
+                  lv_label_set_text(id(mode_display), "КОНДИЦИОНЕР");
                   id(uart_arduino).write_str("MODE:CONDITIONER\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
-                  lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
+                  lv_label_set_text(id(mode_display), "ВЫСОКИЙ КПД");
                   id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                   break;
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
+              
+              // Переключаем на главную страницу через нативный LVGL API
+              if (id(main_page_obj) != nullptr) {
+                lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                ESP_LOGI("mode", "Switched to main page via lv_scr_load_anim");
+              } else {
+                ESP_LOGE("mode", "main_page_obj is null!");
+              }
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
@@ -122,8 +138,6 @@ interval:
                   
                   lv_label_set_text(id(Date), date_part.c_str());
                   lv_label_set_text(id(time_label), time_part.c_str());
-                  lv_label_set_text(id(Date_modes), date_part.c_str());
-                  lv_label_set_text(id(time_label_modes), time_part.c_str());
                 }
               }
             }
@@ -223,7 +237,7 @@ touchscreen:
         - lambda: |-
             ESP_LOGI("touch", "Released");
 
-# ★ LVGL ★
+# ★ LVGL - ИСПОЛЬЗУЕМ НАТИВНЫЙ LVGL API ★
 lvgl:
   id: lvgl_component
   displays:
@@ -232,6 +246,7 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
+    # Главная страница - содержит все виджеты
     - id: main_page
       bg_color: 0x111827
       bg_opa: 100%
@@ -282,25 +297,19 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_24
-        - textarea:
-            id: Econom
+        - label:
+            id: mode_display
             x: 3
             y: 50
             width: 430
             height: 100
-            align: CENTER
             text: "СТАНДАРТНЫЙ"
-            bg_color: 0x1F2937
-            bg_opa: 0%
-            border_width: 0
-            radius: 8
-            outline_opa: 0%
-            shadow_opa: 0%
             text_color: 0xE053D6
+            text_align: CENTER
+            long_mode: CLIP
             text_font: cyrillic_font_40
-
         - button:
-            id: modes
+            id: modes_btn
             x: 159
             y: 200
             width: 160
@@ -322,6 +331,7 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
+    # Страница режимов
     - id: modes_page
       bg_color: 0x111827
       bg_opa: 100%
