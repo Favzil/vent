@@ -36,6 +36,19 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # НОВЫЕ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗАСТАВКИ
+  - id: inactivity_timer
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: screensaver_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: last_touch_time
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -47,8 +60,36 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Интервалы
+# ИНТЕРВАЛЫ
 interval:
+  # Таймер бездействия для заставки (каждые 500 мс)
+  - interval: 500ms
+    then:
+      - lambda: |-
+          // Если заставка не активна
+          if (!id(screensaver_active)) {
+            // Увеличиваем таймер бездействия
+            id(inactivity_timer) += 500;
+            
+            // Если прошло 30 секунд (30000 мс) - активируем заставку
+            if (id(inactivity_timer) >= 30000) {
+              ESP_LOGI("screensaver", "Activating screensaver");
+              id(screensaver_active) = true;
+              
+              // Показываем страницу заставки
+              lvgl.page.show:
+                id: screensaver_page
+              
+              // Приостанавливаем обработку сенсора (чтобы касания не проходили)
+              // Небольшая задержка перед отключением
+              delay(100ms);
+              
+              // Отключаем подсветку
+              id(display_backlight).turn_off();
+            }
+          }
+  
+  # Таймер для обработки нажатий (каждые 100 мс)
   - interval: 100ms
     then:
       - lambda: |-
@@ -108,7 +149,8 @@ interval:
               id(mode_activated) = false;
             }
           }
-          
+  
+  # Чтение UART (каждые 500 мс)
   - interval: 500ms
     then:
       - lambda: |-
@@ -149,6 +191,11 @@ image:
     id: background_image
     type: RGB565
     resize: 480x480
+  # ДОБАВЛЯЕМ ИЗОБРАЖЕНИЕ ДЛЯ ЗАСТАВКИ
+  - file: "img/screensaver_bg.png"   # <- Создайте это изображение 480x480
+    id: screensaver_bg
+    type: RGB565
+    resize: 480x480
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -166,7 +213,12 @@ font:
     size: 12
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
 
-    
+  # ДОБАВЛЯЕМ БОЛЬШОЙ ШРИФТ ДЛЯ ЗАСТАВКИ
+  - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_60
+    size: 60
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+
 # Реле
 switch:
   - platform: gpio
@@ -224,7 +276,7 @@ display:
     invert_colors: False
 
 # ============================================
-# СЕНСОР ЭКРАНА (GT911)
+# СЕНСОР ЭКРАНА (GT911) - ОБНОВЛЕННЫЙ
 # ============================================
 touchscreen:
   - platform: gt911
@@ -239,6 +291,23 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+            
+            // Если заставка активна - пробуждаем
+            if (id(screensaver_active)) {
+              ESP_LOGI("touch", "Waking up from screensaver");
+              id(screensaver_active) = false;
+              id(inactivity_timer) = 0;
+              
+              // Включаем подсветку
+              id(display_backlight).turn_on();
+              
+              // Показываем главную страницу
+              lvgl.page.show:
+                id: main_page
+            } else {
+              // Сбрасываем таймер бездействия при касании
+              id(inactivity_timer) = 0;
+            }
     on_release:
       then:
         - lambda: |-
@@ -253,6 +322,52 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
+    # ========== СТРАНИЦА ЗАСТАВКИ (НОВАЯ) ==========
+    - id: screensaver_page
+      bg_color: 0x000000
+      bg_opa: 100%
+      pad_all: 0
+      widgets:
+        # Фоновое изображение заставки
+        - image:
+            id: screensaver_image
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            src: screensaver_bg
+            align: CENTER
+            opa: 100%
+        
+        # Текст "СЕНСОРНЫЙ ЭКРАН" (или любой другой текст)
+        - label:
+            id: screensaver_text
+            x: 0
+            y: 350
+            width: 480
+            height: 50
+            text: "Нажмите на экран"
+            text_color: 0xFFFFFF
+            text_align: CENTER
+            text_font: cyrillic_font_24
+            opa: 80%
+        
+        # Анимационный индикатор (кружок)
+        - spinner:
+            id: screensaver_spinner
+            x: 215
+            y: 230
+            width: 50
+            height: 50
+            spin_time: 2000ms
+            arc_length: 90deg
+            arc_width: 3
+            arc_color: 0x44A37E
+            indicator:
+              arc_color: 0x44A37E
+              arc_opa: 100%
+              arc_width: 3
+
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
       bg_color: 0x111827
