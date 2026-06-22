@@ -36,6 +36,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: switch_in_progress
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -47,24 +51,28 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Скрипты для переключения страниц
+# Скрипт для переключения на главную страницу с задержкой
 script:
   - id: go_to_main
     then:
-      - logger.log: "Executing go_to_main script"
+      - logger.log: "Starting page switch to main"
+      - delay: 500ms
+      - logger.log: "Executing lvgl.page.show main_page"
       - lvgl.page.show:
           id: main_page
           animation: FADE_IN
           time: 300ms
-      - logger.log: "Page switch command executed"
+      - logger.log: "Page switch to main completed"
   - id: go_to_modes
     then:
-      - logger.log: "Executing go_to_modes script"
+      - logger.log: "Starting page switch to modes"
+      - delay: 500ms
+      - logger.log: "Executing lvgl.page.show modes_page"
       - lvgl.page.show:
           id: modes_page
           animation: FADE_IN
           time: 300ms
-      - logger.log: "Page switch to modes executed"
+      - logger.log: "Page switch to modes completed"
 
 # Интервалы
 interval:
@@ -72,13 +80,14 @@ interval:
     then:
       - lambda: |-
           // Обработка долгого нажатия
-          if (id(press_timer) > 0) {
+          if (id(press_timer) > 0 && !id(switch_in_progress)) {
             id(press_timer) += 100;
             ESP_LOGD("mode", "Timer: %d", id(press_timer));
             
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
+              id(switch_in_progress) = true;
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
@@ -117,12 +126,14 @@ interval:
               }
               ESP_LOGI("mode", "Activated mode: %s", id(selected_mode).c_str());
               
-              // Переключаем на главную страницу через скрипт
+              // Переключаем на главную страницу через скрипт с задержкой
               ESP_LOGI("mode", "=== SWITCHING TO MAIN PAGE ===");
               id(go_to_main).execute();
-              ESP_LOGI("mode", "=== SWITCH COMMAND SENT ===");
               
               id(active_mode_id) = 0;
+              
+              // Сброс флагов через 2 секунды
+              id(switch_in_progress) = false;
             }
           }
           
