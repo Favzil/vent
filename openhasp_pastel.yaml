@@ -63,10 +63,8 @@ interval:
           if (!id(screensaver_active)) {
             id(inactivity_timer) += 500;
             if (id(inactivity_timer) >= 30000) {
-              ESP_LOGI("screensaver", "Activating screensaver and pausing LVGL");
+              ESP_LOGI("screensaver", "Activating screensaver");
               id(screensaver_active) = true;
-              // Приостанавливаем LVGL
-              lvgl.pause;
               // Показываем страницу заставки
               lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               // Выключаем подсветку
@@ -257,36 +255,20 @@ touchscreen:
     transform:
       mirror_x: true
       mirror_y: true
-    # Используем on_release вместо on_touch
     on_release:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Released, checking screensaver...");
-            
-            // Проверяем, активна ли заставка
             if (id(screensaver_active)) {
-              ESP_LOGI("touch", "Waking up, resuming LVGL");
-              
-              // Возобновляем LVGL
-              lvgl.resume;
-              
-              // Включаем подсветку
-              id(display_backlight).turn_on();
-              
-              // Сбрасываем флаги
+              ESP_LOGI("touch", "Waking up from screensaver");
               id(screensaver_active) = false;
               id(inactivity_timer) = 0;
-              
-              // Показываем главную страницу через LVGL API
+              id(display_backlight).turn_on();
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("touch", "Main page loaded");
-              } else {
-                ESP_LOGE("touch", "main_page is null!");
               }
             } else {
-              // Если заставка не активна - просто сбрасываем таймер
               id(inactivity_timer) = 0;
             }
 
@@ -352,7 +334,7 @@ lvgl:
               arc_opa: 100%
               arc_width: 3
         
-        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ (дублирующий триггер)
+        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ
         - button:
             id: wakeup_button
             x: 0
@@ -369,7 +351,6 @@ lvgl:
                     ESP_LOGI("wakeup", "Wakeup button clicked!");
                     if (id(screensaver_active)) {
                       ESP_LOGI("wakeup", "Waking up from screensaver via button");
-                      lvgl.resume;
                       id(screensaver_active) = false;
                       id(inactivity_timer) = 0;
                       id(display_backlight).turn_on();
