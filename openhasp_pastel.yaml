@@ -149,6 +149,7 @@ image:
     id: background_image
     type: RGB565
     resize: 480x480
+    invert_colors: true
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
