@@ -65,9 +65,7 @@ interval:
             if (id(inactivity_timer) >= 30000) {
               ESP_LOGI("screensaver", "Activating screensaver");
               id(screensaver_active) = true;
-              // Показываем страницу заставки
               lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-              // Выключаем подсветку
               id(display_backlight).turn_off();
             }
           }
@@ -255,39 +253,26 @@ touchscreen:
     transform:
       mirror_x: true
       mirror_y: true
-    # Добавляем обработку касаний через сенсор напрямую
     on_touch:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touch detected at x=%d, y=%d", touch.x, touch.y);
-            
-            // Проверяем, активна ли заставка
             if (id(screensaver_active)) {
               ESP_LOGI("touch", "Waking up from screensaver");
-              
-              // Включаем подсветку
               id(display_backlight).turn_on();
-              
-              // Сбрасываем флаги
               id(screensaver_active) = false;
               id(inactivity_timer) = 0;
-              
-              // Показываем главную страницу через LVGL API
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
-                ESP_LOGI("touch", "Main page loaded");
-              } else {
-                ESP_LOGE("touch", "main_page is null!");
               }
             } else {
-              // Если заставка не активна - просто сбрасываем таймер
               id(inactivity_timer) = 0;
             }
     on_release:
       then:
         - lambda: |-
-            ESP_LOGI("touch", "Released at x=%d, y=%d", touch.x, touch.y);
+            ESP_LOGI("touch", "Released");
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -1004,7 +989,8 @@ lvgl:
                   height: 50
                   text: "СТАНДАРТНЫЙ"
                   text_color: 0xFFFFFF
-                  text_align: CENTER                  text_font: cyrillic_font_24
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
 
         - button:
             id: mode_econom
