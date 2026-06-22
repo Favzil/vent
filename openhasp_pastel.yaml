@@ -148,7 +148,7 @@ image:
   - file: "img/olako.png"
     id: background_image
     type: RGB565
-    resize: 480x480  # Подгоняем под размер экрана
+    resize: 480x480
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -211,8 +211,8 @@ spi:
 # I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
-  sda: GPIO19
-  scl: GPIO45
+  sda: GPIO18
+  scl: GPIO8
 
 # ДИСПЛЕЙ
 display:
@@ -259,18 +259,16 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение (добавлено поверх фона, но под всеми элементами)
+        # Фоновое изображение
         - image:
             id: background_image_widget
             x: 0
             y: 0
             width: 480
             height: 480
-            image: background_image
             src: background_image
             align: CENTER
             opa: 100%
-            bg_opa: 0%
 
         - spinner:
             id: widget_1781427523533_f22zs1tti
