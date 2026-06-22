@@ -45,10 +45,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: last_touch_time
-    type: int
-    restore_value: no
-    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -79,10 +75,6 @@ interval:
               // Показываем страницу заставки
               lvgl.page.show:
                 id: screensaver_page
-              
-              // Приостанавливаем обработку сенсора (чтобы касания не проходили)
-              // Небольшая задержка перед отключением
-              delay(100ms);
               
               // Отключаем подсветку
               id(display_backlight).turn_off();
@@ -191,11 +183,6 @@ image:
     id: background_image
     type: RGB565
     resize: 480x480
-  # ДОБАВЛЯЕМ ИЗОБРАЖЕНИЕ ДЛЯ ЗАСТАВКИ
-  - file: "img/screensaver_bg.png"   # <- Создайте это изображение 480x480
-    id: screensaver_bg
-    type: RGB565
-    resize: 480x480
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -211,12 +198,6 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
     size: 12
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
-
-  # ДОБАВЛЯЕМ БОЛЬШОЙ ШРИФТ ДЛЯ ЗАСТАВКИ
-  - file: "fonts/Roboto-Regular.ttf"
-    id: cyrillic_font_60
-    size: 60
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
 
 # Реле
@@ -328,18 +309,29 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение заставки
+        # Используем существующее изображение
         - image:
             id: screensaver_image
             x: 0
             y: 0
             width: 480
             height: 480
-            src: screensaver_bg
+            src: background_image
             align: CENTER
             opa: 100%
         
-        # Текст "СЕНСОРНЫЙ ЭКРАН" (или любой другой текст)
+        # Затемняющий слой (чтобы текст был читаемым)
+        - obj:
+            id: screensaver_overlay
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            bg_color: 0x000000
+            bg_opa: 40%
+            border_width: 0
+        
+        # Текст "Нажмите на экран"
         - label:
             id: screensaver_text
             x: 0
@@ -350,7 +342,7 @@ lvgl:
             text_color: 0xFFFFFF
             text_align: CENTER
             text_font: cyrillic_font_24
-            opa: 80%
+            opa: 100%
         
         # Анимационный индикатор (кружок)
         - spinner:
