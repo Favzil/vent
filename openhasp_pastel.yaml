@@ -64,6 +64,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: startup_done
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -80,12 +84,16 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
-          // Инициализация указателей на страницы при первом запуске
-          if (!id(pages_initialized)) {
-            // Получаем текущую страницу - это main_page при старте
-            id(main_page_obj) = lv_scr_act();
+          // Инициализация при старте - показываем главную страницу
+          if (!id(startup_done)) {
+            // Убеждаемся, что главная страница активна
+            if (id(main_page_obj) != nullptr) {
+              lv_scr_load(id(main_page_obj));
+            }
+            id(startup_done) = true;
             id(pages_initialized) = true;
-            ESP_LOGI("init", "Pages initialized, main_page_obj: %p", id(main_page_obj));
+            ESP_LOGI("init", "Startup complete, main page loaded");
+            return;
           }
           
           // Таймер бездействия - только если не в режиме сна
@@ -440,6 +448,9 @@ lvgl:
           - lambda: |-
               id(main_page_obj) = lv_scr_act();
               id(pages_initialized) = true;
+              // При загрузке главной страницы - выходим из режима сна
+              id(is_sleeping) = false;
+              id(idle_timer) = 0;
               ESP_LOGI("lvgl", "Main page loaded: %p", id(main_page_obj));
       widgets:
         # Фоновое изображение
@@ -987,6 +998,9 @@ lvgl:
         then:
           - lambda: |-
               id(modes_page_obj) = lv_scr_act();
+              // При загрузке страницы режимов - выходим из режима сна
+              id(is_sleeping) = false;
+              id(idle_timer) = 0;
               ESP_LOGI("lvgl", "Modes page loaded: %p", id(modes_page_obj));
       widgets:
         # Верхняя панель
