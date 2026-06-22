@@ -399,6 +399,36 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_12
+        
+        # НЕВИДИМАЯ КНОПКА ДЛЯ ВЫХОДА ИЗ РЕЖИМА СНА
+        - button:
+            id: sleep_exit_btn
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            bg_color: 0x000000
+            bg_opa: 0%
+            border_opa: 0%
+            outline_opa: 0%
+            shadow_opa: 0%
+            opa: 0%
+            on_click:
+              then:
+                - lambda: |-
+                    ESP_LOGI("sleep", "Sleep exit button clicked!");
+                    // Выходим из режима сна
+                    id(is_sleeping) = false;
+                    id(idle_timer) = 0;
+                    
+                    // Возвращаемся на предыдущую страницу
+                    if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
+                      lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                    } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
+                      lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                    }
+                    
+                    ESP_LOGI("sleep", "Exited sleep mode");
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
