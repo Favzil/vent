@@ -61,20 +61,18 @@ interval:
   # Таймер бездействия для заставки (каждые 500 мс)
   - interval: 500ms
     then:
-      - if:
-          condition:
-            lambda: 'return !id(screensaver_active);'
-          then:
-            - lambda: |-
-                id(inactivity_timer) += 500;
-                if (id(inactivity_timer) >= 30000) {
-                  ESP_LOGI("screensaver", "Activating screensaver");
-                  id(screensaver_active) = true;
-                  // Включаем заставку через LVGL
-                  lvgl.page.show:
-                    id: screensaver_page
-                  id(display_backlight).turn_off();
-                }
+      - lambda: |-
+          if (!id(screensaver_active)) {
+            id(inactivity_timer) += 500;
+            if (id(inactivity_timer) >= 30000) {
+              ESP_LOGI("screensaver", "Activating screensaver");
+              id(screensaver_active) = true;
+              // Используем прямое API LVGL для переключения страницы
+              lvgl.page.show:
+                id: screensaver_page
+              id(display_backlight).turn_off();
+            }
+          }
   
   # Таймер для обработки нажатий (каждые 100 мс)
   - interval: 100ms
@@ -267,7 +265,6 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
-        # Если заставка активна - пробуждаем
         - if:
             condition:
               lambda: 'return id(screensaver_active);'
