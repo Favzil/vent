@@ -60,6 +60,10 @@ globals:
     type: lv_obj_t*
     restore_value: no
     initial_value: 'nullptr'
+  - id: pages_initialized
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -76,6 +80,14 @@ interval:
   - interval: 100ms
     then:
       - lambda: |-
+          // Инициализация указателей на страницы при первом запуске
+          if (!id(pages_initialized)) {
+            // Получаем текущую страницу - это main_page при старте
+            id(main_page_obj) = lv_scr_act();
+            id(pages_initialized) = true;
+            ESP_LOGI("init", "Pages initialized, main_page_obj: %p", id(main_page_obj));
+          }
+          
           // Таймер бездействия - только если не в режиме сна
           if (!id(is_sleeping)) {
             id(idle_timer) += 100;
@@ -326,31 +338,6 @@ lvgl:
   touchscreens:
     - my_touchscreen
   rotation: 180
-  on_page_change:
-    - lambda: |-
-        // Сохраняем указатели на страницы
-        lv_obj_t *current_scr = lv_scr_act();
-        
-        // Проверяем, какая страница загружена по её содержимому
-        // Используем ID виджетов для идентификации страниц
-        if (lv_obj_has_state(id(sleep_time), LV_STATE_DEFAULT)) {
-          // Определяем страницу по наличию виджета sleep_time
-          if (lv_obj_get_parent(id(sleep_time)) == current_scr) {
-            id(sleep_page_obj) = current_scr;
-          }
-        }
-        
-        if (lv_obj_has_state(id(time_label), LV_STATE_DEFAULT)) {
-          if (lv_obj_get_parent(id(time_label)) == current_scr) {
-            id(main_page_obj) = current_scr;
-          }
-        }
-        
-        if (lv_obj_has_state(id(time_label_modes), LV_STATE_DEFAULT)) {
-          if (lv_obj_get_parent(id(time_label_modes)) == current_scr) {
-            id(modes_page_obj) = current_scr;
-          }
-        }
   pages:
     # ========== СТРАНИЦА СНА (ЗАСТАВКА) ==========
     - id: sleep_page
@@ -361,7 +348,7 @@ lvgl:
         then:
           - lambda: |-
               id(sleep_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Sleep page loaded");
+              ESP_LOGI("lvgl", "Sleep page loaded: %p", id(sleep_page_obj));
       widgets:
         # Фоновое изображение на весь экран
         - image:
@@ -422,7 +409,8 @@ lvgl:
         then:
           - lambda: |-
               id(main_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Main page loaded");
+              id(pages_initialized) = true;
+              ESP_LOGI("lvgl", "Main page loaded: %p", id(main_page_obj));
       widgets:
         # Фоновое изображение
         - image:
@@ -969,7 +957,7 @@ lvgl:
         then:
           - lambda: |-
               id(modes_page_obj) = lv_scr_act();
-              ESP_LOGI("lvgl", "Modes page loaded");
+              ESP_LOGI("lvgl", "Modes page loaded: %p", id(modes_page_obj));
       widgets:
         # Верхняя панель
         - obj:
