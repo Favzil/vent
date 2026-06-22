@@ -36,6 +36,7 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗАСТАВКИ
   - id: inactivity_timer
     type: int
     restore_value: no
@@ -55,8 +56,9 @@ uart:
   data_bits: 8
   parity: NONE
 
-# ИНТЕРВАЛЫ
+# Интервалы
 interval:
+  # НОВЫЙ ИНТЕРВАЛ ДЛЯ ЗАСТАВКИ
   - interval: 500ms
     then:
       - lambda: |-
@@ -84,6 +86,7 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
+              // Получаем указатель на главную страницу через LVGL
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
@@ -118,6 +121,7 @@ interval:
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
+              // Переключаем на главную страницу
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
@@ -129,7 +133,7 @@ interval:
               id(mode_activated) = false;
             }
           }
-  
+          
   - interval: 500ms
     then:
       - lambda: |-
@@ -244,7 +248,7 @@ display:
     invert_colors: False
 
 # ============================================
-# СЕНСОР ЭКРАНА (GT911) - ИСПОЛЬЗУЕМ on_release
+# СЕНСОР ЭКРАНА (GT911) - РАБОЧАЯ ВЕРСИЯ С ДОБАВЛЕННЫМ ПРОБУЖДЕНИЕМ
 # ============================================
 touchscreen:
   - platform: gt911
@@ -255,22 +259,30 @@ touchscreen:
     transform:
       mirror_x: true
       mirror_y: true
-    on_release:
+    on_touch:
       then:
         - lambda: |-
-            ESP_LOGI("touch", "Released, checking screensaver...");
+            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+            // Проверяем, активна ли заставка
             if (id(screensaver_active)) {
               ESP_LOGI("touch", "Waking up from screensaver");
               id(screensaver_active) = false;
               id(inactivity_timer) = 0;
+              // Включаем подсветку
               id(display_backlight).turn_on();
+              // Показываем главную страницу
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page != nullptr) {
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               }
             } else {
+              // Сбрасываем таймер бездействия
               id(inactivity_timer) = 0;
             }
+    on_release:
+      then:
+        - lambda: |-
+            ESP_LOGI("touch", "Released");
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -281,7 +293,7 @@ lvgl:
     - my_touchscreen
   rotation: 180
   pages:
-    # ========== СТРАНИЦА ЗАСТАВКИ ==========
+    # ========== НОВАЯ СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
       bg_color: 0x000000
       bg_opa: 100%
@@ -334,7 +346,7 @@ lvgl:
               arc_opa: 100%
               arc_width: 3
         
-        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ
+        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ (ДУБЛИРУЮЩИЙ МЕХАНИЗМ)
         - button:
             id: wakeup_button
             x: 0
@@ -366,6 +378,7 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
+        # Фоновое изображение
         - image:
             id: background_image_widget
             x: 0
