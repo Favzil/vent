@@ -48,6 +48,18 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'  # 0 - main, 1 - modes
+  - id: sleep_page_obj
+    type: lv_obj_t*
+    restore_value: no
+    initial_value: 'nullptr'
+  - id: main_page_obj
+    type: lv_obj_t*
+    restore_value: no
+    initial_value: 'nullptr'
+  - id: modes_page_obj
+    type: lv_obj_t*
+    restore_value: no
+    initial_value: 'nullptr'
 
 # UART для связи с Arduino
 uart:
@@ -75,14 +87,16 @@ interval:
               
               // Запоминаем текущую страницу
               lv_obj_t *current_scr = lv_scr_act();
-              if (current_scr == id(main_page).get_page()) {
+              if (current_scr == id(main_page_obj)) {
                 id(previous_page) = 0;
-              } else if (current_scr == id(modes_page).get_page()) {
+              } else if (current_scr == id(modes_page_obj)) {
                 id(previous_page) = 1;
               }
               
               // Показываем страницу сна
-              id(lvgl_component).set_page(id(sleep_page));
+              if (id(sleep_page_obj) != nullptr) {
+                lv_scr_load_anim(id(sleep_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+              }
               
               ESP_LOGI("sleep", "Entering sleep mode");
             }
@@ -287,10 +301,10 @@ touchscreen:
               id(idle_timer) = 0;
               
               // Возвращаемся на предыдущую страницу
-              if (id(previous_page) == 0) {
-                id(lvgl_component).set_page(id(main_page));
-              } else {
-                id(lvgl_component).set_page(id(modes_page));
+              if (id(previous_page) == 0 && id(main_page_obj) != nullptr) {
+                lv_scr_load_anim(id(main_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+              } else if (id(previous_page) == 1 && id(modes_page_obj) != nullptr) {
+                lv_scr_load_anim(id(modes_page_obj), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
               }
               
               ESP_LOGI("sleep", "Exiting sleep mode");
@@ -312,12 +326,42 @@ lvgl:
   touchscreens:
     - my_touchscreen
   rotation: 180
+  on_page_change:
+    - lambda: |-
+        // Сохраняем указатели на страницы
+        lv_obj_t *current_scr = lv_scr_act();
+        
+        // Проверяем, какая страница загружена по её содержимому
+        // Используем ID виджетов для идентификации страниц
+        if (lv_obj_has_state(id(sleep_time), LV_STATE_DEFAULT)) {
+          // Определяем страницу по наличию виджета sleep_time
+          if (lv_obj_get_parent(id(sleep_time)) == current_scr) {
+            id(sleep_page_obj) = current_scr;
+          }
+        }
+        
+        if (lv_obj_has_state(id(time_label), LV_STATE_DEFAULT)) {
+          if (lv_obj_get_parent(id(time_label)) == current_scr) {
+            id(main_page_obj) = current_scr;
+          }
+        }
+        
+        if (lv_obj_has_state(id(time_label_modes), LV_STATE_DEFAULT)) {
+          if (lv_obj_get_parent(id(time_label_modes)) == current_scr) {
+            id(modes_page_obj) = current_scr;
+          }
+        }
   pages:
     # ========== СТРАНИЦА СНА (ЗАСТАВКА) ==========
     - id: sleep_page
       bg_color: 0x000000
       bg_opa: 100%
       pad_all: 0
+      on_load:
+        then:
+          - lambda: |-
+              id(sleep_page_obj) = lv_scr_act();
+              ESP_LOGI("lvgl", "Sleep page loaded");
       widgets:
         # Фоновое изображение на весь экран
         - image:
@@ -374,6 +418,11 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
+      on_load:
+        then:
+          - lambda: |-
+              id(main_page_obj) = lv_scr_act();
+              ESP_LOGI("lvgl", "Main page loaded");
       widgets:
         # Фоновое изображение
         - image:
@@ -916,6 +965,11 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
+      on_load:
+        then:
+          - lambda: |-
+              id(modes_page_obj) = lv_scr_act();
+              ESP_LOGI("lvgl", "Modes page loaded");
       widgets:
         # Верхняя панель
         - obj:
