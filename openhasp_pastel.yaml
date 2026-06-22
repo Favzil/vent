@@ -36,10 +36,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: switch_pending
-    type: bool
-    restore_value: no
-    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -50,16 +46,6 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
-
-# Скрипт для переключения на главную страницу
-script:
-  - id: go_to_main
-    then:
-      - delay: 300ms
-      - lvgl.page.show:
-          id: main_page
-          animation: FADE_IN
-          time: 300ms
 
 # Интервалы
 interval:
@@ -75,38 +61,48 @@ interval:
               
               ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
+              // Получаем указатель на главную страницу через LVGL
+              lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
+              if (main_page == nullptr) {
+                main_page = lv_scr_act();
+              }
+              
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
-                  lv_label_set_text(id(Econom), "СТАНДАРТНЫЙ");
+                  lv_label_set_text(id(mode_display), "СТАНДАРТНЫЙ");
                   id(uart_arduino).write_str("MODE:STANDARD\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
-                  lv_label_set_text(id(Econom), "ЭКОНОМИЧНЫЙ");
+                  lv_label_set_text(id(mode_display), "ЭКОНОМИЧНЫЙ");
                   id(uart_arduino).write_str("MODE:ECONOM\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
-                  lv_label_set_text(id(Econom), "ГОСТЕВОЙ");
+                  lv_label_set_text(id(mode_display), "ГОСТЕВОЙ");
                   id(uart_arduino).write_str("MODE:GUEST\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
-                  lv_label_set_text(id(Econom), "КОНДИЦИОНЕР");
+                  lv_label_set_text(id(mode_display), "КОНДИЦИОНЕР");
                   id(uart_arduino).write_str("MODE:CONDITIONER\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
-                  lv_label_set_text(id(Econom), "ВЫСОКИЙ КПД");
+                  lv_label_set_text(id(mode_display), "ВЫСОКИЙ КПД");
                   id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                   break;
               }
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
-              // Запускаем скрипт переключения на главную страницу
-              id(go_to_main).execute();
-              ESP_LOGI("mode", "Page switch script executed");
+              // Переключаем на главную страницу
+              if (main_page != nullptr) {
+                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                ESP_LOGI("mode", "Switched to main page");
+              } else {
+                ESP_LOGE("mode", "main_page is null!");
+              }
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
@@ -116,7 +112,6 @@ interval:
   - interval: 500ms
     then:
       - lambda: |-
-          // Проверяем, есть ли данные в буфере UART
           if (id(uart_arduino).available()) {
             while (id(uart_arduino).available()) {
               uint8_t byte;
@@ -695,23 +690,17 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_24
-        - textarea:
-            id: Econom
+        - label:
+            id: mode_display
             x: 3
             y: 0
             width: 430
             height: 100
             align: CENTER
             text: "СТАНДАРТНЫЙ"
-            bg_color: 0x1F2937
-            bg_opa: 0%
-            border_width: 1
-            border_color: 0x4B5563
-            border_opa: 0%
-            radius: 8
-            outline_opa: 0%
-            shadow_opa: 0%
             text_color: 0xE053D6
+            text_align: CENTER
+            long_mode: CLIP
             text_font: cyrillic_font_40
 
         - button:
