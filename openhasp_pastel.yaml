@@ -236,7 +236,6 @@ spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
-    # clock_speed убран - это невалидный параметр для spi
 
 # I2C для тачскрина (GT911)
 i2c:
@@ -298,11 +297,8 @@ lvgl:
     - my_touchscreen
   rotation: 180
   
-  # Настройка буферов для плавной анимации
+  # Настройка буфера для плавной анимации
   buffer_size: 50%
-  draw_buffer:
-    size: 50%
-    type: FULL
   
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
@@ -373,10 +369,6 @@ lvgl:
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
-      init_animation:
-        type: FADE_IN
-        time: 300ms
-        delay: 0ms
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
@@ -918,10 +910,6 @@ lvgl:
 
     # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
-      init_animation:
-        type: FADE_IN
-        time: 300ms
-        delay: 0ms
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
