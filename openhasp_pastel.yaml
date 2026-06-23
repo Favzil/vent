@@ -292,7 +292,7 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # ЧЕРНЫЙ ФОН (вместо выключения подсветки)
+        # Полностью черный фон
         - obj:
             id: black_background
             x: 0
@@ -303,7 +303,7 @@ lvgl:
             bg_opa: 100%
             border_width: 0
         
-        # Маленькая подсказка в углу
+        # Маленькая подсказка (почти невидимая)
         - label:
             id: screensaver_hint
             x: 0
@@ -311,12 +311,12 @@ lvgl:
             width: 480
             height: 30
             text: "Нажмите для выхода"
-            text_color: 0x333333
+            text_color: 0x222222
             text_align: CENTER
             text_font: cyrillic_font_12
-            opa: 50%
+            opa: 30%
         
-        # НЕВИДИМАЯ КНОПКА ДЛЯ ПРОБУЖДЕНИЯ (ВО ВСЮ СТРАНИЦУ)
+        # НЕВИДИМАЯ КНОПКА НА ВСЮ СТРАНИЦУ
         - button:
             id: wakeup_button
             x: 0
