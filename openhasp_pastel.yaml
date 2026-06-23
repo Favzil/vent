@@ -77,8 +77,8 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              // Используем прямое LVGL API вместо lvgl.page.show
-              lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+              // Увеличиваем время анимации для плавности
+              lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
             }
           }
   
@@ -129,7 +129,8 @@ interval:
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
-                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                // Увеличиваем время анимации для плавности
+                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
               } else {
                 ESP_LOGE("mode", "main_page is null!");
@@ -237,6 +238,7 @@ spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
+    clock_speed: 80MHz
 
 # I2C для тачскрина (GT911)
 i2c:
@@ -252,10 +254,9 @@ display:
     spi_id: lcd_spi
     cs_pin: GPIO39
     invert_colors: False
+    data_rate: 80MHz
 
-# ============================================
 # СЕНСОР ЭКРАНА (GT911)
-# ============================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
@@ -278,10 +279,10 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
-                  // Используем прямое LVGL API
                   lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                   if (main_page != nullptr) {
-                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                    // Увеличиваем время анимации для плавности
+                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                   }
             else:
               - lambda: |-
@@ -300,6 +301,18 @@ lvgl:
   touchscreens:
     - my_touchscreen
   rotation: 180
+  
+  # ВАЖНО: Настройка буферов для плавной анимации
+  buffer_size: 50%
+  draw_buffer:
+    size: 50%
+    type: FULL
+  
+  disp_buf_1:
+    size: 50%
+  disp_buf_2:
+    size: 50%
+  
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
@@ -364,11 +377,17 @@ lvgl:
                           id(wakeup_block) = 5;
                           lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                           if (main_page != nullptr) {
-                            lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+                            // Увеличиваем время анимации для плавности
+                            lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                           }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
+      # Добавляем настройки для плавного появления
+      init_animation:
+        type: FADE_IN
+        time: 300ms
+        delay: 0ms
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
@@ -910,6 +929,11 @@ lvgl:
 
     # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
+      # Добавляем настройки для плавного появления
+      init_animation:
+        type: FADE_IN
+        time: 300ms
+        delay: 0ms
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
