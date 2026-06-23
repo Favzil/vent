@@ -77,7 +77,6 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              // Увеличиваем время анимации для плавности
               lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
             }
           }
@@ -129,7 +128,6 @@ interval:
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
-                // Увеличиваем время анимации для плавности
                 lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
               } else {
@@ -238,7 +236,7 @@ spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
-    clock_speed: 80MHz
+    # clock_speed убран - это невалидный параметр для spi
 
 # I2C для тачскрина (GT911)
 i2c:
@@ -254,7 +252,6 @@ display:
     spi_id: lcd_spi
     cs_pin: GPIO39
     invert_colors: False
-    data_rate: 80MHz
 
 # СЕНСОР ЭКРАНА (GT911)
 touchscreen:
@@ -281,7 +278,6 @@ touchscreen:
                   id(wakeup_block) = 5;
                   lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                   if (main_page != nullptr) {
-                    // Увеличиваем время анимации для плавности
                     lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                   }
             else:
@@ -302,16 +298,11 @@ lvgl:
     - my_touchscreen
   rotation: 180
   
-  # ВАЖНО: Настройка буферов для плавной анимации
+  # Настройка буферов для плавной анимации
   buffer_size: 50%
   draw_buffer:
     size: 50%
     type: FULL
-  
-  disp_buf_1:
-    size: 50%
-  disp_buf_2:
-    size: 50%
   
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
@@ -377,13 +368,11 @@ lvgl:
                           id(wakeup_block) = 5;
                           lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                           if (main_page != nullptr) {
-                            // Увеличиваем время анимации для плавности
                             lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
                           }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
-      # Добавляем настройки для плавного появления
       init_animation:
         type: FADE_IN
         time: 300ms
@@ -929,7 +918,6 @@ lvgl:
 
     # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
-      # Добавляем настройки для плавного появления
       init_animation:
         type: FADE_IN
         time: 300ms
