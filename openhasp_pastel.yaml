@@ -906,7 +906,7 @@ lvgl:
             shadow_opa: 0%
             widgets:
               - label:
-                  id: stop
+                  id: stoptext
                   x: 0
                   y: 0
                   width: 119
