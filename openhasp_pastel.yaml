@@ -852,9 +852,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    lv_scr_load(lv_obj_get_parent(id(domoi)));
-                    lv_refr_now(nullptr);
+                - lvgl.page.show:
+                    id: main_page
             widgets:
               - label:
                   id: dom
@@ -879,9 +878,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    lv_scr_load(lv_obj_get_parent(id(modes)));
-                    lv_refr_now(nullptr);
+                - lvgl.page.show:
+                    id: modes_page
             widgets:
               - label:
                   id: rezhim
@@ -1158,9 +1156,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    lv_scr_load(lv_obj_get_parent(id(domoi_modes)));
-                    lv_refr_now(nullptr);
+                - lvgl.page.show:
+                    id: main_page
             widgets:
               - label:
                   id: dom_modes
@@ -1185,9 +1182,8 @@ lvgl:
             opa: 100%
             on_click:
               then:
-                - lambda: |-
-                    lv_scr_load(lv_obj_get_parent(id(modes_modes)));
-                    lv_refr_now(nullptr);
+                - lvgl.page.show:
+                    id: modes_page
             widgets:
               - label:
                   id: rezhim_modes
