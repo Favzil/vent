@@ -71,8 +71,6 @@ interval:
                 }
             - lvgl.page.show:
                 id: screensaver_page
-            # НЕ ВЫКЛЮЧАЕМ ПОДСВЕТКУ!
-            # - light.turn_off: display_backlight
   
   - interval: 100ms
     then:
@@ -1018,7 +1016,8 @@ lvgl:
             height: 50
             bg_color: 0x374151
             bg_opa: 100%
-            border_width: 1            border_color: 0x6B7280
+            border_width: 1
+            border_color: 0x6B7280
             radius: 8
             on_press:
               then:
