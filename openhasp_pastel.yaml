@@ -389,21 +389,7 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-
-        - spinner:
-            id: widget_1781427523533_f22zs1tti
-            x: 163
-            y: 285
-            width: 155
-            height: 115
-            spin_time: 1000ms
-            arc_length: 60deg
-            arc_width: 15
-            arc_color: 0x44A37E
-            indicator:
-              arc_color: 0x44A37E
-              arc_opa: 100%
-              arc_width: 8
+       
         - obj:
             id: Upscreen
             x: 1
@@ -893,30 +879,6 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
           
-        - button:
-            id: stop
-            x: 203
-            y: 310
-            width: 75
-            height: 65
-            bg_color: 0x12D90D
-            bg_opa: 0%
-            border_opa: 0%
-            outline_opa: 0%
-            shadow_opa: 0%
-            widgets:
-              - label:
-                  id: stoptext
-                  x: 20
-                  y: 30
-                  width: 200
-                  height: 45
-                  text: "СТОП"
-                  text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
-                  text_font: cyrillic_font_40
-
                   
     # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
@@ -975,7 +937,7 @@ lvgl:
         - button:
             id: mode_standard
             x: 40
-            y: 100
+            y: 60
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1010,7 +972,7 @@ lvgl:
         - button:
             id: mode_econom
             x: 40
-            y: 160
+            y: 120
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1045,7 +1007,7 @@ lvgl:
         - button:
             id: mode_guest
             x: 40
-            y: 220
+            y: 180
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1080,7 +1042,7 @@ lvgl:
         - button:
             id: mode_conditioner
             x: 40
-            y: 280
+            y: 240
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1115,7 +1077,7 @@ lvgl:
         - button:
             id: mode_efficiency
             x: 40
-            y: 340
+            y: 300
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1146,6 +1108,43 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
+
+        - button:
+            id: mode_stop
+            x: 40
+            y: 360
+            width: 398
+            height: 50
+            bg_color: 0x374151
+            bg_opa: 100%
+            border_width: 1
+            border_color: 0x6B7280
+            radius: 8
+            on_press:
+              then:
+                - lambda: |-
+                    id(press_timer) = 100;
+                    id(active_mode_id) = 5;
+                    id(mode_activated) = false;
+            on_release:
+              then:
+                - lambda: |-
+                    if (id(press_timer) < 3000) {
+                      id(press_timer) = 0;
+                      id(active_mode_id) = 0;
+                    }
+            widgets:
+              - label:
+                  x: 0
+                  y: 0
+                  width: 398
+                  height: 50
+                  text: "СТОП"
+                  text_color: 0xA21C15
+                  text_align: CENTER
+                  text_font: cyrillic_font_24                  
+
+                  
 
         # Нижняя панель с кнопками
         - button:
