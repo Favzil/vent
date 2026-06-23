@@ -44,11 +44,11 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  # Добавляем флаг для блокировки повторной активации заставки
-  - id: wakeup_in_progress
-    type: bool
+  # Флаг для блокировки заставки после пробуждения
+  - id: wakeup_block
+    type: int
     restore_value: no
-    initial_value: 'false'
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -62,21 +62,31 @@ uart:
 
 # Интервалы
 interval:
-  - interval: 500ms
+  # Основной таймер заставки - каждую секунду
+  - interval: 1s
     then:
-      - if:
-          condition:
-            lambda: 'return !id(screensaver_active) && !id(wakeup_in_progress);'
-          then:
-            - lambda: |-
-                id(inactivity_timer) += 500;
-                if (id(inactivity_timer) >= 30000) {
-                  ESP_LOGI("screensaver", "Activating screensaver");
-                  id(screensaver_active) = true;
-                  id(inactivity_timer) = 0;
-                }
-            - lvgl.page.show:
+      - lambda: |-
+          // Если заблокировано пробуждение - уменьшаем счетчик блокировки
+          if (id(wakeup_block) > 0) {
+            id(wakeup_block)--;
+            ESP_LOGD("screensaver", "Wakeup block: %d", id(wakeup_block));
+          }
+          
+          // Если заставка не активна и не заблокирована
+          if (!id(screensaver_active) && id(wakeup_block) == 0) {
+            id(inactivity_timer)++;
+            ESP_LOGD("screensaver", "Inactivity: %d seconds", id(inactivity_timer));
+            
+            // Через 30 секунд - активируем заставку
+            if (id(inactivity_timer) >= 30) {
+              ESP_LOGI("screensaver", "Activating screensaver!");
+              id(screensaver_active) = true;
+              id(inactivity_timer) = 0;
+              // Переключаем на страницу заставки
+              lvgl.page.show:
                 id: screensaver_page
+            }
+          }
   
   - interval: 100ms
     then:
@@ -271,19 +281,15 @@ touchscreen:
             then:
               - lambda: |-
                   ESP_LOGI("touch", "Waking up from screensaver");
-                  // Устанавливаем флаг, что пробуждение в процессе
-                  id(wakeup_in_progress) = true;
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
+                  // Блокируем заставку на 5 секунд после пробуждения
+                  id(wakeup_block) = 5;
               - lvgl.page.show:
                   id: main_page
-              - delay: 1000ms
-              - lambda: |-
-                  // Снимаем флаг после задержки
-                  id(wakeup_in_progress) = false;
-                  ESP_LOGI("touch", "Wakeup complete");
             else:
               - lambda: |-
+                  ESP_LOGI("touch", "Resetting inactivity timer");
                   id(inactivity_timer) = 0;
     on_release:
       then:
@@ -346,19 +352,15 @@ lvgl:
                     ESP_LOGI("wakeup", "Wakeup button clicked!");
                 - if:
                     condition:
-                      lambda: 'return id(screensaver_active) && !id(wakeup_in_progress);'
+                      lambda: 'return id(screensaver_active);'
                     then:
                       - lambda: |-
                           ESP_LOGI("wakeup", "Waking up from screensaver via button");
-                          id(wakeup_in_progress) = true;
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
+                          id(wakeup_block) = 5;
                       - lvgl.page.show:
                           id: main_page
-                      - delay: 1000ms
-                      - lambda: |-
-                          id(wakeup_in_progress) = false;
-                          ESP_LOGI("wakeup", "Wakeup complete");
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
