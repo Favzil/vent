@@ -458,7 +458,7 @@ lvgl:
             widgets:
               - label:
                   id: znakgradussulicy
-                  x: 60
+                  x: 50
                   y: 10
                   width: 20
                   height: 26
@@ -469,7 +469,7 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: gradussulicy
-                  x: 35
+                  x: 25
                   y: 37
                   width: 45
                   height: 25
@@ -796,7 +796,7 @@ lvgl:
                   border_width: 0
               - label:
                   id: widget_1781261697547_036jpjyoc
-                  x: 4
+                  x: 0
                   y: 32
                   width: 92
                   height: 24
@@ -907,8 +907,8 @@ lvgl:
             widgets:
               - label:
                   id: stoptext
-                  x: 0
-                  y: 0
+                  x: 20
+                  y: 30
                   width: 200
                   height: 45
                   text: "СТОП"
