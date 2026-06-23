@@ -1124,7 +1124,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 5;
+                    id(active_mode_id) = 6;
                     id(mode_activated) = false;
             on_release:
               then:
