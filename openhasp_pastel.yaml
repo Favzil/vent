@@ -77,7 +77,6 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              // Принудительно скрываем все страницы и показываем заставку
               lv_obj_t *scr = lv_obj_get_parent(id(screensaver_image));
               if (scr != nullptr) {
                 lv_scr_load(scr);
@@ -133,7 +132,6 @@ interval:
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
-                // Принудительная загрузка страницы с немедленным обновлением
                 lv_scr_load(main_page);
                 lv_refr_now(nullptr);
                 ESP_LOGI("mode", "Switched to main page");
@@ -305,10 +303,8 @@ lvgl:
     - my_touchscreen
   rotation: 180
   
-  # Оптимизация для мгновенного переключения
-  buffer_size: 100%  # Полный буфер для максимальной скорости
-  disp_buf_1:
-    size: 100%
+  # Максимальный буфер для скорости
+  buffer_size: 100%
   
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
