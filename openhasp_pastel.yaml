@@ -77,7 +77,7 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
+              lv_scr_load_anim(lv_obj_get_parent(id(screensaver_image)), LV_SCR_LOAD_ANIM_FADE_IN, 1000, 0, false);
             }
           }
   
@@ -128,7 +128,7 @@ interval:
               ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
-                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
+                lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 1000, 0, false);
                 ESP_LOGI("mode", "Switched to main page");
               } else {
                 ESP_LOGE("mode", "main_page is null!");
@@ -277,7 +277,7 @@ touchscreen:
                   id(wakeup_block) = 5;
                   lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                   if (main_page != nullptr) {
-                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
+                    lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 1000, 0, false);
                   }
             else:
               - lambda: |-
@@ -364,7 +364,7 @@ lvgl:
                           id(wakeup_block) = 5;
                           lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                           if (main_page != nullptr) {
-                            lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 500, 0, false);
+                            lv_scr_load_anim(main_page, LV_SCR_LOAD_ANIM_FADE_IN, 1000, 0, false);
                           }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
