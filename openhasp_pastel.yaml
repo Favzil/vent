@@ -410,7 +410,7 @@ lvgl:
             y: 0
             width: 478
             height: 35
-            bg_color: 0x44A37E
+            bg_color: 0x3E705B
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -444,7 +444,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -498,7 +498,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0x1A79FF
+                  line_color: 0x805705
                   line_rounded: true
         - obj:
             id: t_outdoor
@@ -506,7 +506,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -560,7 +560,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0x1A79FF
+                  line_color: 0x805705
                   line_rounded: true
         - obj:
             id: t_fromhome
@@ -568,7 +568,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -622,7 +622,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0x1A79FF
+                  line_color: 0x805705
                   line_rounded: true
         - obj:
             id: t_tohome
@@ -630,7 +630,7 @@ lvgl:
             y: 68
             width: 85
             height: 80
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -684,7 +684,7 @@ lvgl:
                   points:
                     - 0, 0
                     - 129, 0
-                  line_color: 0x1A79FF
+                  line_color: 0x805705
                   line_rounded: true
         - obj:
             id: Pritok_filter
@@ -692,7 +692,7 @@ lvgl:
             y: 300
             width: 100
             height: 100
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -716,12 +716,12 @@ lvgl:
                   adjustable: true
                   start_angle: 135
                   end_angle: 45
-                  arc_color: 0xE053D6
+                  arc_color: 0x3E705B
                   arc_width: 10
                   arc_opa: 20%
                   arc_rounded: true
                   indicator:
-                    arc_color: 0xE053D6
+                    arc_color: 0x3E705B
                     arc_width: 10
                     arc_opa: 100%
                     arc_rounded: true
@@ -757,7 +757,7 @@ lvgl:
             y: 300
             width: 100
             height: 100
-            bg_color: 0x2D2058
+            bg_color: 0x0F0F33
             bg_opa: 95%
             border_width: 1
             border_color: 0x162038
@@ -781,12 +781,12 @@ lvgl:
                   adjustable: false
                   start_angle: 135
                   end_angle: 45
-                  arc_color: 0xE053D6
+                  arc_color: 0x3E705B
                   arc_width: 10
                   arc_opa: 20%
                   arc_rounded: true
                   indicator:
-                    arc_color: 0xE053D6
+                    arc_color: 0x3E705B
                     arc_width: 10
                     arc_opa: 100%
                     arc_rounded: true
@@ -847,7 +847,7 @@ lvgl:
             y: 415
             width: 160
             height: 65
-            bg_color: 0x44A37E
+            bg_color: 0x3E705B
             bg_opa: 100%    
             opa: 100%
             on_click:
@@ -873,7 +873,7 @@ lvgl:
             y: 415
             width: 160
             height: 65
-            bg_color: 0x44A37E
+            bg_color: 0x3E705B
             bg_opa: 100%    
             opa: 100%
             on_click:
@@ -928,7 +928,7 @@ lvgl:
             y: 0
             width: 478
             height: 35
-            bg_color: 0xF713B7
+            bg_color: 0x3E705B
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -1151,7 +1151,7 @@ lvgl:
             y: 415
             width: 160
             height: 65
-            bg_color: 0xF713B7
+            bg_color: 0x3E705B
             bg_opa: 100%    
             opa: 100%
             on_click:
@@ -1177,7 +1177,7 @@ lvgl:
             y: 415
             width: 160
             height: 65
-            bg_color: 0xF713B7
+            bg_color: 0x3E705B
             bg_opa: 100%    
             opa: 100%
             on_click:
@@ -1197,24 +1197,3 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
           
-        - button:
-            id: stop_modes
-            x: 203
-            y: 310
-            width: 75
-            height: 65
-            bg_color: 0xEFF0F0
-            bg_opa: 0%
-            border_opa: 0%
-            outline_opa: 0%
-            shadow_opa: 0%
-            text_color: 0xFFFFFF
-            text_opa: 100%
-            text_font: cyrillic_font_40
-            opa: 94%
-            widgets:
-              - label:
-                  text: "СТОП"
-                  text_align: CENTER
-                  text_color: 0xFFFFFF
-                  text_font: cyrillic_font_40
