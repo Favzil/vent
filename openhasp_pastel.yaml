@@ -44,6 +44,11 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # Добавляем флаг для блокировки повторной активации заставки
+  - id: wakeup_in_progress
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -61,13 +66,14 @@ interval:
     then:
       - if:
           condition:
-            lambda: 'return !id(screensaver_active);'
+            lambda: 'return !id(screensaver_active) && !id(wakeup_in_progress);'
           then:
             - lambda: |-
                 id(inactivity_timer) += 500;
                 if (id(inactivity_timer) >= 30000) {
                   ESP_LOGI("screensaver", "Activating screensaver");
                   id(screensaver_active) = true;
+                  id(inactivity_timer) = 0;
                 }
             - lvgl.page.show:
                 id: screensaver_page
@@ -265,10 +271,17 @@ touchscreen:
             then:
               - lambda: |-
                   ESP_LOGI("touch", "Waking up from screensaver");
+                  // Устанавливаем флаг, что пробуждение в процессе
+                  id(wakeup_in_progress) = true;
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
               - lvgl.page.show:
                   id: main_page
+              - delay: 1000ms
+              - lambda: |-
+                  // Снимаем флаг после задержки
+                  id(wakeup_in_progress) = false;
+                  ESP_LOGI("touch", "Wakeup complete");
             else:
               - lambda: |-
                   id(inactivity_timer) = 0;
@@ -303,7 +316,7 @@ lvgl:
             bg_opa: 100%
             border_width: 0
         
-        # Маленькая подсказка (почти невидимая)
+        # Маленькая подсказка
         - label:
             id: screensaver_hint
             x: 0
@@ -311,10 +324,10 @@ lvgl:
             width: 480
             height: 30
             text: "Нажмите для выхода"
-            text_color: 0x222222
+            text_color: 0x333333
             text_align: CENTER
             text_font: cyrillic_font_12
-            opa: 30%
+            opa: 50%
         
         # НЕВИДИМАЯ КНОПКА НА ВСЮ СТРАНИЦУ
         - button:
@@ -333,14 +346,19 @@ lvgl:
                     ESP_LOGI("wakeup", "Wakeup button clicked!");
                 - if:
                     condition:
-                      lambda: 'return id(screensaver_active);'
+                      lambda: 'return id(screensaver_active) && !id(wakeup_in_progress);'
                     then:
                       - lambda: |-
                           ESP_LOGI("wakeup", "Waking up from screensaver via button");
+                          id(wakeup_in_progress) = true;
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
                       - lvgl.page.show:
                           id: main_page
+                      - delay: 1000ms
+                      - lambda: |-
+                          id(wakeup_in_progress) = false;
+                          ESP_LOGI("wakeup", "Wakeup complete");
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
