@@ -641,7 +641,7 @@ lvgl:
             widgets:
               - label:
                   id: widget_1781262308709_71wbrk8p9
-                 x: 50
+                  x: 50
                   y: 10
                   width: 40
                   height: 26
