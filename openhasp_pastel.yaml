@@ -61,6 +61,21 @@ globals:
     restore_value: no
     initial_value: '1.0'
 
+# ★ ДИАГНОСТИКА ПРИ ЗАГРУЗКЕ ★
+on_boot:
+  then:
+    - lambda: |-
+        ESP_LOGI("icons", "=== ICON LOAD STATUS ===");
+        ESP_LOGI("icons", "Home icon loaded: %s", id(icon_home).is_loaded() ? "YES" : "NO");
+        ESP_LOGI("icons", "Modes icon loaded: %s", id(icon_modes).is_loaded() ? "YES" : "NO");
+        ESP_LOGI("icons", "Background icon loaded: %s", id(background_image).is_loaded() ? "YES" : "NO");
+        if (!id(icon_home).is_loaded()) {
+          ESP_LOGE("icons", "ERROR: Home icon not loaded! Check path and format.");
+        }
+        if (!id(icon_modes).is_loaded()) {
+          ESP_LOGE("icons", "ERROR: Modes icon not loaded! Check path and format.");
+        }
+
 # UART для связи с Arduino
 uart:
   id: uart_arduino
@@ -245,17 +260,16 @@ image:
     type: RGB565
     resize: 480x480
   
-  # ★ ИКОНКА ДЛЯ КНОПКИ "ДОМ" ★
+  # ★ ИКОНКИ БЕЗ RESIZE (ПРЕДЛОЖЕНИЕ 7) ★
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
-    resize: 32x32
-  
-  # ★ ИКОНКА ДЛЯ КНОПКИ "РЕЖИМЫ" ★
+    # resize: 32x32  # Убрали resize
+    
   - file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
-    resize: 32x32
+    # resize: 32x32  # Убрали resize
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
@@ -936,7 +950,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
-        # ★ КНОПКА "ДОМ" С ИКОНКОЙ ★
+        # ★ КНОПКА "ДОМ" - РАБОЧИЙ ВАРИАНТ С ПРОВЕРКОЙ (ПРЕДЛОЖЕНИЕ 8) ★
         - button:
             id: domoi
             x: 0
@@ -969,7 +983,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_24
                  
-        # ★ КНОПКА "РЕЖИМЫ" С ИКОНКОЙ ★
+        # ★ КНОПКА "РЕЖИМЫ" - РАБОЧИЙ ВАРИАНТ С ПРОВЕРКОЙ (ПРЕДЛОЖЕНИЕ 8) ★
         - button:
             id: modes
             x: 159
@@ -1268,7 +1282,7 @@ lvgl:
                   text_font: cyrillic_font_24
 
         # Нижняя панель с кнопками
-        # ★ КНОПКА "ДОМ" С ИКОНКОЙ (на странице режимов) ★
+        # ★ КНОПКА "ДОМ" - РАБОЧИЙ ВАРИАНТ (на странице режимов) ★
         - button:
             id: domoi_modes
             x: 0
@@ -1301,7 +1315,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_24
                  
-        # ★ КНОПКА "РЕЖИМЫ" С ИКОНКОЙ (на странице режимов) ★
+        # ★ КНОПКА "РЕЖИМЫ" - РАБОЧИЙ ВАРИАНТ (на странице режимов) ★
         - button:
             id: modes_modes
             x: 159
