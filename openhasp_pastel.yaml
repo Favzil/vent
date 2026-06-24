@@ -210,27 +210,33 @@ interval:
           if (id(screensaver_active)) {
             // Плавно уменьшаем яркость до целевого значения
             float target = id(screensaver_brightness);
-            float step = 0.02; // Шаг изменения яркости
+            float step = 0.02;
             
             if (id(current_brightness) > target) {
               id(current_brightness) -= step;
               if (id(current_brightness) < target) {
                 id(current_brightness) = target;
               }
-              id(display_backlight).set_level(id(current_brightness));
+              // Используем make_call() для установки яркости
+              auto call = id(display_backlight).make_call();
+              call.set_brightness(id(current_brightness));
+              call.perform();
               ESP_LOGD("brightness", "Fading: %.2f", id(current_brightness));
             }
           } else {
             // Плавно увеличиваем яркость до нормальной
             float target = id(normal_brightness);
-            float step = 0.03; // Шаг изменения яркости (немного быстрее при пробуждении)
+            float step = 0.03;
             
             if (id(current_brightness) < target) {
               id(current_brightness) += step;
               if (id(current_brightness) > target) {
                 id(current_brightness) = target;
               }
-              id(display_backlight).set_level(id(current_brightness));
+              // Используем make_call() для установки яркости
+              auto call = id(display_backlight).make_call();
+              call.set_brightness(id(current_brightness));
+              call.perform();
               ESP_LOGD("brightness", "Waking: %.2f", id(current_brightness));
             }
           }
