@@ -958,7 +958,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_home
-                  align: LEFT
               - label:
                   id: dom
                   x: 55
@@ -992,7 +991,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_modes
-                  align: LEFT
               - label:
                   id: rezhim
                   x: 55
@@ -1292,7 +1290,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_home
-                  align: LEFT
               - label:
                   id: dom_modes
                   x: 55
@@ -1326,7 +1323,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_modes
-                  align: LEFT
               - label:
                   id: rezhim_modes
                   x: 55
