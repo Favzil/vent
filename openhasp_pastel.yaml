@@ -48,6 +48,18 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: normal_brightness
+    type: float
+    restore_value: no
+    initial_value: '1.0'
+  - id: screensaver_brightness
+    type: float
+    restore_value: no
+    initial_value: '0.05'
+  - id: current_brightness
+    type: float
+    restore_value: no
+    initial_value: '1.0'
 
 # UART для связи с Arduino
 uart:
@@ -191,6 +203,38 @@ interval:
             }
           }
 
+  # Интервал для плавного затухания подсветки
+  - interval: 50ms
+    then:
+      - lambda: |-
+          if (id(screensaver_active)) {
+            // Плавно уменьшаем яркость до целевого значения
+            float target = id(screensaver_brightness);
+            float step = 0.02; // Шаг изменения яркости
+            
+            if (id(current_brightness) > target) {
+              id(current_brightness) -= step;
+              if (id(current_brightness) < target) {
+                id(current_brightness) = target;
+              }
+              id(display_backlight).set_level(id(current_brightness));
+              ESP_LOGD("brightness", "Fading: %.2f", id(current_brightness));
+            }
+          } else {
+            // Плавно увеличиваем яркость до нормальной
+            float target = id(normal_brightness);
+            float step = 0.03; // Шаг изменения яркости (немного быстрее при пробуждении)
+            
+            if (id(current_brightness) < target) {
+              id(current_brightness) += step;
+              if (id(current_brightness) > target) {
+                id(current_brightness) = target;
+              }
+              id(display_backlight).set_level(id(current_brightness));
+              ESP_LOGD("brightness", "Waking: %.2f", id(current_brightness));
+            }
+          }
+
 # ИЗОБРАЖЕНИЕ ДЛЯ ФОНА
 image:
   - file: "img/olako.png"
@@ -293,6 +337,7 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
+                  // Яркость будет плавно восстановлена через интервал
                   lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                   if (main_page != nullptr) {
                     lv_scr_load(main_page);
@@ -423,6 +468,7 @@ lvgl:
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
                           id(wakeup_block) = 5;
+                          // Яркость будет плавно восстановлена через интервал
                           lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                           if (main_page != nullptr) {
                             lv_scr_load(main_page);
