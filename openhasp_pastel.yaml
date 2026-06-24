@@ -244,6 +244,7 @@ image:
     type: RGB565
     resize: 480x480
 
+# ШРИФТЫ
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
@@ -253,12 +254,18 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°🏠⚙️🔄💰👤❄️⚡⏹️'
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
 
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
     size: 12
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+
+  # ★ ОТДЕЛЬНЫЙ ШРИФТ ДЛЯ ИКОНОК ★
+  - file: "fonts/Roboto-Regular.ttf"
+    id: icon_font
+    size: 28
+    glyphs: '🏠⚙🔄💰👤❄⚡⏹'
 
 # Реле
 switch:
@@ -947,7 +954,7 @@ lvgl:
                   text: "🏠"
                   text_color: 0x000000
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: dom_text
                   x: 45
@@ -980,10 +987,10 @@ lvgl:
                   y: 15
                   width: 35
                   height: 35
-                  text: "⚙️"
+                  text: "⚙"
                   text_color: 0x000000
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: modes_text
                   x: 45
@@ -1084,7 +1091,7 @@ lvgl:
                   text: "🔄"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_standard
                   x: 55
@@ -1130,7 +1137,7 @@ lvgl:
                   text: "💰"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_econom
                   x: 55
@@ -1176,7 +1183,7 @@ lvgl:
                   text: "👤"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_guest
                   x: 55
@@ -1219,10 +1226,10 @@ lvgl:
                   y: 10
                   width: 30
                   height: 30
-                  text: "❄️"
+                  text: "❄"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_conditioner
                   x: 55
@@ -1268,7 +1275,7 @@ lvgl:
                   text: "⚡"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_efficiency
                   x: 55
@@ -1311,10 +1318,10 @@ lvgl:
                   y: 10
                   width: 30
                   height: 30
-                  text: "⏹️"
+                  text: "⏹"
                   text_color: 0xFFFFFF
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: text_stop
                   x: 55
@@ -1351,7 +1358,7 @@ lvgl:
                   text: "🏠"
                   text_color: 0x000000
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: dom_text_modes
                   x: 45
@@ -1384,10 +1391,10 @@ lvgl:
                   y: 15
                   width: 35
                   height: 35
-                  text: "⚙️"
+                  text: "⚙"
                   text_color: 0x000000
                   text_align: CENTER
-                  text_font: cyrillic_font_24
+                  text_font: icon_font
               - label:
                   id: modes_text_modes
                   x: 45
