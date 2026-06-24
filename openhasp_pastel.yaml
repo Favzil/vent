@@ -184,6 +184,8 @@ interval:
                   lv_label_set_text(id(time_label), time_part.c_str());
                   lv_label_set_text(id(Date_modes), date_part.c_str());
                   lv_label_set_text(id(time_label_modes), time_part.c_str());
+                  lv_label_set_text(id(screensaver_date), date_part.c_str());
+                  lv_label_set_text(id(screensaver_time), time_part.c_str());
                 }
               }
             }
@@ -342,8 +344,50 @@ lvgl:
             height: 480
             src: background_image
             align: CENTER
-            opa: 0%
+            opa: 100%
         
+        # Полупрозрачный фон для времени и даты
+        - obj:
+            id: screensaver_info_bg
+            x: 40
+            y: 180
+            width: 400
+            height: 120
+            bg_color: 0x000000
+            bg_opa: 50%
+            radius: 16
+            border_width: 0
+            shadow_width: 0
+        
+        # Дата на заставке
+        - label:
+            id: screensaver_date
+            x: 40
+            y: 185
+            width: 400
+            height: 40
+            text: "Сб 20-июнь-2026"
+            text_color: 0xFFFFFF
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_24
+            opa: 100%
+        
+        # Время на заставке (крупное)
+        - label:
+            id: screensaver_time
+            x: 40
+            y: 230
+            width: 400
+            height: 60
+            text: "14:32"
+            text_color: 0xFFFFFF
+            text_align: CENTER
+            long_mode: CLIP
+            text_font: cyrillic_font_40
+            opa: 100%
+        
+        # Подсказка внизу
         - label:
             id: screensaver_hint
             x: 0
