@@ -517,15 +517,15 @@ lvgl:
             widgets:
               - label:
                   id: widget_1781262306198_2zgbqa3dx
-                  x: 35
-                  y: 37
-                  width: 20
+                  x: 50
+                  y: 10
+                  width: 40
                   height: 26
                   text: "°C"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262306198_b9dnjbboi
                   x: 25
@@ -579,15 +579,15 @@ lvgl:
             widgets:
               - label:
                   id: widget_1781262307812_ou8uo1mfn
-                  x: 60
-                  y: 22
-                  width: 20
+                  x: 50
+                  y: 10
+                  width: 40
                   height: 26
                   text: "°C"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262307812_3m3qdg397
                   x: 35
@@ -603,7 +603,7 @@ lvgl:
                   id: widget_1781262307812_n406bgqc4
                   x: 10
                   y: 22
-                  width: 45
+                  width: 60
                   height: 15
                   text: "Из дома"
                   text_color: 0xFFFFFF
@@ -641,15 +641,15 @@ lvgl:
             widgets:
               - label:
                   id: widget_1781262308709_71wbrk8p9
-                  x: 60
-                  y: 15
-                  width: 20
+                 x: 50
+                  y: 10
+                  width: 40
                   height: 26
                   text: "°C"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: widget_1781262308709_dnoiw7el6
                   x: 35
@@ -663,9 +663,9 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: textvdom
-                  x: 2
+                  x: 10
                   y: 22
-                  width: 45
+                  width: 60
                   height: 15
                   text: "В дом"
                   text_color: 0xFFFFFF
@@ -948,7 +948,7 @@ lvgl:
         - button:
             id: mode_standard
             x: 40
-            y: 60
+            y: 55
             width: 398
             height: 50
             bg_color: 0x374151
@@ -983,7 +983,7 @@ lvgl:
         - button:
             id: mode_econom
             x: 40
-            y: 120
+            y: 115
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1018,7 +1018,7 @@ lvgl:
         - button:
             id: mode_guest
             x: 40
-            y: 180
+            y: 175
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1053,7 +1053,7 @@ lvgl:
         - button:
             id: mode_conditioner
             x: 40
-            y: 240
+            y: 235
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1088,7 +1088,7 @@ lvgl:
         - button:
             id: mode_efficiency
             x: 40
-            y: 300
+            y: 295
             width: 398
             height: 50
             bg_color: 0x374151
@@ -1123,7 +1123,7 @@ lvgl:
         - button:
             id: mode_stop
             x: 40
-            y: 360
+            y: 355
             width: 398
             height: 50
             bg_color: 0x374151
