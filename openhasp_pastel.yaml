@@ -1011,9 +1011,10 @@ lvgl:
                   width: 398
                   height: 50
                   text: "ЭКОНОМИЧНЫЙ"
-                  text_color: 0xFFFFFF
-                  text_align: CENTER
-                  text_font: cyrillic_font_24        - button:
+                  text_color: 0xFFFFFF                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        - button:
             id: mode_guest
             x: 40
             y: 180
