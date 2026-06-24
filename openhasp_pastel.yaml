@@ -208,7 +208,6 @@ interval:
     then:
       - lambda: |-
           if (id(screensaver_active)) {
-            // Плавно уменьшаем яркость до целевого значения
             float target = id(screensaver_brightness);
             float step = 0.01;
             
@@ -217,14 +216,12 @@ interval:
               if (id(current_brightness) < target) {
                 id(current_brightness) = target;
               }
-              // Используем make_call() для установки яркости
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
               ESP_LOGD("brightness", "Fading: %.2f", id(current_brightness));
             }
           } else {
-            // Плавно увеличиваем яркость до нормальной
             float target = id(normal_brightness);
             float step = 0.03;
             
@@ -233,7 +230,6 @@ interval:
               if (id(current_brightness) > target) {
                 id(current_brightness) = target;
               }
-              // Используем make_call() для установки яркости
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
@@ -257,7 +253,7 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°🏠⚙️🔄💰👤❄️⚡⏹️'
 
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
@@ -343,7 +339,6 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
-                  // Яркость будет плавно восстановлена через интервал
                   lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                   if (main_page != nullptr) {
                     lv_scr_load(main_page);
@@ -367,7 +362,6 @@ lvgl:
     - my_touchscreen
   rotation: 180
   
-  # Максимальный буфер для скорости
   buffer_size: 100%
   
   pages:
@@ -397,7 +391,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Полупрозрачный фон для времени и даты
         - obj:
             id: screensaver_info_bg
             x: 40
@@ -410,7 +403,6 @@ lvgl:
             border_width: 0
             shadow_width: 0
         
-        # Дата на заставке
         - label:
             id: screensaver_date
             x: 40
@@ -424,7 +416,6 @@ lvgl:
             text_font: cyrillic_font_24
             opa: 100%
         
-        # Время на заставке (крупное)
         - label:
             id: screensaver_time
             x: 40
@@ -438,7 +429,6 @@ lvgl:
             text_font: cyrillic_font_40
             opa: 100%
         
-        # Подсказка внизу
         - label:
             id: screensaver_hint
             x: 0
@@ -474,7 +464,6 @@ lvgl:
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
                           id(wakeup_block) = 5;
-                          // Яркость будет плавно восстановлена через интервал
                           lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
                           if (main_page != nullptr) {
                             lv_scr_load(main_page);
@@ -934,6 +923,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
+        # ★ КНОПКА "ДОМ" С ИКОНКОЙ ★
         - button:
             id: domoi
             x: 0
@@ -949,17 +939,27 @@ lvgl:
                     id: main_page
             widgets:
               - label:
-                  id: dom
-                  x: 0
-                  y: 0
-                  width: 119
+                  id: dom_icon
+                  x: 5
+                  y: 15
+                  width: 35
+                  height: 35
+                  text: "🏠"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: dom_text
+                  x: 45
+                  y: 20
+                  width: 110
                   height: 26
                   text: "Дом"
                   text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
+                  text_align: LEFT
                   text_font: cyrillic_font_24
                  
+        # ★ КНОПКА "РЕЖИМЫ" С ИКОНКОЙ ★
         - button:
             id: modes
             x: 159
@@ -975,15 +975,24 @@ lvgl:
                     id: modes_page
             widgets:
               - label:
-                  id: rezhim
-                  x: 0
-                  y: 0
-                  width: 119
+                  id: modes_icon
+                  x: 5
+                  y: 15
+                  width: 35
+                  height: 35
+                  text: "⚙️"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: modes_text
+                  x: 45
+                  y: 20
+                  width: 110
                   height: 26
                   text: "Режимы"
                   text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
+                  text_align: LEFT
                   text_font: cyrillic_font_24
           
                   
@@ -1040,7 +1049,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов с долгим нажатием
+        # ★ КНОПКИ РЕЖИМОВ С ИКОНКАМИ ★
         - button:
             id: mode_standard
             x: 40
@@ -1067,13 +1076,24 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "СТАНДАРТНЫЙ"
+                  id: icon_standard
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "🔄"
                   text_color: 0xFFFFFF
                   text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_standard
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
+                  text: "СТАНДАРТНЫЙ"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         - button:
@@ -1102,13 +1122,24 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ЭКОНОМИЧНЫЙ"
+                  id: icon_econom
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "💰"
                   text_color: 0xFFFFFF
                   text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_econom
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
+                  text: "ЭКОНОМИЧНЫЙ"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         - button:
@@ -1137,13 +1168,24 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ГОСТЕВОЙ"
+                  id: icon_guest
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "👤"
                   text_color: 0xFFFFFF
                   text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_guest
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
+                  text: "ГОСТЕВОЙ"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         - button:
@@ -1172,13 +1214,24 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "КОНДИЦИОНЕР"
+                  id: icon_conditioner
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "❄️"
                   text_color: 0xFFFFFF
                   text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_conditioner
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
+                  text: "КОНДИЦИОНЕР"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         - button:
@@ -1207,13 +1260,24 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
-                  text: "ВЫСОКИЙ КПД"
+                  id: icon_efficiency
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "⚡"
                   text_color: 0xFFFFFF
                   text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_efficiency
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
+                  text: "ВЫСОКИЙ КПД"
+                  text_color: 0xFFFFFF
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         - button:
@@ -1242,16 +1306,28 @@ lvgl:
                     }
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 398
-                  height: 50
+                  id: icon_stop
+                  x: 15
+                  y: 10
+                  width: 30
+                  height: 30
+                  text: "⏹️"
+                  text_color: 0xFFFFFF
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: text_stop
+                  x: 55
+                  y: 12
+                  width: 320
+                  height: 26
                   text: "СТОП"
                   text_color: 0xA21C15
-                  text_align: CENTER
+                  text_align: LEFT
                   text_font: cyrillic_font_24
 
         # Нижняя панель с кнопками
+        # ★ КНОПКА "ДОМ" С ИКОНКОЙ НА СТРАНИЦЕ РЕЖИМОВ ★
         - button:
             id: domoi_modes
             x: 0
@@ -1267,17 +1343,27 @@ lvgl:
                     id: main_page
             widgets:
               - label:
-                  id: dom_modes
-                  x: 0
-                  y: 0
-                  width: 119
+                  id: dom_icon_modes
+                  x: 5
+                  y: 15
+                  width: 35
+                  height: 35
+                  text: "🏠"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: dom_text_modes
+                  x: 45
+                  y: 20
+                  width: 110
                   height: 26
                   text: "Дом"
                   text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
+                  text_align: LEFT
                   text_font: cyrillic_font_24
                  
+        # ★ КНОПКА "РЕЖИМЫ" С ИКОНКОЙ НА СТРАНИЦЕ РЕЖИМОВ ★
         - button:
             id: modes_modes
             x: 159
@@ -1293,13 +1379,22 @@ lvgl:
                     id: modes_page
             widgets:
               - label:
-                  id: rezhim_modes
-                  x: 0
-                  y: 0
-                  width: 119
+                  id: modes_icon_modes
+                  x: 5
+                  y: 15
+                  width: 35
+                  height: 35
+                  text: "⚙️"
+                  text_color: 0x000000
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+              - label:
+                  id: modes_text_modes
+                  x: 45
+                  y: 20
+                  width: 110
                   height: 26
                   text: "Режимы"
                   text_color: 0x000000
-                  text_align: CENTER
-                  long_mode: CLIP
+                  text_align: LEFT
                   text_font: cyrillic_font_24
