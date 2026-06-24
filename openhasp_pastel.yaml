@@ -106,37 +106,32 @@ interval:
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
                   lv_label_set_text(id(mode_display), "СТАНДАРТНЫЙ");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0x0F0F33));
                   id(uart_arduino).write_str("MODE:STANDARD\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
                   lv_label_set_text(id(mode_display), "ЭКОНОМИЧНЫЙ");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0x0F0F33));
                   id(uart_arduino).write_str("MODE:ECONOM\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
                   lv_label_set_text(id(mode_display), "ГОСТЕВОЙ");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0x0F0F33));
                   id(uart_arduino).write_str("MODE:GUEST\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
                   lv_label_set_text(id(mode_display), "КОНДИЦИОНЕР");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0x0F0F33));
                   id(uart_arduino).write_str("MODE:CONDITIONER\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
                   lv_label_set_text(id(mode_display), "ВЫСОКИЙ КПД");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0x0F0F33));
                   id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
                   break;
                 case 6:
                   id(selected_mode) = "СТОП";
                   lv_label_set_text(id(mode_display), "СТОП");
-                  lv_label_set_color(id(mode_display), lv_color_hex(0xFF0000));
+                  lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
                   id(uart_arduino).write_str("MODE:STOP\n");
                   break;
               }
