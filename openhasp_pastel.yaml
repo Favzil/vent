@@ -644,7 +644,7 @@ lvgl:
                   height: 15
                   text: "На улицу"
                   text_color: 0xFFFFFF
-                  text_align: RIGHT
+                  text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
@@ -706,7 +706,7 @@ lvgl:
                   height: 15
                   text: "Из дома"
                   text_color: 0xFFFFFF
-                  text_align: RIGHT
+                  text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
@@ -768,7 +768,7 @@ lvgl:
                   height: 15
                   text: "В дом"
                   text_color: 0xFFFFFF
-                  text_align: RIGHT
+                  text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
@@ -802,7 +802,7 @@ lvgl:
             widgets:
               - arc:
                   id: widget_1781261697547_smtgd7w9q
-                  x: 4
+                  x: 6
                   y: 4
                   width: 92
                   height: 80
@@ -867,7 +867,7 @@ lvgl:
             widgets:
               - arc:
                   id: widget_1781261697547_jcbrfzs59
-                  x: 4
+                  x: 8
                   y: 4
                   width: 92
                   height: 80
@@ -954,15 +954,15 @@ lvgl:
             widgets:
               - image:
                   id: home_icon
-                  x: 64
-                  y: 5
+                  x: 55
+                  y: 1
                   width: 32
                   height: 32
                   src: icon_home
               - label:
                   id: text_dom
                   x: 0
-                  y: 40
+                  y: 30
                   width: 160
                   height: 26
                   text: "ДОМ"
@@ -1001,7 +1001,7 @@ lvgl:
                   text: "РЕЖИМЫ"
                   text_color: 0x000000
                   text_align: LEFT
-                  text_font: cyrillic_font_24
+                  text_font: cyrillic_font_12
                   
            
           
