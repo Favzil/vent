@@ -250,13 +250,13 @@ image:
     id: icon_home
     type: RGB565
     resize: 32x32
-    use_transparency: alpha_channel  # ← ДОБАВЛЕНО
+    transparency: alpha_channel
     
   - file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
     resize: 32x32
-    use_transparency: alpha_channel  # ← ДОБАВЛЕНО
+    transparency: alpha_channel
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
