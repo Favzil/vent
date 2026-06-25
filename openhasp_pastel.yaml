@@ -245,14 +245,18 @@ image:
     type: RGB565
     resize: 480x480
   
-  # ★ ИКОНКИ БЕЗ RESIZE ★
+  # ★ ИКОНКИ С ПРОЗРАЧНОСТЬЮ ★
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
+    resize: 32x32
+    use_transparency: alpha_channel  # ← ДОБАВЛЕНО
     
   - file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
+    resize: 32x32
+    use_transparency: alpha_channel  # ← ДОБАВЛЕНО
 
 font:
   - file: "fonts/Roboto-Regular.ttf"
