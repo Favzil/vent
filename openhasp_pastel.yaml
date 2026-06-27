@@ -241,9 +241,19 @@ interval:
 
 # ★ ИЗОБРАЖЕНИЯ ★
 image:
-  # Фоновое изображение
+  # Фоновые изображения
   - file: "img/olako.png"
     id: background_image
+    type: RGB565
+    resize: 480x480
+  
+  - file: "img/bg_main.png"
+    id: background_main
+    type: RGB565
+    resize: 480x480
+    
+  - file: "img/bg_cfg.png"
+    id: background_settings
     type: RGB565
     resize: 480x480
   
@@ -499,12 +509,12 @@ lvgl:
       pad_all: 0
       widgets:
         - image:
-            id: background_image_widget
+            id: background_main_widget
             x: 0
             y: 0
             width: 480
             height: 480
-            src: background_image
+            src: background_main
             align: CENTER
             opa: 100%
        
@@ -1050,6 +1060,17 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
+        # Фоновое изображение
+        - image:
+            id: background_modes_widget
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            src: background_main
+            align: CENTER
+            opa: 100%
+        
         # Верхняя панель
         - obj:
             id: Upscreen_modes
@@ -1411,6 +1432,17 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
+        # Фоновое изображение
+        - image:
+            id: background_settings_widget
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            src: background_settings
+            align: CENTER
+            opa: 100%
+        
         # Верхняя панель
         - obj:
             id: Upscreen_settings
