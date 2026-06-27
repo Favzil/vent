@@ -1,11 +1,41 @@
 esphome:
   name: esp32-display
   friendly_name: "4848s040"
+  comment: "Optimized version"
 
 esp32:
   variant: esp32s3
   framework:
     type: esp-idf
+    version: recommended
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: y
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+      CONFIG_SPIRAM_USE_CAPS_ALLOC: y
+      CONFIG_SPIRAM_USE_MALLOC: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: 10
+      CONFIG_ESP_TASK_WDT_PANIC: n
+      CONFIG_ESP_TASK_WDT: n
+      CONFIG_ESP_INT_WDT: n
+      CONFIG_ESP_IPC_USES_CALLERS_PCONTEXT: n
+      CONFIG_FREERTOS_UNICORE: y
+      CONFIG_ESP_MAIN_TASK_STACK_SIZE: 8192
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: y
+      CONFIG_ESP_SYSTEM_PANIC_SILENT_REBOOT: n
+      CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE: 32
+      CONFIG_LWIP_TCPIP_CORE_LOCKING: n
+      CONFIG_LWIP_TCPIP_TASK_STACK_SIZE: 2048
+      CONFIG_MBEDTLS_SSL_MAX_CONTENT_LEN: 16384
+      CONFIG_MBEDTLS_CERTIFICATE_BUNDLE: n
+      CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL: n
+      CONFIG_ESP_TLS_INSECURE: y
+      CONFIG_ESP_TLS_SKIP_SESSION_CACHE: y
+      CONFIG_ESP_TLS_SKIP_VERIFY: y
+      CONFIG_ESP_TLS_USE_SECURE_ELEMENT: n
+      CONFIG_ESP_TLS_USE_DS_PERIPHERAL: n
 
 psram:
   mode: octal
@@ -13,6 +43,7 @@ psram:
 
 logger:
   level: DEBUG
+  baud_rate: 0
 
 # Глобальные переменные
 globals:
@@ -78,15 +109,12 @@ interval:
       - lambda: |-
           if (id(wakeup_block) > 0) {
             id(wakeup_block)--;
-            ESP_LOGD("screensaver", "Wakeup block: %d", id(wakeup_block));
           }
           
           if (!id(screensaver_active) && id(wakeup_block) == 0) {
             id(inactivity_timer)++;
-            ESP_LOGD("screensaver", "Inactivity: %d seconds", id(inactivity_timer));
             
             if (id(inactivity_timer) >= 30) {
-              ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
               lv_obj_t *scr = lv_obj_get_parent(id(screensaver_image));
@@ -106,8 +134,6 @@ interval:
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
-              
-              ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
@@ -152,14 +178,10 @@ interval:
                   id(uart_arduino).write_str("MODE:STOP\n");
                   break;
               }
-              ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
                 lv_scr_load(main_page);
                 lv_refr_now(nullptr);
-                ESP_LOGI("mode", "Switched to main page");
-              } else {
-                ESP_LOGE("mode", "main_page is null!");
               }
               
               id(active_mode_id) = 0;
@@ -184,7 +206,6 @@ interval:
               id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
               
               if (!line.empty()) {
-                ESP_LOGI("main", "Received: %s", line.c_str());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
                 
                 size_t space_pos = line.find(' ');
@@ -205,7 +226,6 @@ interval:
             }
           }
 
-  # Интервал для плавного затухания подсветки
   - interval: 50ms
     then:
       - lambda: |-
@@ -221,7 +241,6 @@ interval:
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
-              ESP_LOGD("brightness", "Fading: %.2f", id(current_brightness));
             }
           } else {
             float target = id(normal_brightness);
@@ -235,13 +254,11 @@ interval:
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
-              ESP_LOGD("brightness", "Waking: %.2f", id(current_brightness));
             }
           }
 
 # ★ ИЗОБРАЖЕНИЯ ★
 image:
-  # Фоновые изображения
   - file: "img/olako.png"
     id: background_image
     type: RGB565
@@ -257,7 +274,6 @@ image:
     type: RGB565
     resize: 480x480
   
-  # ★ ИКОНКИ С ПРОЗРАЧНОСТЬЮ ★
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
@@ -280,17 +296,17 @@ font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+    glyphs: '0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяСб'
   
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+    glyphs: '0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяСбКПДЭКОНОМИЧНЫЙСТАНДАРТНЫЙГОСТЕВОЙКОНДИЦИОНЕРВЫСОКИЙНАСТРОЙКАРЕЖИМЫДОМ'
 
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
     size: 12
-    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+    glyphs: '0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяСбКПДЭКОНОМИЧНЫЙСТАНДАРТНЫЙГОСТЕВОЙКОНДИЦИОНЕРВЫСОКИЙНАСТРОЙКАРЕЖИМЫДОМПРИТОЧКАВЫТЯЖКАЯркостьТаймаутЕдиницыОсистеме'
 
 # Реле
 switch:
@@ -360,14 +376,11 @@ touchscreen:
       mirror_y: true
     on_touch:
       then:
-        - lambda: |-
-            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
         - if:
             condition:
               lambda: 'return id(screensaver_active);'
             then:
               - lambda: |-
-                  ESP_LOGI("touch", "Waking up from screensaver");
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
@@ -378,12 +391,7 @@ touchscreen:
                   }
             else:
               - lambda: |-
-                  ESP_LOGI("touch", "Resetting inactivity timer");
                   id(inactivity_timer) = 0;
-    on_release:
-      then:
-        - lambda: |-
-            ESP_LOGI("touch", "Released");
 
 # ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
 lvgl:
@@ -394,7 +402,7 @@ lvgl:
     - my_touchscreen
   rotation: 180
   
-  buffer_size: 100%
+  buffer_size: 50%
   
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
@@ -433,7 +441,6 @@ lvgl:
             bg_opa: 50%
             radius: 16
             border_width: 0
-            shadow_width: 0
         
         - label:
             id: screensaver_date
@@ -482,17 +489,13 @@ lvgl:
             bg_color: 0x000000
             bg_opa: 0%
             border_width: 0
-            shadow_width: 0
             on_click:
               then:
-                - lambda: |-
-                    ESP_LOGI("wakeup", "Wakeup button clicked!");
                 - if:
                     condition:
                       lambda: 'return id(screensaver_active);'
                     then:
                       - lambda: |-
-                          ESP_LOGI("wakeup", "Waking up from screensaver via button");
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
                           id(wakeup_block) = 5;
@@ -564,9 +567,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
             widgets:
@@ -626,9 +626,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
             widgets:
@@ -688,9 +685,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
             widgets:
@@ -750,9 +744,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0xF59E0B
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
             widgets:
@@ -812,9 +803,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0x10B981
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
             widgets:
@@ -877,9 +865,6 @@ lvgl:
             border_color: 0x162038
             border_opa: 20%
             radius: 16
-            shadow_width: 0
-            shadow_color: 0x10B981
-            shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: ACTIVE
             widgets:
@@ -955,7 +940,6 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
-        # ★ КНОПКА "ДОМ" ★
         - button:
             id: domoi
             x: 0
@@ -988,7 +972,6 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_12
                  
-        # ★ КНОПКА "РЕЖИМЫ" ★
         - button:
             id: modes
             x: 160
@@ -1021,7 +1004,6 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_12
 
-        # ★ КНОПКА "НАСТРОЙКА" ★
         - button:
             id: settings
             x: 320
@@ -1060,7 +1042,6 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение
         - image:
             id: background_modes_widget
             x: 0
@@ -1071,7 +1052,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Верхняя панель
         - obj:
             id: Upscreen_modes
             x: 1
@@ -1118,7 +1098,6 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов с долгим нажатием
         - button:
             id: mode_standard
             x: 40
@@ -1329,7 +1308,6 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками (как на главной странице)
         - button:
             id: domoi_modes
             x: 0
@@ -1432,7 +1410,6 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение
         - image:
             id: background_settings_widget
             x: 0
@@ -1443,7 +1420,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Верхняя панель
         - obj:
             id: Upscreen_settings
             x: 1
@@ -1490,7 +1466,6 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Заголовок
         - label:
             x: 0
             y: 60
@@ -1501,7 +1476,6 @@ lvgl:
             text_align: CENTER
             text_font: cyrillic_font_24
 
-        # Пункты настроек
         - obj:
             x: 40
             y: 110
@@ -1586,7 +1560,6 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками (как на главной странице)
         - button:
             id: domoi_settings
             x: 0
