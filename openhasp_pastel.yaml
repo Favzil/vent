@@ -963,14 +963,14 @@ lvgl:
              - image:
                  id: home_icon
                  x: 50
-                 y: 1
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_home
              - label:
                  id: text_dom
-                 x: 0
-                 y: 20
+                 x: -10
+                 y: 10
                  width: 160
                  height: 26
                  text: "ДОМ"
