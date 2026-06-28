@@ -519,6 +519,7 @@ lvgl:
            border_color: 0x4B5563
            radius: 8
            pad_all: 0
+           scrollbar_mode: "OFF"
            widgets:
              - label:
                  id: KhaKar
@@ -969,8 +970,8 @@ lvgl:
                  src: icon_home
              - label:
                  id: text_dom
-                 x: -10
-                 y: 10
+                 x: -25
+                 y: 30
                  width: 160
                  height: 26
                  text: "ДОМ"
@@ -996,14 +997,14 @@ lvgl:
              - image:
                  id: modes_icon
                  x: 50
-                 y: 1
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_modes
              - label:
                  id: rezhim
-                 x: 55
-                 y: 20
+                 x: -25
+                 y: 30
                  width: 100
                  height: 26
                  text: "РЕЖИМЫ"
@@ -1029,14 +1030,14 @@ lvgl:
              - image:
                  id: settings_icon
                  x: 50
-                 y: 1
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_settings
              - label:
                  id: nastroika
-                 x: 55
-                 y: 20
+                 x: -25
+                 y: 30
                  width: 100
                  height: 26
                  text: "НАСТРОЙКА"
