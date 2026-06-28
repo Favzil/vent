@@ -257,60 +257,60 @@ interval:
             }
           }
 
-# ★ ИЗОБРАЖЕНИЯ ★
+# ★ ИЗОБРАЖЕНИЯ - УМЕНЬШЕНЫ ДЛЯ ЭКОНОМИИ ★
 image:
   - file: "img/olako.png"
     id: background_image
     type: RGB565
-    resize: 480x480
+    resize: 240x240
   
   - file: "img/bg_main.png"
     id: background_main
     type: RGB565
-    resize: 480x480
+    resize: 240x240
     
   - file: "img/bg_cfg.png"
     id: background_settings
     type: RGB565
-    resize: 480x480
+    resize: 240x240
   
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
-    resize: 32x32
+    resize: 24x24
     transparency: alpha_channel
     
   - file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
-    resize: 32x32
+    resize: 24x24
     transparency: alpha_channel
 
   - file: "img/settings-heart.png"
     id: icon_settings
     type: RGB565
-    resize: 32x32
+    resize: 24x24
     transparency: alpha_channel
 
-# ★ ОПТИМИЗИРОВАННЫЕ ШРИФТЫ - УНИКАЛЬНЫЕ СИМВОЛЫ В КАЖДОМ ★
+# ★ ШРИФТЫ - МАКСИМАЛЬНАЯ ЭКОНОМИЯ ★
 font:
-  # Шрифт 40 - только нужные буквы (без дубликатов)
+  # Большой шрифт - только цифры и двоеточие (для времени)
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
-    glyphs: '0123456789:АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+    glyphs: '0123456789:'
   
-  # Шрифт 24 - полный алфавит (уникальные символы)
+  # Средний шрифт - полный алфавит (для заголовков)
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
-    glyphs: '0123456789:АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя°C+.-'
+    glyphs: '0123456789:АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя°C+-.'
   
-  # Шрифт 12 - полный алфавит (уникальные символы)
+  # Маленький шрифт - только латиница и базовые символы (для надписей)
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
     size: 12
-    glyphs: '0123456789:АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя°C+.-'
+    glyphs: '0123456789:АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя°C+-.'
 
 # Реле
 switch:
@@ -427,10 +427,10 @@ lvgl:
         
         - image:
             id: screensaver_image
-            x: 0
-            y: 0
-            width: 480
-            height: 480
+            x: 120
+            y: 60
+            width: 240
+            height: 240
             src: background_image
             align: CENTER
             opa: 100%
@@ -438,9 +438,9 @@ lvgl:
         - obj:
             id: screensaver_info_bg
             x: 40
-            y: 180
+            y: 320
             width: 400
-            height: 120
+            height: 100
             bg_color: 0x000000
             bg_opa: 50%
             radius: 16
@@ -449,9 +449,9 @@ lvgl:
         - label:
             id: screensaver_date
             x: 40
-            y: 185
+            y: 325
             width: 400
-            height: 40
+            height: 30
             text: "Сб 20-июнь-2026"
             text_color: 0xFFFFFF
             text_align: CENTER
@@ -462,9 +462,9 @@ lvgl:
         - label:
             id: screensaver_time
             x: 40
-            y: 230
+            y: 355
             width: 400
-            height: 60
+            height: 50
             text: "14:32"
             text_color: 0xFFFFFF
             text_align: CENTER
@@ -517,10 +517,10 @@ lvgl:
       widgets:
         - image:
             id: background_main_widget
-            x: 0
-            y: 0
-            width: 480
-            height: 480
+            x: 120
+            y: 60
+            width: 240
+            height: 240
             src: background_main
             align: CENTER
             opa: 100%
@@ -942,7 +942,7 @@ lvgl:
             text_color: 0x0F0F33
             text_align: CENTER
             long_mode: CLIP
-            text_font: cyrillic_font_40
+            text_font: cyrillic_font_24
 
         - button:
             id: domoi
@@ -962,8 +962,8 @@ lvgl:
                   id: home_icon
                   x: 55
                   y: 1
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_home
               - label:
                   id: text_dom
@@ -994,8 +994,8 @@ lvgl:
                   id: modes_icon
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_modes
               - label:
                   id: rezhim
@@ -1026,8 +1026,8 @@ lvgl:
                   id: settings_icon
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_settings
               - label:
                   id: nastroika
@@ -1048,10 +1048,10 @@ lvgl:
       widgets:
         - image:
             id: background_modes_widget
-            x: 0
-            y: 0
-            width: 480
-            height: 480
+            x: 120
+            y: 60
+            width: 240
+            height: 240
             src: background_main
             align: CENTER
             opa: 100%
@@ -1330,8 +1330,8 @@ lvgl:
                   id: home_icon_modes
                   x: 55
                   y: 1
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_home
               - label:
                   id: dom_modes
@@ -1362,8 +1362,8 @@ lvgl:
                   id: modes_icon_modes
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_modes
               - label:
                   id: rezhim_modes
@@ -1394,8 +1394,8 @@ lvgl:
                   id: settings_icon_modes
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_settings
               - label:
                   id: nastroika_modes
@@ -1416,10 +1416,10 @@ lvgl:
       widgets:
         - image:
             id: background_settings_widget
-            x: 0
-            y: 0
-            width: 480
-            height: 480
+            x: 120
+            y: 60
+            width: 240
+            height: 240
             src: background_settings
             align: CENTER
             opa: 100%
@@ -1582,8 +1582,8 @@ lvgl:
                   id: home_icon_settings
                   x: 55
                   y: 1
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_home
               - label:
                   id: dom_settings
@@ -1614,8 +1614,8 @@ lvgl:
                   id: modes_icon_settings
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_modes
               - label:
                   id: rezhim_settings
@@ -1646,8 +1646,8 @@ lvgl:
                   id: settings_icon_settings
                   x: 15
                   y: 16
-                  width: 32
-                  height: 32
+                  width: 24
+                  height: 24
                   src: icon_settings
               - label:
                   id: nastroika_settings
