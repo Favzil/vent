@@ -635,7 +635,7 @@ lvgl:
                  text_font: cyrillic_font_24
              - label:
                  id: widget_1781262306198_b9dnjbboi
-                 x: 25
+                 x: 10
                  y: 37
                  width: 45
                  height: 25
@@ -697,11 +697,11 @@ lvgl:
                  text_font: cyrillic_font_24
              - label:
                  id: widget_1781262307812_3m3qdg397
-                 x: 35
+                 x: 10
                  y: 37
                  width: 45
                  height: 25
-                 text: "23.5"
+                 text: "+23.5"
                  text_color: 0xFFFFFF
                  text_align: LEFT
                  long_mode: CLIP
@@ -759,11 +759,11 @@ lvgl:
                  text_font: cyrillic_font_24
              - label:
                  id: widget_1781262308709_dnoiw7el6
-                 x: 35
+                 x: 10
                  y: 37
                  width: 45
                  height: 25
-                 text: "23.5"
+                 text: "+23.5"
                  text_color: 0xFFFFFF
                  text_align: LEFT
                  long_mode: CLIP
@@ -810,7 +810,7 @@ lvgl:
            widgets:
              - arc:
                  id: widget_1781261697547_smtgd7w9q
-                 x: 6
+                 x: 8
                  y: 4
                  width: 92
                  height: 80
@@ -835,7 +835,7 @@ lvgl:
                  border_width: 0
              - label:
                  id: lv_label_0
-                 x: 0
+                 x: 2
                  y: 32
                  width: 92
                  height: 24
@@ -871,7 +871,7 @@ lvgl:
            shadow_color: 0x10B981
            shadow_opa: 0%
            pad_all: 0
-           scrollbar_mode: ACTIVE
+           scrollbar_mode: "OFF"
            widgets:
              - arc:
                  id: widget_1781261697547_jcbrfzs59
@@ -882,7 +882,7 @@ lvgl:
                  value: 31
                  min_value: 0
                  max_value: 100
-                 adjustable: false
+                 adjustable: true
                  start_angle: 135
                  end_angle: 45
                  arc_color: 0x12D90D
@@ -900,7 +900,7 @@ lvgl:
                  border_width: 0
              - label:
                  id: widget_1781261697547_036jpjyoc
-                 x: 0
+                 x: 2
                  y: 32
                  width: 92
                  height: 24
@@ -962,7 +962,7 @@ lvgl:
            widgets:
              - image:
                  id: home_icon
-                 x: 55
+                 x: 50
                  y: 1
                  width: 32
                  height: 32
@@ -970,7 +970,7 @@ lvgl:
              - label:
                  id: text_dom
                  x: 0
-                 y: 30
+                 y: 20
                  width: 160
                  height: 26
                  text: "ДОМ"
@@ -995,8 +995,8 @@ lvgl:
            widgets:
              - image:
                  id: modes_icon
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: 1
                  width: 32
                  height: 32
                  src: icon_modes
@@ -1028,8 +1028,8 @@ lvgl:
            widgets:
              - image:
                  id: settings_icon
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: 1
                  width: 32
                  height: 32
                  src: icon_settings
