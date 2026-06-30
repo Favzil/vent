@@ -24,6 +24,10 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '"СТАНДАРТНЫЙ"'
+  - id: current_mode_from_arduino
+    type: std::string
+    restore_value: no
+    initial_value: '"СТАНДАРТНЫЙ"'
   - id: press_timer
     type: int
     restore_value: no
@@ -72,7 +76,7 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '"14:32"'
-  # Новые переменные для данных с Arduino
+  # Переменные для данных с Arduino
   - id: temp_street
     type: float
     restore_value: no
@@ -323,6 +327,34 @@ interval:
                     
                     ESP_LOGI("filter", "Updated filters: supply=%d%%, exhaust=%d%%", supply, exhaust);
                   }
+                }
+                else if (line.find("MODE_STATUS:") == 0) {
+                  // ★ НОВЫЙ ОБРАБОТЧИК ДЛЯ РЕЖИМА ★
+                  std::string mode_data = line.substr(12); // Убираем "MODE_STATUS:"
+                  
+                  // Удаляем возможные пробелы в начале и конце
+                  mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
+                  mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
+                  
+                  ESP_LOGI("mode", "Received mode from Arduino: %s", mode_data.c_str());
+                  
+                  // Сохраняем текущий режим
+                  id(current_mode_from_arduino) = mode_data;
+                  
+                  // Обновляем отображение на главной странице
+                  lv_label_set_text(id(mode_display), mode_data.c_str());
+                  
+                  // Устанавливаем цвет текста в зависимости от режима
+                  if (mode_data == "СТОП") {
+                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
+                  } else {
+                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
+                  }
+                  
+                  // Обновляем глобальную переменную выбранного режима
+                  id(selected_mode) = mode_data;
+                  
+                  ESP_LOGI("mode", "Updated display to mode: %s", mode_data.c_str());
                 }
                 else {
                   // Обработка других данных
