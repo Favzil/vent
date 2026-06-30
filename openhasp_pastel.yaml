@@ -60,6 +60,18 @@ globals:
    type: float
    restore_value: no
    initial_value: '1.0'
+ - id: last_time_update
+   type: int
+   restore_value: no
+   initial_value: '0'
+ - id: current_date
+   type: std::string
+   restore_value: no
+   initial_value: '"Сб 20-июнь-2026"'
+ - id: current_time
+   type: std::string
+   restore_value: no
+   initial_value: '"14:32"'
 
 # UART для связи с Arduino
 uart:
@@ -166,7 +178,14 @@ interval:
              id(mode_activated) = false;
            }
          }
-         
+
+ # Запрос времени у Arduino каждые 10 секунд
+ - interval: 10s
+   then:
+     - lambda: |-
+         ESP_LOGI("time", "Requesting time from Arduino");
+         id(uart_arduino).write_str("GET_TIME\n");
+ 
  - interval: 500ms
    then:
      - lambda: |-
@@ -187,19 +206,37 @@ interval:
                ESP_LOGI("main", "Received: %s", line.c_str());
                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
                
-               size_t space_pos = line.find(' ');
-               if (space_pos != std::string::npos) {
-                 std::string date_part = line.substr(0, space_pos);
-                 std::string time_part = line.substr(space_pos + 1);
-                 
-                 lv_label_set_text(id(Date), date_part.c_str());
-                 lv_label_set_text(id(time_label), time_part.c_str());
-                 lv_label_set_text(id(Date_modes), date_part.c_str());
-                 lv_label_set_text(id(time_label_modes), time_part.c_str());
-                 lv_label_set_text(id(Date_settings), date_part.c_str());
-                 lv_label_set_text(id(time_label_settings), time_part.c_str());
-                 lv_label_set_text(id(screensaver_date), date_part.c_str());
-                 lv_label_set_text(id(screensaver_time), time_part.c_str());
+               // Проверяем, является ли строка ответом на GET_TIME
+               if (line.find("TIME:") == 0) {
+                 std::string time_data = line.substr(5); // Убираем "TIME:"
+                 size_t space_pos = time_data.find(' ');
+                 if (space_pos != std::string::npos) {
+                   std::string date_part = time_data.substr(0, space_pos);
+                   std::string time_part = time_data.substr(space_pos + 1);
+                   
+                   // Сохраняем в глобальные переменные
+                   id(current_date) = date_part;
+                   id(current_time) = time_part;
+                   
+                   // Обновляем все метки даты и времени
+                   lv_label_set_text(id(Date), date_part.c_str());
+                   lv_label_set_text(id(time_label), time_part.c_str());
+                   lv_label_set_text(id(Date_modes), date_part.c_str());
+                   lv_label_set_text(id(time_label_modes), time_part.c_str());
+                   lv_label_set_text(id(Date_settings), date_part.c_str());
+                   lv_label_set_text(id(time_label_settings), time_part.c_str());
+                   lv_label_set_text(id(screensaver_date), date_part.c_str());
+                   lv_label_set_text(id(screensaver_time), time_part.c_str());
+                   
+                   ESP_LOGI("time", "Updated: date=%s, time=%s", date_part.c_str(), time_part.c_str());
+                 }
+               } else {
+                 // Обработка других данных (например, температура)
+                 size_t space_pos = line.find(' ');
+                 if (space_pos != std::string::npos) {
+                   // Можно добавить обработку других данных от Arduino
+                   ESP_LOGD("data", "Other data: %s", line.c_str());
+                 }
                }
              }
            }
@@ -1354,7 +1391,6 @@ lvgl:
                  text_align: LEFT
                  text_font: cyrillic_font_12
 
-                
        - button:
            id: modes_modes
            x: 160
@@ -1371,15 +1407,15 @@ lvgl:
            widgets:
              - image:
                  id: modes_icon_modes
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_modes
              - label:
                  id: rezhim_modes
-                 x: 55
-                 y: 20
+                 x: 39
+                 y: 30
                  width: 100
                  height: 26
                  text: "РЕЖИМЫ"
@@ -1403,15 +1439,15 @@ lvgl:
            widgets:
              - image:
                  id: settings_icon_modes
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_settings
              - label:
                  id: nastroika_modes
-                 x: 55
-                 y: 20
+                 x: 32
+                 y: 30
                  width: 100
                  height: 26
                  text: "НАСТРОЙКА"
@@ -1613,7 +1649,6 @@ lvgl:
                  text_align: LEFT
                  text_font: cyrillic_font_12
 
-                
        - button:
            id: modes_settings
            x: 160
@@ -1630,15 +1665,15 @@ lvgl:
            widgets:
              - image:
                  id: modes_icon_settings
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_modes
              - label:
                  id: rezhim_settings
-                 x: 55
-                 y: 20
+                 x: 39
+                 y: 30
                  width: 100
                  height: 26
                  text: "РЕЖИМЫ"
@@ -1662,15 +1697,15 @@ lvgl:
            widgets:
              - image:
                  id: settings_icon_settings
-                 x: 15
-                 y: 16
+                 x: 50
+                 y: -5
                  width: 32
                  height: 32
                  src: icon_settings
              - label:
                  id: nastroika_settings
-                 x: 55
-                 y: 20
+                 x: 32
+                 y: 30
                  width: 100
                  height: 26
                  text: "НАСТРОЙКА"
