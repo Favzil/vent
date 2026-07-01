@@ -1,6 +1,16 @@
 esphome:
   name: esp32-display
   friendly_name: "4848s040"
+  on_boot:
+    then:
+      - lambda: |-
+          ESP_LOGI("boot", "ESP32-S3 booting...");
+          // Сбрасываем таймеры при загрузке
+          id(last_data_request) = 0;
+          id(data_request_failures) = 0;
+          id(arduino_connected) = false;
+          // Первый запрос данных через 1 секунду после загрузки
+          id(data_request_pending) = true;
 
 esp32:
   variant: esp32s3
@@ -13,6 +23,7 @@ psram:
 
 logger:
   level: DEBUG
+  baud_rate: 115200
 
 # Глобальные переменные
 globals:
@@ -101,6 +112,27 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  # ★ НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ КОНТРОЛЯ СВЯЗИ ★
+  - id: last_data_request
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: data_request_failures
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: arduino_connected
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: data_request_pending
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: last_received_data
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -111,6 +143,7 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
+  rx_buffer_size: 1024  # Увеличиваем буфер
 
 # Интервалы
 interval:
@@ -119,12 +152,10 @@ interval:
       - lambda: |-
           if (id(wakeup_block) > 0) {
             id(wakeup_block)--;
-            ESP_LOGD("screensaver", "Wakeup block: %d", id(wakeup_block));
           }
           
           if (!id(screensaver_active) && id(wakeup_block) == 0) {
             id(inactivity_timer)++;
-            ESP_LOGD("screensaver", "Inactivity: %d seconds", id(inactivity_timer));
             
             if (id(inactivity_timer) >= 30) {
               ESP_LOGI("screensaver", "Activating screensaver!");
@@ -135,6 +166,20 @@ interval:
                 lv_scr_load(scr);
                 lv_refr_now(nullptr);
               }
+            }
+          }
+          
+          // ★ ПРОВЕРКА СВЯЗИ С ARDUINO ★
+          int current_time = millis() / 1000;
+          if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 10)) {
+            if (id(arduino_connected)) {
+              ESP_LOGW("data", "No data from Arduino for 10 seconds!");
+              id(arduino_connected) = false;
+              // Показываем прочерки
+              lv_label_set_text(id(gradussulicy), "--.-");
+              lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "--.-");
+              lv_label_set_text(id(widget_1781262307812_3m3qdg397), "--.-");
+              lv_label_set_text(id(widget_1781262308709_dnoiw7el6), "--.-");
             }
           }
 
@@ -198,9 +243,6 @@ interval:
               if (main_page != nullptr) {
                 lv_scr_load(main_page);
                 lv_refr_now(nullptr);
-                ESP_LOGI("mode", "Switched to main page");
-              } else {
-                ESP_LOGE("mode", "main_page is null!");
               }
               
               id(active_mode_id) = 0;
@@ -208,160 +250,191 @@ interval:
             }
           }
 
-  # Запрос данных у Arduino каждые 5 секунд
-  - interval: 5s
+  # ★ ЗАПРОС ДАННЫХ КАЖДЫЕ 2 СЕКУНДЫ ★
+  - interval: 2s
     then:
       - lambda: |-
-          ESP_LOGI("data", "Requesting data from Arduino");
+          ESP_LOGD("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
+          id(last_data_request) = millis() / 1000;
+          id(data_request_pending) = true;
 
-  - interval: 500ms
+  # ★ ОБРАБОТКА ВХОДЯЩИХ ДАННЫХ (УЛУЧШЕННАЯ) ★
+  - interval: 100ms
     then:
       - lambda: |-
-          if (id(uart_arduino).available()) {
-            while (id(uart_arduino).available()) {
-              uint8_t byte;
-              if (id(uart_arduino).read_byte(&byte)) {
-                id(uart_buffer) += static_cast<char>(byte);
-              }
+          if (!id(uart_arduino).available()) {
+            return;
+          }
+          
+          // Читаем все доступные байты
+          while (id(uart_arduino).available()) {
+            uint8_t byte;
+            if (id(uart_arduino).read_byte(&byte)) {
+              // Игнорируем нулевые байты
+              if (byte == 0) continue;
+              id(uart_buffer) += static_cast<char>(byte);
+            }
+          }
+          
+          // Обрабатываем все полные строки
+          size_t newline_pos = id(uart_buffer).find('\n');
+          while (newline_pos != std::string::npos) {
+            std::string line = id(uart_buffer).substr(0, newline_pos);
+            id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
+            
+            // Удаляем \r если есть
+            if (!line.empty() && line.back() == '\r') {
+              line.pop_back();
             }
             
-            size_t newline_pos = id(uart_buffer).find('\n');
-            if (newline_pos != std::string::npos) {
-              std::string line = id(uart_buffer).substr(0, newline_pos);
-              id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
-              
-              if (!line.empty()) {
-                ESP_LOGI("main", "Received: %s", line.c_str());
-                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            if (line.empty()) {
+              newline_pos = id(uart_buffer).find('\n');
+              continue;
+            }
+            
+            ESP_LOGI("main", "Received: %s", line.c_str());
+            
+            // ★ ОБНОВЛЯЕМ ВРЕМЯ ПОСЛЕДНЕГО ПОЛУЧЕНИЯ ★
+            id(last_received_data) = millis() / 1000;
+            id(data_request_pending) = false;
+            
+            if (!id(arduino_connected)) {
+              id(arduino_connected) = true;
+              ESP_LOGI("data", "Arduino connected!");
+            }
+            
+            // ★ ОБРАБОТКА ВРЕМЕНИ ★
+            if (line.rfind("TIME:", 0) == 0) {
+              std::string time_data = line.substr(5);
+              size_t space_pos = time_data.find(' ');
+              if (space_pos != std::string::npos) {
+                std::string date_part = time_data.substr(0, space_pos);
+                std::string time_part = time_data.substr(space_pos + 1);
                 
-                // Обработка данных от Arduino
-                if (line.find("TIME:") == 0) {
-                  // Парсинг времени
-                  std::string time_data = line.substr(5);
-                  size_t space_pos = time_data.find(' ');
-                  if (space_pos != std::string::npos) {
-                    std::string date_part = time_data.substr(0, space_pos);
-                    std::string time_part = time_data.substr(space_pos + 1);
-                    
-                    id(current_date) = date_part;
-                    id(current_time) = time_part;
-                    
-                    // Обновление всех меток даты и времени
-                    lv_label_set_text(id(Date), date_part.c_str());
-                    lv_label_set_text(id(time_label), time_part.c_str());
-                    lv_label_set_text(id(Date_modes), date_part.c_str());
-                    lv_label_set_text(id(time_label_modes), time_part.c_str());
-                    lv_label_set_text(id(Date_settings), date_part.c_str());
-                    lv_label_set_text(id(time_label_settings), time_part.c_str());
-                    lv_label_set_text(id(screensaver_date), date_part.c_str());
-                    lv_label_set_text(id(screensaver_time), time_part.c_str());
-                    
-                    ESP_LOGI("time", "Updated: date=%s, time=%s", date_part.c_str(), time_part.c_str());
-                  }
-                }
-                else if (line.find("TEMP:") == 0) {
-                  // Парсинг температур: TEMP:23.5,22.1,24.0,21.8
-                  std::string temp_data = line.substr(5);
-                  std::vector<std::string> temps;
-                  size_t pos = 0;
-                  while ((pos = temp_data.find(',')) != std::string::npos) {
-                    temps.push_back(temp_data.substr(0, pos));
-                    temp_data.erase(0, pos + 1);
-                  }
-                  temps.push_back(temp_data);
+                // Удаляем лишние пробелы
+                date_part.erase(0, date_part.find_first_not_of(" \t"));
+                date_part.erase(date_part.find_last_not_of(" \t") + 1);
+                time_part.erase(0, time_part.find_first_not_of(" \t"));
+                time_part.erase(time_part.find_last_not_of(" \t") + 1);
+                
+                id(current_date) = date_part;
+                id(current_time) = time_part;
+                
+                // Обновление меток даты и времени
+                lv_label_set_text(id(Date), date_part.c_str());
+                lv_label_set_text(id(time_label), time_part.c_str());
+                lv_label_set_text(id(Date_modes), date_part.c_str());
+                lv_label_set_text(id(time_label_modes), time_part.c_str());
+                lv_label_set_text(id(Date_settings), date_part.c_str());
+                lv_label_set_text(id(time_label_settings), time_part.c_str());
+                lv_label_set_text(id(screensaver_date), date_part.c_str());
+                lv_label_set_text(id(screensaver_time), time_part.c_str());
+                
+                ESP_LOGI("time", "Updated: date=%s, time=%s", date_part.c_str(), time_part.c_str());
+              }
+            }
+            // ★ ОБРАБОТКА ТЕМПЕРАТУР ★
+            else if (line.rfind("TEMP:", 0) == 0) {
+              std::string temp_data = line.substr(5);
+              std::vector<std::string> temps;
+              size_t pos = 0;
+              while ((pos = temp_data.find(',')) != std::string::npos) {
+                std::string temp = temp_data.substr(0, pos);
+                temp.erase(0, temp.find_first_not_of(" \t"));
+                temp.erase(temp.find_last_not_of(" \t") + 1);
+                temps.push_back(temp);
+                temp_data.erase(0, pos + 1);
+              }
+              temp_data.erase(0, temp_data.find_first_not_of(" \t"));
+              temp_data.erase(temp_data.find_last_not_of(" \t") + 1);
+              temps.push_back(temp_data);
+              
+              if (temps.size() >= 4) {
+                try {
+                  id(temp_street) = std::stof(temps[0]);
+                  id(temp_outdoor) = std::stof(temps[1]);
+                  id(temp_from_home) = std::stof(temps[2]);
+                  id(temp_to_home) = std::stof(temps[3]);
                   
-                  if (temps.size() >= 4) {
-                    // Обновление переменных
-                    id(temp_street) = std::stof(temps[0]);
-                    id(temp_outdoor) = std::stof(temps[1]);
-                    id(temp_from_home) = std::stof(temps[2]);
-                    id(temp_to_home) = std::stof(temps[3]);
-                    
-                    // Форматирование для отображения
-                    char buffer[10];
-                    
-                    // С улицы
-                    snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_street));
-                    lv_label_set_text(id(gradussulicy), buffer);
-                    
-                    // На улицу
-                    snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_outdoor));
-                    lv_label_set_text(id(widget_1781262306198_b9dnjbboi), buffer);
-                    
-                    // Из дома
-                    snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_from_home));
-                    lv_label_set_text(id(widget_1781262307812_3m3qdg397), buffer);
-                    
-                    // В дом
-                    snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_to_home));
-                    lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buffer);
-                    
-                    ESP_LOGI("temp", "Updated temps: street=%.1f, outdoor=%.1f, from_home=%.1f, to_home=%.1f", 
-                             id(temp_street), id(temp_outdoor), id(temp_from_home), id(temp_to_home));
-                  }
-                }
-                else if (line.find("FILTER:") == 0) {
-                  // Парсинг фильтров: FILTER:72,31
-                  std::string filter_data = line.substr(7);
-                  size_t comma_pos = filter_data.find(',');
-                  if (comma_pos != std::string::npos) {
-                    int supply = std::stoi(filter_data.substr(0, comma_pos));
-                    int exhaust = std::stoi(filter_data.substr(comma_pos + 1));
-                    
-                    id(filter_supply) = supply;
-                    id(filter_exhaust) = exhaust;
-                    
-                    // Обновление процентов фильтров
-                    char buffer[10];
-                    
-                    // Приточка
-                    snprintf(buffer, sizeof(buffer), "%d%%", supply);
-                    lv_label_set_text(id(lv_label_0), buffer);
-                    lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), supply);
-                    
-                    // Вытяжка
-                    snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
-                    lv_label_set_text(id(widget_1781261697547_036jpjyoc), buffer);
-                    lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), exhaust);
-                    
-                    ESP_LOGI("filter", "Updated filters: supply=%d%%, exhaust=%d%%", supply, exhaust);
-                  }
-                }
-                else if (line.find("MODE_STATUS:") == 0) {
-                  // ★ НОВЫЙ ОБРАБОТЧИК ДЛЯ РЕЖИМА ★
-                  std::string mode_data = line.substr(12); // Убираем "MODE_STATUS:"
+                  char buffer[10];
                   
-                  // Удаляем возможные пробелы в начале и конце
-                  mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
-                  mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
+                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_street));
+                  lv_label_set_text(id(gradussulicy), buffer);
                   
-                  ESP_LOGI("mode", "Received mode from Arduino: %s", mode_data.c_str());
+                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_outdoor));
+                  lv_label_set_text(id(widget_1781262306198_b9dnjbboi), buffer);
                   
-                  // Сохраняем текущий режим
-                  id(current_mode_from_arduino) = mode_data;
+                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_from_home));
+                  lv_label_set_text(id(widget_1781262307812_3m3qdg397), buffer);
                   
-                  // Обновляем отображение на главной странице
-                  lv_label_set_text(id(mode_display), mode_data.c_str());
+                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_to_home));
+                  lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buffer);
                   
-                  // Устанавливаем цвет текста в зависимости от режима
-                  if (mode_data == "СТОП") {
-                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
-                  } else {
-                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  }
-                  
-                  // Обновляем глобальную переменную выбранного режима
-                  id(selected_mode) = mode_data;
-                  
-                  ESP_LOGI("mode", "Updated display to mode: %s", mode_data.c_str());
-                }
-                else {
-                  // Обработка других данных
-                  ESP_LOGD("data", "Other data: %s", line.c_str());
+                  ESP_LOGI("temp", "Updated: street=%.1f, outdoor=%.1f, from=%.1f, to=%.1f", 
+                           id(temp_street), id(temp_outdoor), id(temp_from_home), id(temp_to_home));
+                } catch (const std::exception& e) {
+                  ESP_LOGE("temp", "Parse error: %s", e.what());
                 }
               }
             }
+            // ★ ОБРАБОТКА ФИЛЬТРОВ ★
+            else if (line.rfind("FILTER:", 0) == 0) {
+              std::string filter_data = line.substr(7);
+              size_t comma_pos = filter_data.find(',');
+              if (comma_pos != std::string::npos) {
+                try {
+                  std::string supply_str = filter_data.substr(0, comma_pos);
+                  std::string exhaust_str = filter_data.substr(comma_pos + 1);
+                  
+                  supply_str.erase(0, supply_str.find_first_not_of(" \t"));
+                  supply_str.erase(supply_str.find_last_not_of(" \t") + 1);
+                  exhaust_str.erase(0, exhaust_str.find_first_not_of(" \t"));
+                  exhaust_str.erase(exhaust_str.find_last_not_of(" \t") + 1);
+                  
+                  int supply = std::stoi(supply_str);
+                  int exhaust = std::stoi(exhaust_str);
+                  
+                  id(filter_supply) = supply;
+                  id(filter_exhaust) = exhaust;
+                  
+                  char buffer[10];
+                  
+                  snprintf(buffer, sizeof(buffer), "%d%%", supply);
+                  lv_label_set_text(id(lv_label_0), buffer);
+                  lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), supply);
+                  
+                  snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
+                  lv_label_set_text(id(widget_1781261697547_036jpjyoc), buffer);
+                  lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), exhaust);
+                  
+                  ESP_LOGI("filter", "Updated: supply=%d%%, exhaust=%d%%", supply, exhaust);
+                } catch (const std::exception& e) {
+                  ESP_LOGE("filter", "Parse error: %s", e.what());
+                }
+              }
+            }
+            // ★ ОБРАБОТКА РЕЖИМА ★
+            else if (line.rfind("MODE_STATUS:", 0) == 0) {
+              std::string mode_data = line.substr(12);
+              mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
+              mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
+              
+              ESP_LOGI("mode", "Mode from Arduino: %s", mode_data.c_str());
+              
+              id(current_mode_from_arduino) = mode_data;
+              lv_label_set_text(id(mode_display), mode_data.c_str());
+              
+              if (mode_data == "СТОП") {
+                lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
+              } else {
+                lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
+              }
+              
+              id(selected_mode) = mode_data;
+            }
+            
+            newline_pos = id(uart_buffer).find('\n');
           }
 
   # Интервал для плавного затухания подсветки
@@ -380,7 +453,6 @@ interval:
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
-              ESP_LOGD("brightness", "Fading: %.2f", id(current_brightness));
             }
           } else {
             float target = id(normal_brightness);
@@ -394,19 +466,16 @@ interval:
               auto call = id(display_backlight).make_call();
               call.set_brightness(id(current_brightness));
               call.perform();
-              ESP_LOGD("brightness", "Waking: %.2f", id(current_brightness));
             }
           }
 
 # ★ ИЗОБРАЖЕНИЯ ★
 image:
-  # Фоновое изображение
   - file: "img/olako.png"
     id: background_image
     type: RGB565
     resize: 480x480
   
-  # ★ ИКОНКИ С ПРОЗРАЧНОСТЬЮ ★
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
@@ -1480,7 +1549,7 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками (как на главной странице)
+        # Нижняя панель с кнопками
         - button:
             id: domoi_modes
             x: 0
@@ -1738,7 +1807,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками (как на главной странице)
+        # Нижняя панель с кнопками
         - button:
             id: domoi_settings
             x: 0
