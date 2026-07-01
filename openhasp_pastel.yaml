@@ -5,8 +5,6 @@ esphome:
     then:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
-          // Просто логируем, что система запустилась
-          // Управление питанием оставляем настройкам ESPHome
 
 esp32:
   variant: esp32s3
@@ -20,7 +18,6 @@ psram:
   speed: 80MHz
 
 # Отключаем энергосбережение через настройки ESPHome
-# Wi-Fi (если нужен)
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -359,22 +356,24 @@ interval:
               temps.push_back(temp_data);
               
               if (temps.size() >= 4) {
-                // Проверяем, что все значения - числа
-                bool valid = true;
-                for (const auto& t : temps) {
-                  try {
-                    std::stof(t);
-                  } catch (...) {
-                    valid = false;
-                    break;
-                  }
+                // Парсим без try-catch, используем sscanf
+                float t1, t2, t3, t4;
+                int parsed = sscanf(temps[0].c_str(), "%f", &t1);
+                if (parsed == 1) {
+                  parsed = sscanf(temps[1].c_str(), "%f", &t2);
+                }
+                if (parsed == 1) {
+                  parsed = sscanf(temps[2].c_str(), "%f", &t3);
+                }
+                if (parsed == 1) {
+                  parsed = sscanf(temps[3].c_str(), "%f", &t4);
                 }
                 
-                if (valid) {
-                  id(temp_street) = std::stof(temps[0]);
-                  id(temp_outdoor) = std::stof(temps[1]);
-                  id(temp_from_home) = std::stof(temps[2]);
-                  id(temp_to_home) = std::stof(temps[3]);
+                if (parsed == 1) {
+                  id(temp_street) = t1;
+                  id(temp_outdoor) = t2;
+                  id(temp_from_home) = t3;
+                  id(temp_to_home) = t4;
                   
                   char buffer[10];
                   
@@ -410,10 +409,11 @@ interval:
                 exhaust_str.erase(0, exhaust_str.find_first_not_of(" \t"));
                 exhaust_str.erase(exhaust_str.find_last_not_of(" \t") + 1);
                 
-                try {
-                  int supply = std::stoi(supply_str);
-                  int exhaust = std::stoi(exhaust_str);
-                  
+                int supply = 0, exhaust = 0;
+                int parsed1 = sscanf(supply_str.c_str(), "%d", &supply);
+                int parsed2 = sscanf(exhaust_str.c_str(), "%d", &exhaust);
+                
+                if (parsed1 == 1 && parsed2 == 1) {
                   id(filter_supply) = supply;
                   id(filter_exhaust) = exhaust;
                   
@@ -426,7 +426,9 @@ interval:
                   snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
                   lv_label_set_text(id(widget_1781261697547_036jpjyoc), buffer);
                   lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), exhaust);
-                } catch (...) {
+                  
+                  ESP_LOGI("filter", "Updated: supply=%d%%, exhaust=%d%%", supply, exhaust);
+                } else {
                   ESP_LOGE("filter", "Invalid filter data: %s", line.c_str());
                 }
               }
