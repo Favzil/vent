@@ -28,14 +28,6 @@ esp32:
     version: latest
   board: esp32-s3-devkitc-1
 
-# Добавляем отдельную секцию для PlatformIO
-external_components:
-  - source: github://esphome/esphome@dev
-
-# Отключаем энергосбережение через config
-esp32_improv:
-  authorizer: none
-
 psram:
   mode: octal
   speed: 80MHz
