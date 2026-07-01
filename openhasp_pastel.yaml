@@ -5,25 +5,60 @@ esphome:
     then:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
-          // Сбрасываем таймеры при загрузке
-          id(last_data_request) = 0;
-          id(data_request_failures) = 0;
-          id(arduino_connected) = false;
-          // Первый запрос данных через 1 секунду после загрузки
-          id(data_request_pending) = true;
+          // Отключаем энергосбережение
+          esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+          esp_deep_sleep_disable();
+          // Устанавливаем максимальную частоту процессора
+          esp_pm_config_esp32s3_t pm_config = {
+            .light_sleep_enable = false,
+            .max_freq_mhz = 240,
+            .min_freq_mhz = 240
+          };
+          esp_pm_configure(&pm_config);
+          // Отключаем автоматический сон
+          esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+          ESP_LOGI("boot", "Power management configured");
 
 esp32:
   variant: esp32s3
   framework:
     type: esp-idf
+    version: latest
+  board: esp32-s3-devkitc-1
 
 psram:
   mode: octal
   speed: 80MHz
 
+# ★ ОТКЛЮЧАЕМ ЭНЕРГОСБЕРЕЖЕНИЕ ★
+wifi:
+  # Удаляем или комментируем если Wi-Fi не нужен
+  # Если нужен - добавляем:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  power_save_mode: NONE  # Отключаем энергосбережение Wi-Fi
+  manual_ip:
+    static_ip: 192.168.0.100
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    dns1: 8.8.8.8
+    dns2: 4.4.4.4
+
 logger:
   level: DEBUG
   baud_rate: 115200
+
+# ★ ДОБАВЛЯЕМ КОМПОНЕНТ ДЛЯ УПРАВЛЕНИЯ ПИТАНИЕМ ★
+pm:
+  - id: power_manager
+    # Отключаем все режимы сна
+    disable_light_sleep: true
+    disable_deep_sleep: true
+
+# ★ НАСТРОЙКА ПИТАНИЯ ★
+esp32_improv:
+  authorizer: none
 
 # Глобальные переменные
 globals:
@@ -112,7 +147,7 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
-  # ★ НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ КОНТРОЛЯ СВЯЗИ ★
+  # Переменные для контроля связи
   - id: last_data_request
     type: int
     restore_value: no
@@ -133,6 +168,10 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: boot_count
+    type: int
+    restore_value: true
+    initial_value: '0'
 
 # UART для связи с Arduino
 uart:
@@ -143,7 +182,7 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
-  rx_buffer_size: 1024  # Увеличиваем буфер
+  rx_buffer_size: 1024
 
 # Интервалы
 interval:
@@ -169,18 +208,26 @@ interval:
             }
           }
           
-          // ★ ПРОВЕРКА СВЯЗИ С ARDUINO ★
+          // Проверка связи с Arduino
           int current_time = millis() / 1000;
           if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 10)) {
             if (id(arduino_connected)) {
               ESP_LOGW("data", "No data from Arduino for 10 seconds!");
               id(arduino_connected) = false;
-              // Показываем прочерки
               lv_label_set_text(id(gradussulicy), "--.-");
               lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "--.-");
               lv_label_set_text(id(widget_1781262307812_3m3qdg397), "--.-");
               lv_label_set_text(id(widget_1781262308709_dnoiw7el6), "--.-");
             }
+          }
+          
+          // ★ ПЕРИОДИЧЕСКИ ОТПРАВЛЯЕМ КОМАНДУ ДЛЯ ПОДДЕРЖАНИЯ АКТИВНОСТИ ★
+          static int heartbeat_counter = 0;
+          heartbeat_counter++;
+          if (heartbeat_counter >= 10) { // Каждые 10 секунд
+            heartbeat_counter = 0;
+            // Отправляем ping чтобы Arduino знал что мы живы
+            id(uart_arduino).write_str("PING\n");
           }
 
   - interval: 100ms
@@ -250,7 +297,7 @@ interval:
             }
           }
 
-  # ★ ЗАПРОС ДАННЫХ КАЖДЫЕ 2 СЕКУНДЫ ★
+  # Запрос данных каждые 2 секунды
   - interval: 2s
     then:
       - lambda: |-
@@ -259,7 +306,7 @@ interval:
           id(last_data_request) = millis() / 1000;
           id(data_request_pending) = true;
 
-  # ★ ОБРАБОТКА ВХОДЯЩИХ ДАННЫХ (УЛУЧШЕННАЯ) ★
+  # Обработка входящих данных
   - interval: 100ms
     then:
       - lambda: |-
@@ -267,23 +314,19 @@ interval:
             return;
           }
           
-          // Читаем все доступные байты
           while (id(uart_arduino).available()) {
             uint8_t byte;
             if (id(uart_arduino).read_byte(&byte)) {
-              // Игнорируем нулевые байты
               if (byte == 0) continue;
               id(uart_buffer) += static_cast<char>(byte);
             }
           }
           
-          // Обрабатываем все полные строки
           size_t newline_pos = id(uart_buffer).find('\n');
           while (newline_pos != std::string::npos) {
             std::string line = id(uart_buffer).substr(0, newline_pos);
             id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
             
-            // Удаляем \r если есть
             if (!line.empty() && line.back() == '\r') {
               line.pop_back();
             }
@@ -295,7 +338,6 @@ interval:
             
             ESP_LOGI("main", "Received: %s", line.c_str());
             
-            // ★ ОБНОВЛЯЕМ ВРЕМЯ ПОСЛЕДНЕГО ПОЛУЧЕНИЯ ★
             id(last_received_data) = millis() / 1000;
             id(data_request_pending) = false;
             
@@ -304,7 +346,7 @@ interval:
               ESP_LOGI("data", "Arduino connected!");
             }
             
-            // ★ ОБРАБОТКА ВРЕМЕНИ ★
+            // Обработка TIME
             if (line.rfind("TIME:", 0) == 0) {
               std::string time_data = line.substr(5);
               size_t space_pos = time_data.find(' ');
@@ -312,7 +354,6 @@ interval:
                 std::string date_part = time_data.substr(0, space_pos);
                 std::string time_part = time_data.substr(space_pos + 1);
                 
-                // Удаляем лишние пробелы
                 date_part.erase(0, date_part.find_first_not_of(" \t"));
                 date_part.erase(date_part.find_last_not_of(" \t") + 1);
                 time_part.erase(0, time_part.find_first_not_of(" \t"));
@@ -321,7 +362,6 @@ interval:
                 id(current_date) = date_part;
                 id(current_time) = time_part;
                 
-                // Обновление меток даты и времени
                 lv_label_set_text(id(Date), date_part.c_str());
                 lv_label_set_text(id(time_label), time_part.c_str());
                 lv_label_set_text(id(Date_modes), date_part.c_str());
@@ -330,11 +370,9 @@ interval:
                 lv_label_set_text(id(time_label_settings), time_part.c_str());
                 lv_label_set_text(id(screensaver_date), date_part.c_str());
                 lv_label_set_text(id(screensaver_time), time_part.c_str());
-                
-                ESP_LOGI("time", "Updated: date=%s, time=%s", date_part.c_str(), time_part.c_str());
               }
             }
-            // ★ ОБРАБОТКА ТЕМПЕРАТУР ★
+            // Обработка TEMP
             else if (line.rfind("TEMP:", 0) == 0) {
               std::string temp_data = line.substr(5);
               std::vector<std::string> temps;
@@ -370,15 +408,12 @@ interval:
                   
                   snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_to_home));
                   lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buffer);
-                  
-                  ESP_LOGI("temp", "Updated: street=%.1f, outdoor=%.1f, from=%.1f, to=%.1f", 
-                           id(temp_street), id(temp_outdoor), id(temp_from_home), id(temp_to_home));
                 } catch (const std::exception& e) {
                   ESP_LOGE("temp", "Parse error: %s", e.what());
                 }
               }
             }
-            // ★ ОБРАБОТКА ФИЛЬТРОВ ★
+            // Обработка FILTER
             else if (line.rfind("FILTER:", 0) == 0) {
               std::string filter_data = line.substr(7);
               size_t comma_pos = filter_data.find(',');
@@ -407,14 +442,12 @@ interval:
                   snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
                   lv_label_set_text(id(widget_1781261697547_036jpjyoc), buffer);
                   lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), exhaust);
-                  
-                  ESP_LOGI("filter", "Updated: supply=%d%%, exhaust=%d%%", supply, exhaust);
                 } catch (const std::exception& e) {
                   ESP_LOGE("filter", "Parse error: %s", e.what());
                 }
               }
             }
-            // ★ ОБРАБОТКА РЕЖИМА ★
+            // Обработка MODE_STATUS
             else if (line.rfind("MODE_STATUS:", 0) == 0) {
               std::string mode_data = line.substr(12);
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
@@ -433,11 +466,15 @@ interval:
               
               id(selected_mode) = mode_data;
             }
+            // Обработка PONG ответа
+            else if (line.rfind("PONG", 0) == 0) {
+              ESP_LOGI("data", "Received PONG from Arduino");
+            }
             
             newline_pos = id(uart_buffer).find('\n');
           }
 
-  # Интервал для плавного затухания подсветки
+  # Интервал для подсветки
   - interval: 50ms
     then:
       - lambda: |-
@@ -469,7 +506,7 @@ interval:
             }
           }
 
-# ★ ИЗОБРАЖЕНИЯ ★
+# Изображения
 image:
   - file: "img/olako.png"
     id: background_image
@@ -494,6 +531,7 @@ image:
     resize: 32x32
     transparency: alpha_channel
 
+# Шрифты
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
@@ -517,16 +555,19 @@ switch:
     pin:
       number: GPIO40
       inverted: true
+      mode: OUTPUT
   - platform: gpio
     name: "Реле 2"
     pin:
       number: GPIO2
       inverted: true
+      mode: OUTPUT
   - platform: gpio
     name: "Реле 3"
     pin:
       number: GPIO1
       inverted: true
+      mode: OUTPUT
 
 # Подсветка
 output:
@@ -557,7 +598,7 @@ i2c:
   sda: GPIO19
   scl: GPIO45
 
-# ДИСПЛЕЙ
+# Дисплей
 display:
   - platform: mipi_rgb
     id: tft_display
@@ -566,7 +607,7 @@ display:
     cs_pin: GPIO39
     invert_colors: False
 
-# СЕНСОР ЭКРАНА (GT911)
+# Сенсор экрана (GT911)
 touchscreen:
   - platform: gt911
     id: my_touchscreen
@@ -603,7 +644,7 @@ touchscreen:
         - lambda: |-
             ESP_LOGI("touch", "Released");
 
-# ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
+# LVGL
 lvgl:
   id: lvgl_component
   displays:
@@ -611,7 +652,6 @@ lvgl:
   touchscreens:
     - my_touchscreen
   rotation: 180
-  
   buffer_size: 100%
   
   pages:
@@ -1174,7 +1214,7 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
 
-        # ★ КНОПКА "ДОМ" ★
+        # Кнопка "ДОМ"
         - button:
             id: domoi
             x: 0
@@ -1207,7 +1247,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_12
                   
-        # ★ КНОПКА "РЕЖИМЫ" ★
+        # Кнопка "РЕЖИМЫ"
         - button:
             id: modes
             x: 160
@@ -1240,7 +1280,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_12
 
-        # ★ КНОПКА "НАСТРОЙКА" ★
+        # Кнопка "НАСТРОЙКА"
         - button:
             id: settings
             x: 320
@@ -1279,7 +1319,6 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение
         - image:
             id: background_image_modes
             x: 0
@@ -1290,7 +1329,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Верхняя панель
         - obj:
             id: Upscreen_modes
             x: 1
@@ -1338,7 +1376,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов с долгим нажатием
+        # Кнопки режимов
         - button:
             id: mode_standard
             x: 40
@@ -1549,7 +1587,7 @@ lvgl:
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками
+        # Нижняя панель
         - button:
             id: domoi_modes
             x: 0
@@ -1652,7 +1690,6 @@ lvgl:
       bg_opa: 100%
       pad_all: 0
       widgets:
-        # Фоновое изображение
         - image:
             id: background_image_settings
             x: 0
@@ -1663,7 +1700,6 @@ lvgl:
             align: CENTER
             opa: 100%
         
-        # Верхняя панель
         - obj:
             id: Upscreen_settings
             x: 1
@@ -1711,7 +1747,6 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Заголовок
         - label:
             x: 0
             y: 60
@@ -1722,7 +1757,6 @@ lvgl:
             text_align: CENTER
             text_font: cyrillic_font_24
 
-        # Пункты настроек
         - obj:
             x: 40
             y: 110
@@ -1807,7 +1841,7 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_24
 
-        # Нижняя панель с кнопками
+        # Нижняя панель
         - button:
             id: domoi_settings
             x: 0
