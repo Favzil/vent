@@ -5,21 +5,8 @@ esphome:
     then:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
-          // Отключаем энергосбережение
-          #ifdef CONFIG_ESP_SLEEP_POWER_DOWN_FLASH
-          esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
-          esp_deep_sleep_disable();
-          #endif
-          
-          // Настраиваем максимальную частоту
-          esp_pm_config_esp32s3_t pm_config = {
-            .light_sleep_enable = false,
-            .max_freq_mhz = 240,
-            .min_freq_mhz = 240
-          };
-          esp_pm_configure(&pm_config);
-          
-          ESP_LOGI("boot", "Power management configured - sleep disabled");
+          // Просто логируем, что система запустилась
+          // Управление питанием оставляем настройкам ESPHome
 
 esp32:
   variant: esp32s3
@@ -32,6 +19,7 @@ psram:
   mode: octal
   speed: 80MHz
 
+# Отключаем энергосбережение через настройки ESPHome
 # Wi-Fi (если нужен)
 wifi:
   ssid: !secret wifi_ssid
@@ -154,10 +142,6 @@ globals:
   - id: last_received_data
     type: int
     restore_value: no
-    initial_value: '0'
-  - id: boot_count
-    type: int
-    restore_value: true
     initial_value: '0'
 
 # UART для связи с Arduino
@@ -375,7 +359,18 @@ interval:
               temps.push_back(temp_data);
               
               if (temps.size() >= 4) {
-                try {
+                // Проверяем, что все значения - числа
+                bool valid = true;
+                for (const auto& t : temps) {
+                  try {
+                    std::stof(t);
+                  } catch (...) {
+                    valid = false;
+                    break;
+                  }
+                }
+                
+                if (valid) {
                   id(temp_street) = std::stof(temps[0]);
                   id(temp_outdoor) = std::stof(temps[1]);
                   id(temp_from_home) = std::stof(temps[2]);
@@ -394,8 +389,11 @@ interval:
                   
                   snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_to_home));
                   lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buffer);
-                } catch (const std::exception& e) {
-                  ESP_LOGE("temp", "Parse error: %s", e.what());
+                  
+                  ESP_LOGI("temp", "Updated: street=%.1f, outdoor=%.1f, from=%.1f, to=%.1f", 
+                           id(temp_street), id(temp_outdoor), id(temp_from_home), id(temp_to_home));
+                } else {
+                  ESP_LOGE("temp", "Invalid temperature data: %s", line.c_str());
                 }
               }
             }
@@ -404,15 +402,15 @@ interval:
               std::string filter_data = line.substr(7);
               size_t comma_pos = filter_data.find(',');
               if (comma_pos != std::string::npos) {
+                std::string supply_str = filter_data.substr(0, comma_pos);
+                std::string exhaust_str = filter_data.substr(comma_pos + 1);
+                
+                supply_str.erase(0, supply_str.find_first_not_of(" \t"));
+                supply_str.erase(supply_str.find_last_not_of(" \t") + 1);
+                exhaust_str.erase(0, exhaust_str.find_first_not_of(" \t"));
+                exhaust_str.erase(exhaust_str.find_last_not_of(" \t") + 1);
+                
                 try {
-                  std::string supply_str = filter_data.substr(0, comma_pos);
-                  std::string exhaust_str = filter_data.substr(comma_pos + 1);
-                  
-                  supply_str.erase(0, supply_str.find_first_not_of(" \t"));
-                  supply_str.erase(supply_str.find_last_not_of(" \t") + 1);
-                  exhaust_str.erase(0, exhaust_str.find_first_not_of(" \t"));
-                  exhaust_str.erase(exhaust_str.find_last_not_of(" \t") + 1);
-                  
                   int supply = std::stoi(supply_str);
                   int exhaust = std::stoi(exhaust_str);
                   
@@ -428,8 +426,8 @@ interval:
                   snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
                   lv_label_set_text(id(widget_1781261697547_036jpjyoc), buffer);
                   lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), exhaust);
-                } catch (const std::exception& e) {
-                  ESP_LOGE("filter", "Parse error: %s", e.what());
+                } catch (...) {
+                  ESP_LOGE("filter", "Invalid filter data: %s", line.c_str());
                 }
               }
             }
