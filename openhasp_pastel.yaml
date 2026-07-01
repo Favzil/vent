@@ -5,19 +5,23 @@ esphome:
     then:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
-          // Отключаем энергосбережение
+          // Отключаем энергосбережение через ESP-IDF
+          #ifdef CONFIG_ESP_SLEEP_POWER_DOWN_FLASH
+          // Отключаем sleep
           esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+          // Отключаем глубокий сон
           esp_deep_sleep_disable();
-          // Устанавливаем максимальную частоту процессора
+          #endif
+          
+          // Настраиваем максимальную частоту
           esp_pm_config_esp32s3_t pm_config = {
             .light_sleep_enable = false,
             .max_freq_mhz = 240,
             .min_freq_mhz = 240
           };
           esp_pm_configure(&pm_config);
-          // Отключаем автоматический сон
-          esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
-          ESP_LOGI("boot", "Power management configured");
+          
+          ESP_LOGI("boot", "Power management configured - sleep disabled");
 
 esp32:
   variant: esp32s3
@@ -25,15 +29,25 @@ esp32:
     type: esp-idf
     version: latest
   board: esp32-s3-devkitc-1
+  # Отключаем энергосбережение на уровне платформы
+  platformio_options:
+    board_build:
+      flash_mode: dio
+      flash_size: 16MB
+    build_flags:
+      - "-DCONFIG_ESP_SLEEP_POWER_DOWN_FLASH=n"
+      - "-DCONFIG_ESP_SYSTEM_PM_POWER_DOWN_CPU=n"
+      - "-DCONFIG_ESP_SYSTEM_PM_POWER_DOWN_RTC=n"
+      - "-DCONFIG_ESP_SYSTEM_PM_POWER_DOWN_PERIPHERAL=n"
+      - "-DCONFIG_PM_POWER_DOWN_PERIPHERAL_IN_LIGHT_SLEEP=n"
+      - "-DCONFIG_PM_ENABLE=n"
 
 psram:
   mode: octal
   speed: 80MHz
 
-# ★ ОТКЛЮЧАЕМ ЭНЕРГОСБЕРЕЖЕНИЕ ★
+# Wi-Fi (если нужен)
 wifi:
-  # Удаляем или комментируем если Wi-Fi не нужен
-  # Если нужен - добавляем:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   fast_connect: true
@@ -48,17 +62,6 @@ wifi:
 logger:
   level: DEBUG
   baud_rate: 115200
-
-# ★ ДОБАВЛЯЕМ КОМПОНЕНТ ДЛЯ УПРАВЛЕНИЯ ПИТАНИЕМ ★
-pm:
-  - id: power_manager
-    # Отключаем все режимы сна
-    disable_light_sleep: true
-    disable_deep_sleep: true
-
-# ★ НАСТРОЙКА ПИТАНИЯ ★
-esp32_improv:
-  authorizer: none
 
 # Глобальные переменные
 globals:
@@ -122,7 +125,6 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '"14:32"'
-  # Переменные для данных с Arduino
   - id: temp_street
     type: float
     restore_value: no
@@ -147,7 +149,6 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
-  # Переменные для контроля связи
   - id: last_data_request
     type: int
     restore_value: no
@@ -221,12 +222,11 @@ interval:
             }
           }
           
-          // ★ ПЕРИОДИЧЕСКИ ОТПРАВЛЯЕМ КОМАНДУ ДЛЯ ПОДДЕРЖАНИЯ АКТИВНОСТИ ★
+          // Heartbeat для поддержания активности
           static int heartbeat_counter = 0;
           heartbeat_counter++;
-          if (heartbeat_counter >= 10) { // Каждые 10 секунд
+          if (heartbeat_counter >= 10) {
             heartbeat_counter = 0;
-            // Отправляем ping чтобы Arduino знал что мы живы
             id(uart_arduino).write_str("PING\n");
           }
 
@@ -466,7 +466,7 @@ interval:
               
               id(selected_mode) = mode_data;
             }
-            // Обработка PONG ответа
+            // Обработка PONG
             else if (line.rfind("PONG", 0) == 0) {
               ESP_LOGI("data", "Received PONG from Arduino");
             }
