@@ -5,6 +5,8 @@ esphome:
     then:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
+          // При загрузке запрашиваем текущий режим у Arduino
+          id(uart_arduino).write_str("GET_MODE\n");
 
 esp32:
   variant: esp32s3
@@ -17,7 +19,7 @@ psram:
   mode: octal
   speed: 80MHz
 
-# Отключаем энергосбережение через настройки ESPHome
+# Отключаем энергосбережение
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -140,13 +142,21 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  - id: sync_mode_pending
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: pending_mode
+    type: std::string
+    restore_value: no
+    initial_value: '""'
 
-# UART для связи с Arduino
+# UART для связи с Arduino (скорость 9600)
 uart:
   id: uart_arduino
   tx_pin: GPIO43
   rx_pin: GPIO44
-  baud_rate: 115200
+  baud_rate: 9600
   stop_bits: 1
   data_bits: 8
   parity: NONE
@@ -178,9 +188,9 @@ interval:
           
           // Проверка связи с Arduino
           int current_time = millis() / 1000;
-          if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 10)) {
+          if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 15)) {
             if (id(arduino_connected)) {
-              ESP_LOGW("data", "No data from Arduino for 10 seconds!");
+              ESP_LOGW("data", "No data from Arduino for 15 seconds!");
               id(arduino_connected) = false;
               lv_label_set_text(id(gradussulicy), "--.-");
               lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "--.-");
@@ -214,6 +224,7 @@ interval:
                 main_page = lv_scr_act();
               }
               
+              // Отправляем режим на Arduino
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
@@ -252,7 +263,7 @@ interval:
                   id(uart_arduino).write_str("MODE:STOP\n");
                   break;
               }
-              ESP_LOGI("mode", "Activated: %s", id(selected_mode).c_str());
+              ESP_LOGI("mode", "Sent to Arduino: %s", id(selected_mode).c_str());
               
               if (main_page != nullptr) {
                 lv_scr_load(main_page);
@@ -264,14 +275,21 @@ interval:
             }
           }
 
-  # Запрос данных каждые 2 секунды
-  - interval: 2s
+  # Запрос данных каждые 3 секунды
+  - interval: 3s
     then:
       - lambda: |-
           ESP_LOGD("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
           id(last_data_request) = millis() / 1000;
           id(data_request_pending) = true;
+
+  # Запрос режима каждые 5 секунд (для синхронизации)
+  - interval: 5s
+    then:
+      - lambda: |-
+          ESP_LOGD("mode", "Requesting mode from Arduino");
+          id(uart_arduino).write_str("GET_MODE\n");
 
   # Обработка входящих данных
   - interval: 100ms
@@ -313,7 +331,7 @@ interval:
               ESP_LOGI("data", "Arduino connected!");
             }
             
-            // Обработка TIME
+            // ========== ОБРАБОТКА ВРЕМЕНИ ==========
             if (line.rfind("TIME:", 0) == 0) {
               std::string time_data = line.substr(5);
               size_t space_pos = time_data.find(' ');
@@ -339,7 +357,7 @@ interval:
                 lv_label_set_text(id(screensaver_time), time_part.c_str());
               }
             }
-            // Обработка TEMP
+            // ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
             else if (line.rfind("TEMP:", 0) == 0) {
               std::string temp_data = line.substr(5);
               std::vector<std::string> temps;
@@ -356,7 +374,6 @@ interval:
               temps.push_back(temp_data);
               
               if (temps.size() >= 4) {
-                // Парсим без try-catch, используем sscanf
                 float t1, t2, t3, t4;
                 int parsed = sscanf(temps[0].c_str(), "%f", &t1);
                 if (parsed == 1) {
@@ -396,7 +413,7 @@ interval:
                 }
               }
             }
-            // Обработка FILTER
+            // ========== ОБРАБОТКА ФИЛЬТРОВ ==========
             else if (line.rfind("FILTER:", 0) == 0) {
               std::string filter_data = line.substr(7);
               size_t comma_pos = filter_data.find(',');
@@ -433,28 +450,37 @@ interval:
                 }
               }
             }
-            // Обработка MODE_STATUS
-            else if (line.rfind("MODE_STATUS:", 0) == 0) {
-              std::string mode_data = line.substr(12);
+            // ========== ОБРАБОТКА РЕЖИМА (ОТ ARDUINO) ==========
+            else if (line.rfind("MODE:", 0) == 0) {
+              std::string mode_data = line.substr(5);
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
               mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
               
               ESP_LOGI("mode", "Mode from Arduino: %s", mode_data.c_str());
               
-              id(current_mode_from_arduino) = mode_data;
-              lv_label_set_text(id(mode_display), mode_data.c_str());
-              
-              if (mode_data == "СТОП") {
-                lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
-              } else {
-                lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
+              // Проверяем, отличается ли режим от текущего
+              if (id(selected_mode) != mode_data) {
+                ESP_LOGI("mode", "Mode changed on Arduino, updating display");
+                id(selected_mode) = mode_data;
+                id(current_mode_from_arduino) = mode_data;
+                
+                // Обновляем отображение на главной странице
+                lv_label_set_text(id(mode_display), mode_data.c_str());
+                
+                if (mode_data == "СТОП") {
+                  lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
+                } else {
+                  lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
+                }
               }
-              
-              id(selected_mode) = mode_data;
             }
-            // Обработка PONG
+            // ========== ОБРАБОТКА PONG ==========
             else if (line.rfind("PONG", 0) == 0) {
               ESP_LOGI("data", "Received PONG from Arduino");
+            }
+            // ========== ОБРАБОТКА ОШИБОК ==========
+            else if (line.rfind("ERROR:", 0) == 0) {
+              ESP_LOGE("arduino", "Arduino error: %s", line.c_str());
             }
             
             newline_pos = id(uart_buffer).find('\n');
@@ -1362,7 +1388,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
 
-        # Кнопки режимов
+        # Кнопки режимов (долгое нажатие)
         - button:
             id: mode_standard
             x: 40
