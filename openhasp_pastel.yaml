@@ -6,6 +6,7 @@ esphome:
       - lambda: |-
           ESP_LOGI("boot", "ESP32-S3 booting...");
           id(uart_arduino).write_str("GET_MODE\n");
+          id(uart_arduino).write_str("GET_DATA\n");
 
 esp32:
   variant: esp32s3
@@ -140,17 +141,62 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
+  # НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ СТАТУСА
+  - id: room_temp
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: supply_fan_speed
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: exhaust_fan_speed
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: efficiency
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: system_state
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: heating_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: cooling_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: pid_output
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: current_error
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+  - id: has_error
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: last_status_update
+    type: int
+    restore_value: no
+    initial_value: '0'
 
-# UART для связи с Arduino (скорость 9600)
+# UART для связи с Arduino (скорость 115200 - исправлено!)
 uart:
   id: uart_arduino
   tx_pin: GPIO43
   rx_pin: GPIO44
-  baud_rate: 9600
+  baud_rate: 115200  # ИСПРАВЛЕНО: 115200 вместо 9600
   stop_bits: 1
   data_bits: 8
   parity: NONE
-  rx_buffer_size: 1024
+  rx_buffer_size: 2048  # Увеличено для надежности
 
 # Интервалы
 interval:
@@ -186,6 +232,10 @@ interval:
               lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "--.-");
               lv_label_set_text(id(widget_1781262307812_3m3qdg397), "--.-");
               lv_label_set_text(id(widget_1781262308709_dnoiw7el6), "--.-");
+              lv_label_set_text(id(lv_label_0), "--%");
+              lv_label_set_text(id(widget_1781261697547_036jpjyoc), "--%");
+              lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), 0);
+              lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), 0);
             }
           }
           
@@ -214,43 +264,43 @@ interval:
                 main_page = lv_scr_act();
               }
               
-              // Отправляем режим на Arduino
+              // Отправляем режим на Arduino (текстовые названия)
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
                   lv_label_set_text(id(mode_display), "СТАНДАРТНЫЙ");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  id(uart_arduino).write_str("MODE:STANDARD\n");
+                  id(uart_arduino).write_str("MODE:СТАНДАРТНЫЙ\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
                   lv_label_set_text(id(mode_display), "ЭКОНОМИЧНЫЙ");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  id(uart_arduino).write_str("MODE:ECONOM\n");
+                  id(uart_arduino).write_str("MODE:ЭКОНОМИЧНЫЙ\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
                   lv_label_set_text(id(mode_display), "ГОСТЕВОЙ");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  id(uart_arduino).write_str("MODE:GUEST\n");
+                  id(uart_arduino).write_str("MODE:ГОСТЕВОЙ\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
                   lv_label_set_text(id(mode_display), "КОНДИЦИОНЕР");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  id(uart_arduino).write_str("MODE:CONDITIONER\n");
+                  id(uart_arduino).write_str("MODE:КОНДИЦИОНЕР\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
                   lv_label_set_text(id(mode_display), "ВЫСОКИЙ КПД");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
-                  id(uart_arduino).write_str("MODE:HIGH_EFFICIENCY\n");
+                  id(uart_arduino).write_str("MODE:ВЫСОКИЙ КПД\n");
                   break;
                 case 6:
                   id(selected_mode) = "СТОП";
                   lv_label_set_text(id(mode_display), "СТОП");
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
-                  id(uart_arduino).write_str("MODE:STOP\n");
+                  id(uart_arduino).write_str("MODE:СТОП\n");
                   break;
               }
               ESP_LOGI("mode", "Sent to Arduino: %s", id(selected_mode).c_str());
@@ -280,6 +330,13 @@ interval:
       - lambda: |-
           ESP_LOGD("mode", "Requesting mode from Arduino");
           id(uart_arduino).write_str("GET_MODE\n");
+
+  # Запрос статуса каждые 10 секунд
+  - interval: 10s
+    then:
+      - lambda: |-
+          ESP_LOGD("status", "Requesting status from Arduino");
+          id(uart_arduino).write_str("GET_STATUS\n");
 
   # Обработка входящих данных
   - interval: 100ms
@@ -321,30 +378,69 @@ interval:
               ESP_LOGI("data", "Arduino connected!");
             }
             
-            // ========== ОБРАБОТКА ВРЕМЕНИ ==========
+            // ========== ОБРАБОТКА ВРЕМЕНИ (ЦИФРОВОЙ ФОРМАТ) ==========
             if (line.rfind("TIME:", 0) == 0) {
               std::string time_data = line.substr(5);
-              size_t space_pos = time_data.find(' ');
-              if (space_pos != std::string::npos) {
-                std::string date_part = time_data.substr(0, space_pos);
-                std::string time_part = time_data.substr(space_pos + 1);
+              // Формат: 2026-08-25 14:30:45
+              
+              int year, month, day, hour, minute, second;
+              if (sscanf(time_data.c_str(), "%d-%d-%d %d:%d:%d", 
+                         &year, &month, &day, &hour, &minute, &second) == 6) {
                 
-                date_part.erase(0, date_part.find_first_not_of(" \t"));
-                date_part.erase(date_part.find_last_not_of(" \t") + 1);
-                time_part.erase(0, time_part.find_first_not_of(" \t"));
-                time_part.erase(time_part.find_last_not_of(" \t") + 1);
+                // Формируем дату для отображения
+                const char* months[] = {"янв","фев","мар","апр","май","июн",
+                                        "июл","авг","сен","окт","ноя","дек"};
+                const char* weekdays[] = {"Вс","Пн","Вт","Ср","Чт","Пт","Сб"};
                 
-                id(current_date) = date_part;
-                id(current_time) = time_part;
+                // Вычисляем день недели (Zeller's congruence)
+                int y = year;
+                int m = month;
+                if (m < 3) { m += 12; y--; }
+                int wd = (day + 2*m + 3*(m+1)/5 + y + y/4 - y/100 + y/400) % 7;
                 
-                lv_label_set_text(id(Date), date_part.c_str());
-                lv_label_set_text(id(time_label), time_part.c_str());
-                lv_label_set_text(id(Date_modes), date_part.c_str());
-                lv_label_set_text(id(time_label_modes), time_part.c_str());
-                lv_label_set_text(id(Date_settings), date_part.c_str());
-                lv_label_set_text(id(time_label_settings), time_part.c_str());
-                lv_label_set_text(id(screensaver_date), date_part.c_str());
-                lv_label_set_text(id(screensaver_time), time_part.c_str());
+                char date_str[50];
+                snprintf(date_str, sizeof(date_str), "%s %02d-%s-%04d", 
+                         weekdays[wd], day, months[month-1], year);
+                
+                char time_str[10];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", hour, minute);
+                
+                id(current_date) = date_str;
+                id(current_time) = time_str;
+                
+                lv_label_set_text(id(Date), date_str);
+                lv_label_set_text(id(time_label), time_str);
+                lv_label_set_text(id(Date_modes), date_str);
+                lv_label_set_text(id(time_label_modes), time_str);
+                lv_label_set_text(id(Date_settings), date_str);
+                lv_label_set_text(id(time_label_settings), time_str);
+                lv_label_set_text(id(screensaver_date), date_str);
+                lv_label_set_text(id(screensaver_time), time_str);
+              } else {
+                // Fallback: старый формат с русскими буквами
+                std::string time_data_old = line.substr(5);
+                size_t space_pos = time_data_old.find(' ');
+                if (space_pos != std::string::npos) {
+                  std::string date_part = time_data_old.substr(0, space_pos);
+                  std::string time_part = time_data_old.substr(space_pos + 1);
+                  
+                  date_part.erase(0, date_part.find_first_not_of(" \t"));
+                  date_part.erase(date_part.find_last_not_of(" \t") + 1);
+                  time_part.erase(0, time_part.find_first_not_of(" \t"));
+                  time_part.erase(time_part.find_last_not_of(" \t") + 1);
+                  
+                  id(current_date) = date_part;
+                  id(current_time) = time_part;
+                  
+                  lv_label_set_text(id(Date), date_part.c_str());
+                  lv_label_set_text(id(time_label), time_part.c_str());
+                  lv_label_set_text(id(Date_modes), date_part.c_str());
+                  lv_label_set_text(id(time_label_modes), time_part.c_str());
+                  lv_label_set_text(id(Date_settings), date_part.c_str());
+                  lv_label_set_text(id(time_label_settings), time_part.c_str());
+                  lv_label_set_text(id(screensaver_date), date_part.c_str());
+                  lv_label_set_text(id(screensaver_time), time_part.c_str());
+                }
               }
             }
             // ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
@@ -452,7 +548,7 @@ interval:
               
               ESP_LOGI("mode", "Mode from Arduino: '%s'", mode_data.c_str());
               
-              // Проверяем, что это не число (индекс режима)
+              // Проверяем, является ли число (индекс режима)
               bool is_number = true;
               for (char c : mode_data) {
                 if (!isdigit(c)) {
@@ -461,7 +557,7 @@ interval:
                 }
               }
               
-              // Если это название режима (не число), обновляем отображение
+              // Если это название режима (текст), обновляем отображение
               if (!is_number && mode_data.length() > 0) {
                 ESP_LOGI("mode", "Mode name received: %s", mode_data.c_str());
                 id(selected_mode) = mode_data;
@@ -476,20 +572,120 @@ interval:
                   lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
                 }
               } else {
-                ESP_LOGW("mode", "Ignoring numeric mode: %s", mode_data.c_str());
+                // Если это число - преобразуем в название
+                int mode_num = atoi(mode_data.c_str());
+                const char* mode_names[] = {"СТАНДАРТНЫЙ", "ЭКОНОМИЧНЫЙ", "ГОСТЕВОЙ", 
+                                            "КОНДИЦИОНЕР", "ВЫСОКИЙ КПД", "СТОП"};
+                if (mode_num >= 0 && mode_num <= 5) {
+                  std::string mode_name = mode_names[mode_num];
+                  id(selected_mode) = mode_name;
+                  id(current_mode_from_arduino) = mode_name;
+                  lv_label_set_text(id(mode_display), mode_name.c_str());
+                  
+                  if (mode_name == "СТОП") {
+                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0xFF0000), 0);
+                  } else {
+                    lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
+                  }
+                }
               }
             }
-            // ========== ОБРАБОТКА PONG ==========
+            // ========== ОБРАБОТКА STATUS (НОВАЯ!) ==========
+            else if (line.rfind("STATUS:", 0) == 0) {
+              std::string status = line.substr(7);
+              
+              ESP_LOGI("status", "Parsing status: %s", status.c_str());
+              
+              int mode, state, supplyFan, exhaustFan;
+              float temp, pid, efficiency;
+              char error[20] = {0};
+              char heating[4] = {0};
+              char cooling[4] = {0};
+              
+              // Парсим все параметры
+              int parsed = sscanf(status.c_str(), 
+                                  "Mode=%d,State=%d,Temp=%f,Error=%19[^,],Heating=%3[^,],Cooling=%3[^,],SupplyFan=%d,ExhaustFan=%d,PID=%f,Efficiency=%f",
+                                  &mode, &state, &temp, error, heating, cooling, 
+                                  &supplyFan, &exhaustFan, &pid, &efficiency);
+              
+              if (parsed >= 10) {
+                id(room_temp) = temp;
+                id(supply_fan_speed) = supplyFan;
+                id(exhaust_fan_speed) = exhaustFan;
+                id(efficiency) = efficiency;
+                id(system_state) = state;
+                id(heating_active) = (strcmp(heating, "ON") == 0);
+                id(cooling_active) = (strcmp(cooling, "ON") == 0);
+                id(pid_output) = pid;
+                
+                // Обновляем ошибку
+                if (strlen(error) > 0) {
+                  id(has_error) = true;
+                  id(current_error) = error;
+                } else {
+                  id(has_error) = false;
+                  id(current_error) = "";
+                }
+                
+                // Обновляем отображение статуса
+                char buffer[20];
+                
+                // Температура в доме (если есть виджет)
+                snprintf(buffer, sizeof(buffer), "%.1f°C", temp);
+                // lv_label_set_text(id(room_temp_label), buffer); // Раскомментировать при наличии виджета
+                
+                // Скорости вентиляторов
+                snprintf(buffer, sizeof(buffer), "%d%%", supplyFan);
+                // lv_label_set_text(id(supply_fan_label), buffer);
+                
+                snprintf(buffer, sizeof(buffer), "%d%%", exhaustFan);
+                // lv_label_set_text(id(exhaust_fan_label), buffer);
+                
+                // КПД
+                snprintf(buffer, sizeof(buffer), "%.1f%%", efficiency);
+                // lv_label_set_text(id(efficiency_label), buffer);
+                
+                // Статус ошибки
+                if (id(has_error)) {
+                  // lv_label_set_text(id(error_label), id(current_error).c_str());
+                  // lv_obj_set_style_text_color(id(error_label), lv_color_hex(0xFF0000), 0);
+                } else {
+                  // lv_label_set_text(id(error_label), "НЕТ ОШИБОК");
+                  // lv_obj_set_style_text_color(id(error_label), lv_color_hex(0x00FF00), 0);
+                }
+                
+                ESP_LOGI("status", "Updated: Mode=%d, State=%d, Temp=%.1f, Error=%s, Heating=%s, Cooling=%s, Supply=%d%%, Exhaust=%d%%, PID=%.1f, Efficiency=%.1f%%",
+                         mode, state, temp, error, heating, cooling, supplyFan, exhaustFan, pid, efficiency);
+              } else {
+                ESP_LOGW("status", "Failed to parse status, got %d params", parsed);
+              }
+            }
+            // ========== ОБРАБОТКА ОШИБОК ОТ ARDUINO (НОВАЯ!) ==========
+            else if (line.rfind("ERROR:", 0) == 0) {
+              std::string error_code = line.substr(6);
+              error_code.erase(0, error_code.find_first_not_of(" \t\n\r"));
+              error_code.erase(error_code.find_last_not_of(" \t\n\r") + 1);
+              
+              ESP_LOGE("arduino", "Arduino error: %s", error_code.c_str());
+              
+              id(has_error) = true;
+              id(current_error) = error_code;
+              
+              // Отображаем ошибку на экране
+              // lv_label_set_text(id(error_label), error_code.c_str());
+              // lv_obj_set_style_text_color(id(error_label), lv_color_hex(0xFF0000), 0);
+              
+              // Можно мигать индикатором или менять фон
+              // lv_obj_set_style_bg_color(id(error_indicator), lv_color_hex(0xFF0000), 0);
+            }
+            // ========== ОБРАБОТКА PONG (НОВАЯ!) ==========
             else if (line.rfind("PONG", 0) == 0) {
               ESP_LOGI("data", "Received PONG from Arduino");
+              id(arduino_connected) = true;
             }
-            // ========== ОБРАБОТКА ОШИБОК ==========
-            else if (line.rfind("ERROR:", 0) == 0) {
-              ESP_LOGE("arduino", "Arduino error: %s", line.c_str());
-            }
-            // ========== ОБРАБОТКА СТАТУСА ==========
-            else if (line.rfind("STATUS:", 0) == 0) {
-              ESP_LOGI("status", "Status from Arduino: %s", line.c_str());
+            // ========== ОБРАБОТКА OK (ПОДТВЕРЖДЕНИЕ) ==========
+            else if (line.rfind("OK:", 0) == 0) {
+              ESP_LOGI("arduino", "Arduino OK: %s", line.c_str());
             }
             
             newline_pos = id(uart_buffer).find('\n');
