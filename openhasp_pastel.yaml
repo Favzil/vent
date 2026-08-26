@@ -395,10 +395,6 @@ interval:
                   id(temp_outdoor) = t2;
                   id(temp_from_home) = t3;
                   id(temp_to_home) = t4;
-                  
-                  char buffer[10];
-                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_street));
-                  // Обновление через actions будет позже
                 }
               }
             }
@@ -955,7 +951,8 @@ lvgl:
                   x: 2
                   y: 62
                   width: 80
-                  height: 10                  points:
+                  height: 10
+                  points:
                     - 0, 0
                     - 129, 0
                   line_color: 0x805705
