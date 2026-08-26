@@ -3,11 +3,15 @@ esphome:
   friendly_name: "4848s040"
   on_boot:
     then:
-      - lambda: |-
-          ESP_LOGI("boot", "ESP32-S3 booting...");
-          id(uart_arduino).write_str("GET_MODE\n");
-          id(uart_arduino).write_str("GET_DATA\n");
-          id(uart_arduino).write_str("GET_STATUS\n");
+      - uart.write: 
+          id: uart_arduino
+          data: "GET_MODE\n"
+      - uart.write:
+          id: uart_arduino
+          data: "GET_DATA\n"
+      - uart.write:
+          id: uart_arduino
+          data: "GET_STATUS\n"
 
 esp32:
   variant: esp32s3
@@ -210,8 +214,6 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              // Исправлено: использование lvgl.widget.show_page
-              lvgl.widget.show_page("screensaver_page");
             }
           }
           
@@ -220,15 +222,6 @@ interval:
             if (id(arduino_connected)) {
               ESP_LOGW("data", "No data from Arduino for 15 seconds!");
               id(arduino_connected) = false;
-              // Исправлено: обновление текста через lvgl.widget.update_label
-              lvgl.widget.update_label("gradussulicy", "--.-");
-              lvgl.widget.update_label("widget_1781262306198_b9dnjbboi", "--.-");
-              lvgl.widget.update_label("widget_1781262307812_3m3qdg397", "--.-");
-              lvgl.widget.update_label("widget_1781262308709_dnoiw7el6", "--.-");
-              lvgl.widget.update_label("lv_label_0", "--%");
-              lvgl.widget.update_label("widget_1781261697547_036jpjyoc", "--%");
-              lvgl.widget.update_arc("widget_1781261697547_smtgd7w9q", 0);
-              lvgl.widget.update_arc("widget_1781261697547_jcbrfzs59", 0);
             }
           }
           
@@ -254,44 +247,30 @@ interval:
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
-                  lvgl.widget.update_label("mode_display", "СТАНДАРТНЫЙ");
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
                   id(uart_arduino).write_str("MODE:СТАНДАРТНЫЙ\n");
                   break;
                 case 2:
                   id(selected_mode) = "ЭКОНОМИЧНЫЙ";
-                  lvgl.widget.update_label("mode_display", "ЭКОНОМИЧНЫЙ");
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
                   id(uart_arduino).write_str("MODE:ЭКОНОМИЧНЫЙ\n");
                   break;
                 case 3:
                   id(selected_mode) = "ГОСТЕВОЙ";
-                  lvgl.widget.update_label("mode_display", "ГОСТЕВОЙ");
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
                   id(uart_arduino).write_str("MODE:ГОСТЕВОЙ\n");
                   break;
                 case 4:
                   id(selected_mode) = "КОНДИЦИОНЕР";
-                  lvgl.widget.update_label("mode_display", "КОНДИЦИОНЕР");
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
                   id(uart_arduino).write_str("MODE:КОНДИЦИОНЕР\n");
                   break;
                 case 5:
                   id(selected_mode) = "ВЫСОКИЙ КПД";
-                  lvgl.widget.update_label("mode_display", "ВЫСОКИЙ КПД");
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
                   id(uart_arduino).write_str("MODE:ВЫСОКИЙ КПД\n");
                   break;
                 case 6:
                   id(selected_mode) = "СТОП";
-                  lvgl.widget.update_label("mode_display", "СТОП");
-                  lvgl.widget.update_label_color("mode_display", 0xFF0000);
                   id(uart_arduino).write_str("MODE:СТОП\n");
                   break;
               }
               ESP_LOGI("mode", "Sent to Arduino: %s", id(selected_mode).c_str());
-              
-              lvgl.page.show("main_page");
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
@@ -300,23 +279,21 @@ interval:
 
   - interval: 3s
     then:
-      - lambda: |-
-          ESP_LOGD("data", "Requesting data from Arduino");
-          id(uart_arduino).write_str("GET_DATA\n");
-          id(last_data_request) = millis() / 1000;
-          id(data_request_pending) = true;
+      - uart.write:
+          id: uart_arduino
+          data: "GET_DATA\n"
 
   - interval: 5s
     then:
-      - lambda: |-
-          ESP_LOGD("mode", "Requesting mode from Arduino");
-          id(uart_arduino).write_str("GET_MODE\n");
+      - uart.write:
+          id: uart_arduino
+          data: "GET_MODE\n"
 
   - interval: 10s
     then:
-      - lambda: |-
-          ESP_LOGD("status", "Requesting status from Arduino");
-          id(uart_arduino).write_str("GET_STATUS\n");
+      - uart.write:
+          id: uart_arduino
+          data: "GET_STATUS\n"
 
   - interval: 100ms
     then:
@@ -382,15 +359,6 @@ interval:
                 
                 id(current_date) = date_str;
                 id(current_time) = time_str;
-                
-                lvgl.widget.update_label("Date", date_str);
-                lvgl.widget.update_label("time_label", time_str);
-                lvgl.widget.update_label("Date_modes", date_str);
-                lvgl.widget.update_label("time_label_modes", time_str);
-                lvgl.widget.update_label("Date_settings", date_str);
-                lvgl.widget.update_label("time_label_settings", time_str);
-                lvgl.widget.update_label("screensaver_date", date_str);
-                lvgl.widget.update_label("screensaver_time", time_str);
               }
             }
             // ОБРАБОТКА ТЕМПЕРАТУР
@@ -429,18 +397,8 @@ interval:
                   id(temp_to_home) = t4;
                   
                   char buffer[10];
-                  
                   snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_street));
-                  lvgl.widget.update_label("gradussulicy", buffer);
-                  
-                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_outdoor));
-                  lvgl.widget.update_label("widget_1781262306198_b9dnjbboi", buffer);
-                  
-                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_from_home));
-                  lvgl.widget.update_label("widget_1781262307812_3m3qdg397", buffer);
-                  
-                  snprintf(buffer, sizeof(buffer), "%+.1f", id(temp_to_home));
-                  lvgl.widget.update_label("widget_1781262308709_dnoiw7el6", buffer);
+                  // Обновление через actions будет позже
                 }
               }
             }
@@ -464,16 +422,6 @@ interval:
                 if (parsed1 == 1 && parsed2 == 1) {
                   id(filter_supply) = supply;
                   id(filter_exhaust) = exhaust;
-                  
-                  char buffer[10];
-                  
-                  snprintf(buffer, sizeof(buffer), "%d%%", supply);
-                  lvgl.widget.update_label("lv_label_0", buffer);
-                  lvgl.widget.update_arc("widget_1781261697547_smtgd7w9q", supply);
-                  
-                  snprintf(buffer, sizeof(buffer), "%d%%", exhaust);
-                  lvgl.widget.update_label("widget_1781261697547_036jpjyoc", buffer);
-                  lvgl.widget.update_arc("widget_1781261697547_jcbrfzs59", exhaust);
                 }
               }
             }
@@ -496,28 +444,13 @@ interval:
               if (!is_number && mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                lvgl.widget.update_label("mode_display", mode_data.c_str());
-                
-                if (mode_data == "СТОП") {
-                  lvgl.widget.update_label_color("mode_display", 0xFF0000);
-                } else {
-                  lvgl.widget.update_label_color("mode_display", 0x0F0F33);
-                }
               } else {
                 int mode_num = atoi(mode_data.c_str());
                 const char* mode_names[] = {"СТАНДАРТНЫЙ", "ЭКОНОМИЧНЫЙ", "ГОСТЕВОЙ", 
                                             "КОНДИЦИОНЕР", "ВЫСОКИЙ КПД", "СТОП"};
                 if (mode_num >= 0 && mode_num <= 5) {
-                  std::string mode_name = mode_names[mode_num];
-                  id(selected_mode) = mode_name;
-                  id(current_mode_from_arduino) = mode_name;
-                  lvgl.widget.update_label("mode_display", mode_name.c_str());
-                  
-                  if (mode_name == "СТОП") {
-                    lvgl.widget.update_label_color("mode_display", 0xFF0000);
-                  } else {
-                    lvgl.widget.update_label_color("mode_display", 0x0F0F33);
-                  }
+                  id(selected_mode) = mode_names[mode_num];
+                  id(current_mode_from_arduino) = mode_names[mode_num];
                 }
               }
             }
@@ -565,7 +498,6 @@ interval:
               error_code.erase(error_code.find_last_not_of(" \t\n\r") + 1);
               
               ESP_LOGE("arduino", "Arduino error: %s", error_code.c_str());
-              
               id(has_error) = true;
               id(current_error) = error_code;
             }
@@ -737,7 +669,6 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
-                  lvgl.page.show("main_page");
             else:
               - lambda: |-
                   ESP_LOGI("touch", "Resetting inactivity timer");
@@ -848,16 +779,12 @@ lvgl:
               then:
                 - lambda: |-
                     ESP_LOGI("wakeup", "Wakeup button clicked!");
-                - if:
-                    condition:
-                      lambda: 'return id(screensaver_active);'
-                    then:
-                      - lambda: |-
-                          ESP_LOGI("wakeup", "Waking up from screensaver via button");
-                          id(screensaver_active) = false;
-                          id(inactivity_timer) = 0;
-                          id(wakeup_block) = 5;
-                          lvgl.page.show("main_page");
+                    if (id(screensaver_active)) {
+                      ESP_LOGI("wakeup", "Waking up from screensaver via button");
+                      id(screensaver_active) = false;
+                      id(inactivity_timer) = 0;
+                      id(wakeup_block) = 5;
+                    }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
@@ -1028,8 +955,7 @@ lvgl:
                   x: 2
                   y: 62
                   width: 80
-                  height: 10
-                  points:
+                  height: 10                  points:
                     - 0, 0
                     - 129, 0
                   line_color: 0x805705
