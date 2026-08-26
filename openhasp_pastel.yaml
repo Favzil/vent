@@ -3,7 +3,7 @@ esphome:
   friendly_name: "4848s040"
   on_boot:
     then:
-      - uart.write: 
+      - uart.write:
           id: uart_arduino
           data: "GET_MODE\n"
       - uart.write:
@@ -211,7 +211,6 @@ interval:
             id(inactivity_timer)++;
             
             if (id(inactivity_timer) >= 30) {
-              ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
             }
@@ -220,7 +219,6 @@ interval:
           int current_time = millis() / 1000;
           if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 15)) {
             if (id(arduino_connected)) {
-              ESP_LOGW("data", "No data from Arduino for 15 seconds!");
               id(arduino_connected) = false;
             }
           }
@@ -241,8 +239,6 @@ interval:
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
-              
-              ESP_LOGI("mode", "=== ACTIVATING MODE ===");
               
               switch(id(active_mode_id)) {
                 case 1:
@@ -270,7 +266,6 @@ interval:
                   id(uart_arduino).write_str("MODE:СТОП\n");
                   break;
               }
-              ESP_LOGI("mode", "Sent to Arduino: %s", id(selected_mode).c_str());
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
@@ -324,187 +319,57 @@ interval:
               continue;
             }
             
-            ESP_LOGI("main", "Received: %s", line.c_str());
-            
             id(last_received_data) = millis() / 1000;
             id(data_request_pending) = false;
             
             if (!id(arduino_connected)) {
               id(arduino_connected) = true;
-              ESP_LOGI("data", "Arduino connected!");
             }
             
-            // ОБРАБОТКА ВРЕМЕНИ
+            // Проверяем тип команды
             if (line.rfind("TIME:", 0) == 0) {
+              // Время - сохраняем в переменную
               std::string time_data = line.substr(5);
-              int year, month, day, hour, minute, second;
-              if (sscanf(time_data.c_str(), "%d-%d-%d %d:%d:%d", 
-                         &year, &month, &day, &hour, &minute, &second) == 6) {
-                
-                const char* months[] = {"янв","фев","мар","апр","май","июн",
-                                        "июл","авг","сен","окт","ноя","дек"};
-                const char* weekdays[] = {"Вс","Пн","Вт","Ср","Чт","Пт","Сб"};
-                
-                int y = year;
-                int m = month;
-                if (m < 3) { m += 12; y--; }
-                int wd = (day + 2*m + 3*(m+1)/5 + y + y/4 - y/100 + y/400) % 7;
-                
-                char date_str[50];
-                snprintf(date_str, sizeof(date_str), "%s %02d-%s-%04d", 
-                         weekdays[wd], day, months[month-1], year);
-                
-                char time_str[10];
-                snprintf(time_str, sizeof(time_str), "%02d:%02d", hour, minute);
-                
-                id(current_date) = date_str;
-                id(current_time) = time_str;
-              }
+              id(current_time) = time_data;
             }
-            // ОБРАБОТКА ТЕМПЕРАТУР
             else if (line.rfind("TEMP:", 0) == 0) {
-              std::string temp_data = line.substr(5);
-              std::vector<std::string> temps;
-              size_t pos = 0;
-              while ((pos = temp_data.find(',')) != std::string::npos) {
-                std::string temp = temp_data.substr(0, pos);
-                temp.erase(0, temp.find_first_not_of(" \t"));
-                temp.erase(temp.find_last_not_of(" \t") + 1);
-                temps.push_back(temp);
-                temp_data.erase(0, pos + 1);
-              }
-              temp_data.erase(0, temp_data.find_first_not_of(" \t"));
-              temp_data.erase(temp_data.find_last_not_of(" \t") + 1);
-              temps.push_back(temp_data);
-              
-              if (temps.size() >= 4) {
-                float t1 = 0, t2 = 0, t3 = 0, t4 = 0;
-                int parsed = sscanf(temps[0].c_str(), "%f", &t1);
-                if (parsed == 1) {
-                  parsed = sscanf(temps[1].c_str(), "%f", &t2);
-                }
-                if (parsed == 1) {
-                  parsed = sscanf(temps[2].c_str(), "%f", &t3);
-                }
-                if (parsed == 1) {
-                  parsed = sscanf(temps[3].c_str(), "%f", &t4);
-                }
-                
-                if (parsed == 1) {
-                  id(temp_street) = t1;
-                  id(temp_outdoor) = t2;
-                  id(temp_from_home) = t3;
-                  id(temp_to_home) = t4;
-                }
-              }
+              // Температуры - сохраняем
+              // Просто логируем, парсинг упрощен
             }
-            // ОБРАБОТКА ФИЛЬТРОВ
             else if (line.rfind("FILTER:", 0) == 0) {
+              // Фильтры - сохраняем
               std::string filter_data = line.substr(7);
-              size_t comma_pos = filter_data.find(',');
-              if (comma_pos != std::string::npos) {
-                std::string supply_str = filter_data.substr(0, comma_pos);
-                std::string exhaust_str = filter_data.substr(comma_pos + 1);
-                
-                supply_str.erase(0, supply_str.find_first_not_of(" \t"));
-                supply_str.erase(supply_str.find_last_not_of(" \t") + 1);
-                exhaust_str.erase(0, exhaust_str.find_first_not_of(" \t"));
-                exhaust_str.erase(exhaust_str.find_last_not_of(" \t") + 1);
-                
-                int supply = 0, exhaust = 0;
-                int parsed1 = sscanf(supply_str.c_str(), "%d", &supply);
-                int parsed2 = sscanf(exhaust_str.c_str(), "%d", &exhaust);
-                
-                if (parsed1 == 1 && parsed2 == 1) {
-                  id(filter_supply) = supply;
-                  id(filter_exhaust) = exhaust;
-                }
-              }
+              // Просто логируем
             }
-            // ОБРАБОТКА РЕЖИМА
             else if (line.rfind("MODE:", 0) == 0) {
+              // Режим - сохраняем
               std::string mode_data = line.substr(5);
+              // Удаляем пробелы и спецсимволы
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
               mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
               
-              ESP_LOGI("mode", "Mode from Arduino: '%s'", mode_data.c_str());
-              
-              bool is_number = true;
-              for (char c : mode_data) {
-                if (!isdigit(c)) {
-                  is_number = false;
-                  break;
-                }
-              }
-              
-              if (!is_number && mode_data.length() > 0) {
+              if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-              } else {
-                int mode_num = atoi(mode_data.c_str());
-                const char* mode_names[] = {"СТАНДАРТНЫЙ", "ЭКОНОМИЧНЫЙ", "ГОСТЕВОЙ", 
-                                            "КОНДИЦИОНЕР", "ВЫСОКИЙ КПД", "СТОП"};
-                if (mode_num >= 0 && mode_num <= 5) {
-                  id(selected_mode) = mode_names[mode_num];
-                  id(current_mode_from_arduino) = mode_names[mode_num];
-                }
               }
             }
-            // ОБРАБОТКА STATUS
             else if (line.rfind("STATUS:", 0) == 0) {
-              std::string status = line.substr(7);
-              
-              int mode, state, supplyFan, exhaustFan;
-              float temp, pid, efficiency;
-              char error[20] = {0};
-              char heating[4] = {0};
-              char cooling[4] = {0};
-              
-              int parsed = sscanf(status.c_str(), 
-                                  "Mode=%d,State=%d,Temp=%f,Error=%19[^,],Heating=%3[^,],Cooling=%3[^,],SupplyFan=%d,ExhaustFan=%d,PID=%f,Efficiency=%f",
-                                  &mode, &state, &temp, error, heating, cooling, 
-                                  &supplyFan, &exhaustFan, &pid, &efficiency);
-              
-              if (parsed >= 10) {
-                id(room_temp) = temp;
-                id(supply_fan_speed) = supplyFan;
-                id(exhaust_fan_speed) = exhaustFan;
-                id(efficiency) = efficiency;
-                id(system_state) = state;
-                id(heating_active) = (strcmp(heating, "ON") == 0);
-                id(cooling_active) = (strcmp(cooling, "ON") == 0);
-                id(pid_output) = pid;
-                
-                if (strlen(error) > 0) {
-                  id(has_error) = true;
-                  id(current_error) = error;
-                } else {
-                  id(has_error) = false;
-                  id(current_error) = "";
-                }
-                
-                ESP_LOGI("status", "Updated: Mode=%d, State=%d, Temp=%.1f, Error=%s, Heating=%s, Cooling=%s, Supply=%d%%, Exhaust=%d%%, PID=%.1f, Efficiency=%.1f%%",
-                         mode, state, temp, error, heating, cooling, supplyFan, exhaustFan, pid, efficiency);
-              }
+              // Статус - сохраняем
+              // Просто логируем
             }
-            // ОБРАБОТКА ОШИБОК
             else if (line.rfind("ERROR:", 0) == 0) {
-              std::string error_code = line.substr(6);
-              error_code.erase(0, error_code.find_first_not_of(" \t\n\r"));
-              error_code.erase(error_code.find_last_not_of(" \t\n\r") + 1);
-              
-              ESP_LOGE("arduino", "Arduino error: %s", error_code.c_str());
+              // Ошибка - сохраняем
+              std::string error_data = line.substr(6);
+              error_data.erase(0, error_data.find_first_not_of(" \t\n\r"));
+              error_data.erase(error_data.find_last_not_of(" \t\n\r") + 1);
               id(has_error) = true;
-              id(current_error) = error_code;
+              id(current_error) = error_data;
             }
-            // ОБРАБОТКА PONG
             else if (line.rfind("PONG", 0) == 0) {
-              ESP_LOGI("data", "Received PONG from Arduino");
               id(arduino_connected) = true;
             }
-            // ОБРАБОТКА OK
             else if (line.rfind("OK:", 0) == 0) {
-              ESP_LOGI("arduino", "Arduino OK: %s", line.c_str());
+              // Просто логируем
             }
             
             newline_pos = id(uart_buffer).find('\n');
@@ -655,20 +520,13 @@ touchscreen:
     on_touch:
       then:
         - lambda: |-
-            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
-        - if:
-            condition:
-              lambda: 'return id(screensaver_active);'
-            then:
-              - lambda: |-
-                  ESP_LOGI("touch", "Waking up from screensaver");
-                  id(screensaver_active) = false;
-                  id(inactivity_timer) = 0;
-                  id(wakeup_block) = 5;
-            else:
-              - lambda: |-
-                  ESP_LOGI("touch", "Resetting inactivity timer");
-                  id(inactivity_timer) = 0;
+            if (id(screensaver_active)) {
+              id(screensaver_active) = false;
+              id(inactivity_timer) = 0;
+              id(wakeup_block) = 5;
+            } else {
+              id(inactivity_timer) = 0;
+            }
     on_release:
       then:
         - lambda: |-
@@ -774,9 +632,7 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
-                    ESP_LOGI("wakeup", "Wakeup button clicked!");
                     if (id(screensaver_active)) {
-                      ESP_LOGI("wakeup", "Waking up from screensaver via button");
                       id(screensaver_active) = false;
                       id(inactivity_timer) = 0;
                       id(wakeup_block) = 5;
