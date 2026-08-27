@@ -193,6 +193,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: last_screensaver_switch
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 # UART для связи с Arduino
 uart:
@@ -220,7 +224,7 @@ interval:
             if (id(inactivity_timer) >= 30) {
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              lvgl.page.show("screensaver_page");
+              id(last_screensaver_switch) = true;
             }
           }
           
@@ -237,6 +241,16 @@ interval:
             heartbeat_counter = 0;
             id(uart_arduino).write_str("PING\n");
           }
+
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(last_screensaver_switch);'
+          then:
+            - lvgl.page.show: screensaver_page
+            - lambda: |-
+                id(last_screensaver_switch) = false;
 
   - interval: 100ms
     then:
@@ -342,7 +356,7 @@ interval:
               // Просто логируем
             }
             else if (line.rfind("FILTER:", 0) == 0) {
-              std::string filter_data = line.substr(7);
+              // Просто логируем
             }
             else if (line.rfind("MODE:", 0) == 0) {
               std::string mode_data = line.substr(5);
@@ -352,7 +366,6 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                lvgl.widget.update_label("mode_display", mode_data.c_str());
               }
             }
             else if (line.rfind("STATUS:", 0) == 0) {
@@ -527,8 +540,7 @@ touchscreen:
               id(screensaver_active) = false;
               id(inactivity_timer) = 0;
               id(wakeup_block) = 5;
-              // ВАЖНО: переключаем страницу на главную
-              lvgl.page.show("main_page");
+              id(last_screensaver_switch) = true;
             } else {
               id(inactivity_timer) = 0;
             }
@@ -536,6 +548,21 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Released");
+
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screensaver_active);'
+          then:
+            - lvgl.page.show: screensaver_page
+      - if:
+          condition:
+            lambda: 'return !id(screensaver_active) && id(last_screensaver_switch);'
+          then:
+            - lvgl.page.show: main_page
+            - lambda: |-
+                id(last_screensaver_switch) = false;
 
 # LVGL
 lvgl:
@@ -643,8 +670,7 @@ lvgl:
                       id(screensaver_active) = false;
                       id(inactivity_timer) = 0;
                       id(wakeup_block) = 5;
-                      // ВАЖНО: переключаем страницу на главную
-                      lvgl.page.show("main_page");
+                      id(last_screensaver_switch) = true;
                     }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
