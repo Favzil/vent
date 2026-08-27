@@ -252,6 +252,21 @@ interval:
             - lambda: |-
                 id(last_screensaver_switch) = false;
 
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screensaver_active) && !id(last_screensaver_switch);'
+          then:
+            - lvgl.page.show: screensaver_page
+      - if:
+          condition:
+            lambda: 'return !id(screensaver_active) && id(last_screensaver_switch);'
+          then:
+            - lvgl.page.show: main_page
+            - lambda: |-
+                id(last_screensaver_switch) = false;
+
   - interval: 100ms
     then:
       - lambda: |-
@@ -548,21 +563,6 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Released");
-
-  - interval: 500ms
-    then:
-      - if:
-          condition:
-            lambda: 'return id(screensaver_active);'
-          then:
-            - lvgl.page.show: screensaver_page
-      - if:
-          condition:
-            lambda: 'return !id(screensaver_active) && id(last_screensaver_switch);'
-          then:
-            - lvgl.page.show: main_page
-            - lambda: |-
-                id(last_screensaver_switch) = false;
 
 # LVGL
 lvgl:
