@@ -12,6 +12,13 @@ esphome:
       - uart.write:
           id: uart_arduino
           data: "GET_STATUS\n"
+      - lvgl.page.show: main_page
+      - delay: 100ms
+      - lambda: |-
+          id(current_brightness) = id(normal_brightness);
+          auto call = id(display_backlight).make_call();
+          call.set_brightness(id(current_brightness));
+          call.perform();
 
 esp32:
   variant: esp32s3
@@ -77,7 +84,7 @@ globals:
   - id: wakeup_block
     type: int
     restore_value: no
-    initial_value: '0'
+    initial_value: '5'
   - id: normal_brightness
     type: float
     restore_value: no
@@ -213,6 +220,7 @@ interval:
             if (id(inactivity_timer) >= 30) {
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
+              lvgl.page.show("screensaver_page");
             }
           }
           
@@ -326,39 +334,31 @@ interval:
               id(arduino_connected) = true;
             }
             
-            // Проверяем тип команды
             if (line.rfind("TIME:", 0) == 0) {
-              // Время - сохраняем в переменную
               std::string time_data = line.substr(5);
               id(current_time) = time_data;
             }
             else if (line.rfind("TEMP:", 0) == 0) {
-              // Температуры - сохраняем
-              // Просто логируем, парсинг упрощен
-            }
-            else if (line.rfind("FILTER:", 0) == 0) {
-              // Фильтры - сохраняем
-              std::string filter_data = line.substr(7);
               // Просто логируем
             }
+            else if (line.rfind("FILTER:", 0) == 0) {
+              std::string filter_data = line.substr(7);
+            }
             else if (line.rfind("MODE:", 0) == 0) {
-              // Режим - сохраняем
               std::string mode_data = line.substr(5);
-              // Удаляем пробелы и спецсимволы
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
               mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
               
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
+                lvgl.widget.update_label("mode_display", mode_data.c_str());
               }
             }
             else if (line.rfind("STATUS:", 0) == 0) {
-              // Статус - сохраняем
               // Просто логируем
             }
             else if (line.rfind("ERROR:", 0) == 0) {
-              // Ошибка - сохраняем
               std::string error_data = line.substr(6);
               error_data.erase(0, error_data.find_first_not_of(" \t\n\r"));
               error_data.erase(error_data.find_last_not_of(" \t\n\r") + 1);
@@ -520,10 +520,15 @@ touchscreen:
     on_touch:
       then:
         - lambda: |-
+            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+            
             if (id(screensaver_active)) {
+              ESP_LOGI("touch", "Waking up from screensaver");
               id(screensaver_active) = false;
               id(inactivity_timer) = 0;
               id(wakeup_block) = 5;
+              // ВАЖНО: переключаем страницу на главную
+              lvgl.page.show("main_page");
             } else {
               id(inactivity_timer) = 0;
             }
@@ -632,10 +637,14 @@ lvgl:
             on_click:
               then:
                 - lambda: |-
+                    ESP_LOGI("wakeup", "Wakeup button clicked!");
                     if (id(screensaver_active)) {
+                      ESP_LOGI("wakeup", "Waking up from screensaver via button");
                       id(screensaver_active) = false;
                       id(inactivity_timer) = 0;
                       id(wakeup_block) = 5;
+                      // ВАЖНО: переключаем страницу на главную
+                      lvgl.page.show("main_page");
                     }
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
