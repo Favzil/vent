@@ -327,6 +327,7 @@ interval:
           id: uart_arduino
           data: "GET_STATUS\n"
 
+  # ========== ГЛАВНЫЙ ОБРАБОТЧИК UART ==========
   - interval: 100ms
     then:
       - lambda: |-
@@ -363,16 +364,173 @@ interval:
               id(arduino_connected) = true;
             }
             
+            // ========== ОБРАБОТКА ВРЕМЕНИ ==========
             if (line.rfind("TIME:", 0) == 0) {
               std::string time_data = line.substr(5);
               id(current_time) = time_data;
+              
+              // Парсим время для отображения (только HH:MM)
+              std::string time_short = time_data;
+              size_t space_pos = time_short.find(' ');
+              if (space_pos != std::string::npos) {
+                time_short = time_short.substr(space_pos + 1);
+                if (time_short.length() >= 5) {
+                  time_short = time_short.substr(0, 5);
+                }
+              }
+              
+              // Обновляем виджеты времени
+              auto time_label = lvgl.label.get_widget("time_label");
+              if (time_label) {
+                lvgl.label.update(time_label, "text", time_short);
+              }
+              auto time_label_modes = lvgl.label.get_widget("time_label_modes");
+              if (time_label_modes) {
+                lvgl.label.update(time_label_modes, "text", time_short);
+              }
+              auto time_label_settings = lvgl.label.get_widget("time_label_settings");
+              if (time_label_settings) {
+                lvgl.label.update(time_label_settings, "text", time_short);
+              }
+              
+              // Обновляем screensaver время
+              auto ss_time = lvgl.label.get_widget("screensaver_time");
+              if (ss_time) {
+                lvgl.label.update(ss_time, "text", time_short);
+              }
+              
+              // Парсим дату для screensaver
+              // TIME:2026-08-28 14:32:00 -> 28-авг-2026
+              if (time_data.length() >= 10) {
+                std::string date_part = time_data.substr(0, 10); // 2026-08-28
+                int year = 0, month = 0, day = 0;
+                try {
+                  year = std::stoi(date_part.substr(0, 4));
+                  month = std::stoi(date_part.substr(5, 2));
+                  day = std::stoi(date_part.substr(8, 2));
+                } catch (...) {
+                  // ignore parse errors
+                }
+                
+                const char* months[] = {"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"};
+                char date_str[32];
+                if (year > 2000 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                  snprintf(date_str, sizeof(date_str), "%d-%s-%d", day, months[month-1], year);
+                } else {
+                  snprintf(date_str, sizeof(date_str), "-- --- ----");
+                }
+                id(current_date) = date_str;
+                
+                auto date_label = lvgl.label.get_widget("Date");
+                if (date_label) {
+                  lvgl.label.update(date_label, "text", date_str);
+                }
+                auto date_modes = lvgl.label.get_widget("Date_modes");
+                if (date_modes) {
+                  lvgl.label.update(date_modes, "text", date_str);
+                }
+                auto date_settings = lvgl.label.get_widget("Date_settings");
+                if (date_settings) {
+                  lvgl.label.update(date_settings, "text", date_str);
+                }
+                auto ss_date = lvgl.label.get_widget("screensaver_date");
+                if (ss_date) {
+                  lvgl.label.update(ss_date, "text", date_str);
+                }
+              }
             }
+            // ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
             else if (line.rfind("TEMP:", 0) == 0) {
-              // Просто логируем
+              // TEMP:12.5,15.3,18.7,21.0
+              std::string temp_data = line.substr(5);
+              // Парсим через запятую
+              size_t pos1 = temp_data.find(',');
+              if (pos1 != std::string::npos) {
+                try {
+                  float t1 = std::stof(temp_data.substr(0, pos1));
+                  size_t pos2 = temp_data.find(',', pos1+1);
+                  if (pos2 != std::string::npos) {
+                    float t2 = std::stof(temp_data.substr(pos1+1, pos2-pos1-1));
+                    size_t pos3 = temp_data.find(',', pos2+1);
+                    if (pos3 != std::string::npos) {
+                      float t3 = std::stof(temp_data.substr(pos2+1, pos3-pos2-1));
+                      float t4 = std::stof(temp_data.substr(pos3+1));
+                      
+                      id(temp_street) = t1;    // с улицы
+                      id(temp_outdoor) = t2;   // на улицу
+                      id(temp_from_home) = t3; // из дома
+                      id(temp_to_home) = t4;   // в дом
+                      
+                      // Обновляем виджеты
+                      char buf[16];
+                      
+                      auto label = lvgl.label.get_widget("gradussulicy");
+                      if (label) {
+                        snprintf(buf, sizeof(buf), "%+.1f", t1);
+                        lvgl.label.update(label, "text", buf);
+                      }
+                      label = lvgl.label.get_widget("widget_1781262306198_b9dnjbboi");
+                      if (label) {
+                        snprintf(buf, sizeof(buf), "%+.1f", t2);
+                        lvgl.label.update(label, "text", buf);
+                      }
+                      label = lvgl.label.get_widget("widget_1781262307812_3m3qdg397");
+                      if (label) {
+                        snprintf(buf, sizeof(buf), "%+.1f", t3);
+                        lvgl.label.update(label, "text", buf);
+                      }
+                      label = lvgl.label.get_widget("widget_1781262308709_dnoiw7el6");
+                      if (label) {
+                        snprintf(buf, sizeof(buf), "%+.1f", t4);
+                        lvgl.label.update(label, "text", buf);
+                      }
+                    }
+                  }
+                } catch (...) {
+                  // ignore parse errors
+                }
+              }
             }
+            // ========== ОБРАБОТКА ФИЛЬТРОВ ==========
             else if (line.rfind("FILTER:", 0) == 0) {
-              // Просто логируем
+              std::string filter_data = line.substr(7);
+              size_t pos = filter_data.find(',');
+              if (pos != std::string::npos) {
+                try {
+                  int supply = std::stoi(filter_data.substr(0, pos));
+                  int exhaust = std::stoi(filter_data.substr(pos+1));
+                  
+                  id(filter_supply) = supply;
+                  id(filter_exhaust) = exhaust;
+                  
+                  // Обновляем виджеты фильтров
+                  char buf[16];
+                  
+                  auto arc_supply = lvgl.arc.get_widget("widget_1781261697547_smtgd7w9q");
+                  if (arc_supply) {
+                    lvgl.arc.update(arc_supply, "value", supply);
+                  }
+                  auto label_supply = lvgl.label.get_widget("lv_label_0");
+                  if (label_supply) {
+                    snprintf(buf, sizeof(buf), "%d%%", supply);
+                    lvgl.label.update(label_supply, "text", buf);
+                  }
+                  
+                  auto arc_exhaust = lvgl.arc.get_widget("widget_1781261697547_jcbrfzs59");
+                  if (arc_exhaust) {
+                    lvgl.arc.update(arc_exhaust, "value", exhaust);
+                  }
+                  auto label_exhaust = lvgl.label.get_widget("widget_1781261697547_036jpjyoc");
+                  if (label_exhaust) {
+                    snprintf(buf, sizeof(buf), "%d%%", exhaust);
+                    lvgl.label.update(label_exhaust, "text", buf);
+                  }
+                } catch (...) {
+                  // ignore parse errors
+                }
+              }
             }
+            // ========== ОБРАБОТКА РЕЖИМА ==========
             else if (line.rfind("MODE:", 0) == 0) {
               std::string mode_data = line.substr(5);
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
@@ -381,22 +539,77 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
+                
+                // Обновляем главный экран
+                auto mode_display = lvgl.label.get_widget("mode_display");
+                if (mode_display) {
+                  lvgl.label.update(mode_display, "text", mode_data);
+                }
               }
             }
+            // ========== ОБРАБОТКА СТАТУСА ==========
             else if (line.rfind("STATUS:", 0) == 0) {
-              // Просто логируем
-            }
-            else if (line.rfind("ERROR:", 0) == 0) {
-              std::string error_data = line.substr(6);
-              error_data.erase(0, error_data.find_first_not_of(" \t\n\r"));
-              error_data.erase(error_data.find_last_not_of(" \t\n\r") + 1);
-              id(has_error) = true;
-              id(current_error) = error_data;
+              // STATUS:Mode=1,State=0,Temp=22.5,Error=OK,Heat=OFF,Cool=OFF,Speed=70,70,PID=0.0,Eff=85.0
+              std::string status = line.substr(7);
+              
+              // Парсим температуру в доме
+              size_t temp_pos = status.find("Temp=");
+              if (temp_pos != std::string::npos) {
+                size_t comma_pos = status.find(',', temp_pos);
+                if (comma_pos != std::string::npos) {
+                  try {
+                    std::string temp_str = status.substr(temp_pos+5, comma_pos-temp_pos-5);
+                    id(room_temp) = std::stof(temp_str);
+                  } catch (...) {
+                    // ignore parse errors
+                  }
+                }
+              }
+              
+              // Парсим КПД
+              size_t eff_pos = status.find("Eff=");
+              if (eff_pos != std::string::npos) {
+                try {
+                  id(efficiency) = std::stof(status.substr(eff_pos+4));
+                } catch (...) {
+                  // ignore parse errors
+                }
+              }
+              
+              // Парсим состояние ошибки
+              size_t err_pos = status.find("Error=");
+              if (err_pos != std::string::npos) {
+                size_t comma_pos = status.find(',', err_pos);
+                if (comma_pos != std::string::npos) {
+                  std::string err_str = status.substr(err_pos+6, comma_pos-err_pos-6);
+                  if (err_str == "OK") {
+                    id(has_error) = false;
+                    id(current_error) = "";
+                  } else {
+                    id(has_error) = true;
+                    id(current_error) = err_str;
+                  }
+                }
+              }
+              
+              // Парсим состояние системы
+              size_t state_pos = status.find("State=");
+              if (state_pos != std::string::npos) {
+                size_t comma_pos = status.find(',', state_pos);
+                if (comma_pos != std::string::npos) {
+                  try {
+                    id(system_state) = std::stoi(status.substr(state_pos+6, comma_pos-state_pos-6));
+                  } catch (...) {
+                    // ignore parse errors
+                  }
+                }
+              }
             }
             else if (line.rfind("PONG", 0) == 0) {
               id(arduino_connected) = true;
             }
             else if (line.rfind("OK:", 0) == 0) {
+              // OK:MODE_ACCEPTED - режим принят
               // Просто логируем
             }
             
@@ -750,8 +963,7 @@ lvgl:
                   height: 26
                   text: "°C"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
+                  text_align: LEFT                  long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
                   id: gradussulicy
