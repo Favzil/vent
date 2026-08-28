@@ -357,10 +357,10 @@ interval:
                   time_short = time_short.substr(0, 5);
                 }
               }
-              lvgl.label.update("time_label", "text", time_short);
-              lvgl.label.update("time_label_modes", "text", time_short);
-              lvgl.label.update("time_label_settings", "text", time_short);
-              lvgl.label.update("screensaver_time", "text", time_short);
+              lvgl.label.update("time_label", time_short);
+              lvgl.label.update("time_label_modes", time_short);
+              lvgl.label.update("time_label_settings", time_short);
+              lvgl.label.update("screensaver_time", time_short);
               if (time_data.length() >= 10) {
                 std::string date_part = time_data.substr(0, 10);
                 int year = 0, month = 0, day = 0;
@@ -375,10 +375,10 @@ interval:
                   snprintf(date_str, sizeof(date_str), "-- --- ----");
                 }
                 id(current_date) = date_str;
-                lvgl.label.update("Date", "text", date_str);
-                lvgl.label.update("Date_modes", "text", date_str);
-                lvgl.label.update("Date_settings", "text", date_str);
-                lvgl.label.update("screensaver_date", "text", date_str);
+                lvgl.label.update("Date", date_str);
+                lvgl.label.update("Date_modes", date_str);
+                lvgl.label.update("Date_settings", date_str);
+                lvgl.label.update("screensaver_date", date_str);
               }
             }
             else if (line.rfind("TEMP:", 0) == 0) {
@@ -399,13 +399,13 @@ interval:
                     id(temp_to_home) = t4;
                     char buf[16];
                     snprintf(buf, sizeof(buf), "%+.1f", t1);
-                    lvgl.label.update("gradussulicy", "text", buf);
+                    lvgl.label.update("gradussulicy", buf);
                     snprintf(buf, sizeof(buf), "%+.1f", t2);
-                    lvgl.label.update("widget_1781262306198_b9dnjbboi", "text", buf);
+                    lvgl.label.update("widget_1781262306198_b9dnjbboi", buf);
                     snprintf(buf, sizeof(buf), "%+.1f", t3);
-                    lvgl.label.update("widget_1781262307812_3m3qdg397", "text", buf);
+                    lvgl.label.update("widget_1781262307812_3m3qdg397", buf);
                     snprintf(buf, sizeof(buf), "%+.1f", t4);
-                    lvgl.label.update("widget_1781262308709_dnoiw7el6", "text", buf);
+                    lvgl.label.update("widget_1781262308709_dnoiw7el6", buf);
                   }
                 }
               }
@@ -419,12 +419,12 @@ interval:
                 id(filter_supply) = supply;
                 id(filter_exhaust) = exhaust;
                 char buf[16];
-                lvgl.arc.update("widget_1781261697547_smtgd7w9q", "value", supply);
+                lvgl.arc.update("widget_1781261697547_smtgd7w9q", supply);
                 snprintf(buf, sizeof(buf), "%d%%", supply);
-                lvgl.label.update("lv_label_0", "text", buf);
-                lvgl.arc.update("widget_1781261697547_jcbrfzs59", "value", exhaust);
+                lvgl.label.update("lv_label_0", buf);
+                lvgl.arc.update("widget_1781261697547_jcbrfzs59", exhaust);
                 snprintf(buf, sizeof(buf), "%d%%", exhaust);
-                lvgl.label.update("widget_1781261697547_036jpjyoc", "text", buf);
+                lvgl.label.update("widget_1781261697547_036jpjyoc", buf);
               }
             }
             else if (line.rfind("MODE:", 0) == 0) {
@@ -434,7 +434,7 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                lvgl.label.update("mode_display", "text", mode_data);
+                lvgl.label.update("mode_display", mode_data);
               }
             }
             else if (line.rfind("STATUS:", 0) == 0) {
