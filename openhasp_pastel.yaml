@@ -357,31 +357,24 @@ interval:
                   time_short = time_short.substr(0, 5);
                 }
               }
-              auto time_label = lvgl.label.get("time_label");
-              if (time_label) {
-                lvgl.label.update(time_label, "text", time_short);
+              if (lvgl.label.has("time_label")) {
+                lvgl.label.update("time_label", "text", time_short);
               }
-              auto time_label_modes = lvgl.label.get("time_label_modes");
-              if (time_label_modes) {
-                lvgl.label.update(time_label_modes, "text", time_short);
+              if (lvgl.label.has("time_label_modes")) {
+                lvgl.label.update("time_label_modes", "text", time_short);
               }
-              auto time_label_settings = lvgl.label.get("time_label_settings");
-              if (time_label_settings) {
-                lvgl.label.update(time_label_settings, "text", time_short);
+              if (lvgl.label.has("time_label_settings")) {
+                lvgl.label.update("time_label_settings", "text", time_short);
               }
-              auto ss_time = lvgl.label.get("screensaver_time");
-              if (ss_time) {
-                lvgl.label.update(ss_time, "text", time_short);
+              if (lvgl.label.has("screensaver_time")) {
+                lvgl.label.update("screensaver_time", "text", time_short);
               }
               if (time_data.length() >= 10) {
                 std::string date_part = time_data.substr(0, 10);
                 int year = 0, month = 0, day = 0;
-                try {
-                  year = std::stoi(date_part.substr(0, 4));
-                  month = std::stoi(date_part.substr(5, 2));
-                  day = std::stoi(date_part.substr(8, 2));
-                } catch (...) {
-                }
+                year = std::stoi(date_part.substr(0, 4));
+                month = std::stoi(date_part.substr(5, 2));
+                day = std::stoi(date_part.substr(8, 2));
                 const char* months[] = {"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"};
                 char date_str[32];
                 if (year > 2000 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
@@ -390,21 +383,17 @@ interval:
                   snprintf(date_str, sizeof(date_str), "-- --- ----");
                 }
                 id(current_date) = date_str;
-                auto date_label = lvgl.label.get("Date");
-                if (date_label) {
-                  lvgl.label.update(date_label, "text", date_str);
+                if (lvgl.label.has("Date")) {
+                  lvgl.label.update("Date", "text", date_str);
                 }
-                auto date_modes = lvgl.label.get("Date_modes");
-                if (date_modes) {
-                  lvgl.label.update(date_modes, "text", date_str);
+                if (lvgl.label.has("Date_modes")) {
+                  lvgl.label.update("Date_modes", "text", date_str);
                 }
-                auto date_settings = lvgl.label.get("Date_settings");
-                if (date_settings) {
-                  lvgl.label.update(date_settings, "text", date_str);
+                if (lvgl.label.has("Date_settings")) {
+                  lvgl.label.update("Date_settings", "text", date_str);
                 }
-                auto ss_date = lvgl.label.get("screensaver_date");
-                if (ss_date) {
-                  lvgl.label.update(ss_date, "text", date_str);
+                if (lvgl.label.has("screensaver_date")) {
+                  lvgl.label.update("screensaver_date", "text", date_str);
                 }
               }
             }
@@ -412,43 +401,36 @@ interval:
               std::string temp_data = line.substr(5);
               size_t pos1 = temp_data.find(',');
               if (pos1 != std::string::npos) {
-                try {
-                  float t1 = std::stof(temp_data.substr(0, pos1));
-                  size_t pos2 = temp_data.find(',', pos1+1);
-                  if (pos2 != std::string::npos) {
-                    float t2 = std::stof(temp_data.substr(pos1+1, pos2-pos1-1));
-                    size_t pos3 = temp_data.find(',', pos2+1);
-                    if (pos3 != std::string::npos) {
-                      float t3 = std::stof(temp_data.substr(pos2+1, pos3-pos2-1));
-                      float t4 = std::stof(temp_data.substr(pos3+1));
-                      id(temp_street) = t1;
-                      id(temp_outdoor) = t2;
-                      id(temp_from_home) = t3;
-                      id(temp_to_home) = t4;
-                      char buf[16];
-                      auto label = lvgl.label.get("gradussulicy");
-                      if (label) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t1);
-                        lvgl.label.update(label, "text", buf);
-                      }
-                      label = lvgl.label.get("widget_1781262306198_b9dnjbboi");
-                      if (label) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t2);
-                        lvgl.label.update(label, "text", buf);
-                      }
-                      label = lvgl.label.get("widget_1781262307812_3m3qdg397");
-                      if (label) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t3);
-                        lvgl.label.update(label, "text", buf);
-                      }
-                      label = lvgl.label.get("widget_1781262308709_dnoiw7el6");
-                      if (label) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t4);
-                        lvgl.label.update(label, "text", buf);
-                      }
+                float t1 = std::stof(temp_data.substr(0, pos1));
+                size_t pos2 = temp_data.find(',', pos1+1);
+                if (pos2 != std::string::npos) {
+                  float t2 = std::stof(temp_data.substr(pos1+1, pos2-pos1-1));
+                  size_t pos3 = temp_data.find(',', pos2+1);
+                  if (pos3 != std::string::npos) {
+                    float t3 = std::stof(temp_data.substr(pos2+1, pos3-pos2-1));
+                    float t4 = std::stof(temp_data.substr(pos3+1));
+                    id(temp_street) = t1;
+                    id(temp_outdoor) = t2;
+                    id(temp_from_home) = t3;
+                    id(temp_to_home) = t4;
+                    char buf[16];
+                    if (lvgl.label.has("gradussulicy")) {
+                      snprintf(buf, sizeof(buf), "%+.1f", t1);
+                      lvgl.label.update("gradussulicy", "text", buf);
+                    }
+                    if (lvgl.label.has("widget_1781262306198_b9dnjbboi")) {
+                      snprintf(buf, sizeof(buf), "%+.1f", t2);
+                      lvgl.label.update("widget_1781262306198_b9dnjbboi", "text", buf);
+                    }
+                    if (lvgl.label.has("widget_1781262307812_3m3qdg397")) {
+                      snprintf(buf, sizeof(buf), "%+.1f", t3);
+                      lvgl.label.update("widget_1781262307812_3m3qdg397", "text", buf);
+                    }
+                    if (lvgl.label.has("widget_1781262308709_dnoiw7el6")) {
+                      snprintf(buf, sizeof(buf), "%+.1f", t4);
+                      lvgl.label.update("widget_1781262308709_dnoiw7el6", "text", buf);
                     }
                   }
-                } catch (...) {
                 }
               }
             }
@@ -456,31 +438,24 @@ interval:
               std::string filter_data = line.substr(7);
               size_t pos = filter_data.find(',');
               if (pos != std::string::npos) {
-                try {
-                  int supply = std::stoi(filter_data.substr(0, pos));
-                  int exhaust = std::stoi(filter_data.substr(pos+1));
-                  id(filter_supply) = supply;
-                  id(filter_exhaust) = exhaust;
-                  char buf[16];
-                  auto arc_supply = lvgl.arc.get("widget_1781261697547_smtgd7w9q");
-                  if (arc_supply) {
-                    lvgl.arc.update(arc_supply, "value", supply);
-                  }
-                  auto label_supply = lvgl.label.get("lv_label_0");
-                  if (label_supply) {
-                    snprintf(buf, sizeof(buf), "%d%%", supply);
-                    lvgl.label.update(label_supply, "text", buf);
-                  }
-                  auto arc_exhaust = lvgl.arc.get("widget_1781261697547_jcbrfzs59");
-                  if (arc_exhaust) {
-                    lvgl.arc.update(arc_exhaust, "value", exhaust);
-                  }
-                  auto label_exhaust = lvgl.label.get("widget_1781261697547_036jpjyoc");
-                  if (label_exhaust) {
-                    snprintf(buf, sizeof(buf), "%d%%", exhaust);
-                    lvgl.label.update(label_exhaust, "text", buf);
-                  }
-                } catch (...) {
+                int supply = std::stoi(filter_data.substr(0, pos));
+                int exhaust = std::stoi(filter_data.substr(pos+1));
+                id(filter_supply) = supply;
+                id(filter_exhaust) = exhaust;
+                char buf[16];
+                if (lvgl.arc.has("widget_1781261697547_smtgd7w9q")) {
+                  lvgl.arc.update("widget_1781261697547_smtgd7w9q", "value", supply);
+                }
+                if (lvgl.label.has("lv_label_0")) {
+                  snprintf(buf, sizeof(buf), "%d%%", supply);
+                  lvgl.label.update("lv_label_0", "text", buf);
+                }
+                if (lvgl.arc.has("widget_1781261697547_jcbrfzs59")) {
+                  lvgl.arc.update("widget_1781261697547_jcbrfzs59", "value", exhaust);
+                }
+                if (lvgl.label.has("widget_1781261697547_036jpjyoc")) {
+                  snprintf(buf, sizeof(buf), "%d%%", exhaust);
+                  lvgl.label.update("widget_1781261697547_036jpjyoc", "text", buf);
                 }
               }
             }
@@ -491,9 +466,8 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                auto mode_display = lvgl.label.get("mode_display");
-                if (mode_display) {
-                  lvgl.label.update(mode_display, "text", mode_data);
+                if (lvgl.label.has("mode_display")) {
+                  lvgl.label.update("mode_display", "text", mode_data);
                 }
               }
             }
@@ -503,19 +477,13 @@ interval:
               if (temp_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', temp_pos);
                 if (comma_pos != std::string::npos) {
-                  try {
-                    std::string temp_str = status.substr(temp_pos+5, comma_pos-temp_pos-5);
-                    id(room_temp) = std::stof(temp_str);
-                  } catch (...) {
-                  }
+                  std::string temp_str = status.substr(temp_pos+5, comma_pos-temp_pos-5);
+                  id(room_temp) = std::stof(temp_str);
                 }
               }
               size_t eff_pos = status.find("Eff=");
               if (eff_pos != std::string::npos) {
-                try {
-                  id(efficiency) = std::stof(status.substr(eff_pos+4));
-                } catch (...) {
-                }
+                id(efficiency) = std::stof(status.substr(eff_pos+4));
               }
               size_t err_pos = status.find("Error=");
               if (err_pos != std::string::npos) {
@@ -535,10 +503,7 @@ interval:
               if (state_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', state_pos);
                 if (comma_pos != std::string::npos) {
-                  try {
-                    id(system_state) = std::stoi(status.substr(state_pos+6, comma_pos-state_pos-6));
-                  } catch (...) {
-                  }
+                  id(system_state) = std::stoi(status.substr(state_pos+6, comma_pos-state_pos-6));
                 }
               }
             }
