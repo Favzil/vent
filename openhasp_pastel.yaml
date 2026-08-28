@@ -400,9 +400,8 @@ interval:
               }
               
               // Парсим дату для screensaver
-              // TIME:2026-08-28 14:32:00 -> 28-авг-2026
               if (time_data.length() >= 10) {
-                std::string date_part = time_data.substr(0, 10); // 2026-08-28
+                std::string date_part = time_data.substr(0, 10);
                 int year = 0, month = 0, day = 0;
                 try {
                   year = std::stoi(date_part.substr(0, 4));
@@ -439,11 +438,9 @@ interval:
                 }
               }
             }
-            // ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
+            # ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
             else if (line.rfind("TEMP:", 0) == 0) {
-              // TEMP:12.5,15.3,18.7,21.0
               std::string temp_data = line.substr(5);
-              // Парсим через запятую
               size_t pos1 = temp_data.find(',');
               if (pos1 != std::string::npos) {
                 try {
@@ -456,12 +453,11 @@ interval:
                       float t3 = std::stof(temp_data.substr(pos2+1, pos3-pos2-1));
                       float t4 = std::stof(temp_data.substr(pos3+1));
                       
-                      id(temp_street) = t1;    // с улицы
-                      id(temp_outdoor) = t2;   // на улицу
-                      id(temp_from_home) = t3; // из дома
-                      id(temp_to_home) = t4;   // в дом
+                      id(temp_street) = t1;
+                      id(temp_outdoor) = t2;
+                      id(temp_from_home) = t3;
+                      id(temp_to_home) = t4;
                       
-                      // Обновляем виджеты
                       char buf[16];
                       
                       auto label = lvgl.label.get_widget("gradussulicy");
@@ -491,7 +487,7 @@ interval:
                 }
               }
             }
-            // ========== ОБРАБОТКА ФИЛЬТРОВ ==========
+            # ========== ОБРАБОТКА ФИЛЬТРОВ ==========
             else if (line.rfind("FILTER:", 0) == 0) {
               std::string filter_data = line.substr(7);
               size_t pos = filter_data.find(',');
@@ -503,7 +499,6 @@ interval:
                   id(filter_supply) = supply;
                   id(filter_exhaust) = exhaust;
                   
-                  // Обновляем виджеты фильтров
                   char buf[16];
                   
                   auto arc_supply = lvgl.arc.get_widget("widget_1781261697547_smtgd7w9q");
@@ -530,7 +525,7 @@ interval:
                 }
               }
             }
-            // ========== ОБРАБОТКА РЕЖИМА ==========
+            # ========== ОБРАБОТКА РЕЖИМА ==========
             else if (line.rfind("MODE:", 0) == 0) {
               std::string mode_data = line.substr(5);
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
@@ -540,19 +535,16 @@ interval:
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
                 
-                // Обновляем главный экран
                 auto mode_display = lvgl.label.get_widget("mode_display");
                 if (mode_display) {
                   lvgl.label.update(mode_display, "text", mode_data);
                 }
               }
             }
-            // ========== ОБРАБОТКА СТАТУСА ==========
+            # ========== ОБРАБОТКА СТАТУСА ==========
             else if (line.rfind("STATUS:", 0) == 0) {
-              // STATUS:Mode=1,State=0,Temp=22.5,Error=OK,Heat=OFF,Cool=OFF,Speed=70,70,PID=0.0,Eff=85.0
               std::string status = line.substr(7);
               
-              // Парсим температуру в доме
               size_t temp_pos = status.find("Temp=");
               if (temp_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', temp_pos);
@@ -566,7 +558,6 @@ interval:
                 }
               }
               
-              // Парсим КПД
               size_t eff_pos = status.find("Eff=");
               if (eff_pos != std::string::npos) {
                 try {
@@ -576,7 +567,6 @@ interval:
                 }
               }
               
-              // Парсим состояние ошибки
               size_t err_pos = status.find("Error=");
               if (err_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', err_pos);
@@ -592,7 +582,6 @@ interval:
                 }
               }
               
-              // Парсим состояние системы
               size_t state_pos = status.find("State=");
               if (state_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', state_pos);
@@ -610,7 +599,6 @@ interval:
             }
             else if (line.rfind("OK:", 0) == 0) {
               // OK:MODE_ACCEPTED - режим принят
-              // Просто логируем
             }
             
             newline_pos = id(uart_buffer).find('\n');
@@ -963,7 +951,8 @@ lvgl:
                   height: 26
                   text: "°C"
                   text_color: 0xFFFFFF
-                  text_align: LEFT                  long_mode: CLIP
+                  text_align: LEFT
+                  long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
                   id: gradussulicy
