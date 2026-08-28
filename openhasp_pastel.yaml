@@ -47,7 +47,6 @@ logger:
   level: DEBUG
   baud_rate: 115200
 
-# Глобальные переменные
 globals:
   - id: uart_buffer
     type: std::string
@@ -198,7 +197,6 @@ globals:
     restore_value: no
     initial_value: 'false'
 
-# UART для связи с Arduino
 uart:
   id: uart_arduino
   tx_pin: GPIO43
@@ -209,7 +207,6 @@ uart:
   parity: NONE
   rx_buffer_size: 2048
 
-# Интервалы
 interval:
   - interval: 1s
     then:
@@ -217,24 +214,20 @@ interval:
           if (id(wakeup_block) > 0) {
             id(wakeup_block)--;
           }
-          
           if (!id(screensaver_active) && id(wakeup_block) == 0) {
             id(inactivity_timer)++;
-            
             if (id(inactivity_timer) >= 30) {
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
               id(last_screensaver_switch) = true;
             }
           }
-          
           int current_time = millis() / 1000;
           if (id(last_received_data) > 0 && (current_time - id(last_received_data) > 15)) {
             if (id(arduino_connected)) {
               id(arduino_connected) = false;
             }
           }
-          
           static int heartbeat_counter = 0;
           heartbeat_counter++;
           if (heartbeat_counter >= 10) {
@@ -272,11 +265,9 @@ interval:
       - lambda: |-
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
-            
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
-              
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
@@ -303,7 +294,6 @@ interval:
                   id(uart_arduino).write_str("MODE:СТОП\n");
                   break;
               }
-              
               id(active_mode_id) = 0;
               id(mode_activated) = false;
             }
@@ -327,14 +317,12 @@ interval:
           id: uart_arduino
           data: "GET_STATUS\n"
 
-  # ========== ГЛАВНЫЙ ОБРАБОТЧИК UART ==========
   - interval: 100ms
     then:
       - lambda: |-
           if (!id(uart_arduino).available()) {
             return;
           }
-          
           while (id(uart_arduino).available()) {
             uint8_t byte;
             if (id(uart_arduino).read_byte(&byte)) {
@@ -342,34 +330,25 @@ interval:
               id(uart_buffer) += static_cast<char>(byte);
             }
           }
-          
           size_t newline_pos = id(uart_buffer).find('\n');
           while (newline_pos != std::string::npos) {
             std::string line = id(uart_buffer).substr(0, newline_pos);
             id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
-            
             if (!line.empty() && line.back() == '\r') {
               line.pop_back();
             }
-            
             if (line.empty()) {
               newline_pos = id(uart_buffer).find('\n');
               continue;
             }
-            
             id(last_received_data) = millis() / 1000;
             id(data_request_pending) = false;
-            
             if (!id(arduino_connected)) {
               id(arduino_connected) = true;
             }
-            
-            // ========== ОБРАБОТКА ВРЕМЕНИ ==========
             if (line.rfind("TIME:", 0) == 0) {
               std::string time_data = line.substr(5);
               id(current_time) = time_data;
-              
-              // Парсим время для отображения (только HH:MM)
               std::string time_short = time_data;
               size_t space_pos = time_short.find(' ');
               if (space_pos != std::string::npos) {
@@ -378,28 +357,22 @@ interval:
                   time_short = time_short.substr(0, 5);
                 }
               }
-              
-              // Обновляем виджеты времени
-              auto time_label = lvgl.label.get_widget("time_label");
+              auto time_label = lvgl.label.get("time_label");
               if (time_label) {
                 lvgl.label.update(time_label, "text", time_short);
               }
-              auto time_label_modes = lvgl.label.get_widget("time_label_modes");
+              auto time_label_modes = lvgl.label.get("time_label_modes");
               if (time_label_modes) {
                 lvgl.label.update(time_label_modes, "text", time_short);
               }
-              auto time_label_settings = lvgl.label.get_widget("time_label_settings");
+              auto time_label_settings = lvgl.label.get("time_label_settings");
               if (time_label_settings) {
                 lvgl.label.update(time_label_settings, "text", time_short);
               }
-              
-              // Обновляем screensaver время
-              auto ss_time = lvgl.label.get_widget("screensaver_time");
+              auto ss_time = lvgl.label.get("screensaver_time");
               if (ss_time) {
                 lvgl.label.update(ss_time, "text", time_short);
               }
-              
-              // Парсим дату для screensaver
               if (time_data.length() >= 10) {
                 std::string date_part = time_data.substr(0, 10);
                 int year = 0, month = 0, day = 0;
@@ -408,9 +381,7 @@ interval:
                   month = std::stoi(date_part.substr(5, 2));
                   day = std::stoi(date_part.substr(8, 2));
                 } catch (...) {
-                  // ignore parse errors
                 }
-                
                 const char* months[] = {"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"};
                 char date_str[32];
                 if (year > 2000 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
@@ -419,26 +390,24 @@ interval:
                   snprintf(date_str, sizeof(date_str), "-- --- ----");
                 }
                 id(current_date) = date_str;
-                
-                auto date_label = lvgl.label.get_widget("Date");
+                auto date_label = lvgl.label.get("Date");
                 if (date_label) {
                   lvgl.label.update(date_label, "text", date_str);
                 }
-                auto date_modes = lvgl.label.get_widget("Date_modes");
+                auto date_modes = lvgl.label.get("Date_modes");
                 if (date_modes) {
                   lvgl.label.update(date_modes, "text", date_str);
                 }
-                auto date_settings = lvgl.label.get_widget("Date_settings");
+                auto date_settings = lvgl.label.get("Date_settings");
                 if (date_settings) {
                   lvgl.label.update(date_settings, "text", date_str);
                 }
-                auto ss_date = lvgl.label.get_widget("screensaver_date");
+                auto ss_date = lvgl.label.get("screensaver_date");
                 if (ss_date) {
                   lvgl.label.update(ss_date, "text", date_str);
                 }
               }
             }
-            # ========== ОБРАБОТКА ТЕМПЕРАТУР ==========
             else if (line.rfind("TEMP:", 0) == 0) {
               std::string temp_data = line.substr(5);
               size_t pos1 = temp_data.find(',');
@@ -452,30 +421,27 @@ interval:
                     if (pos3 != std::string::npos) {
                       float t3 = std::stof(temp_data.substr(pos2+1, pos3-pos2-1));
                       float t4 = std::stof(temp_data.substr(pos3+1));
-                      
                       id(temp_street) = t1;
                       id(temp_outdoor) = t2;
                       id(temp_from_home) = t3;
                       id(temp_to_home) = t4;
-                      
                       char buf[16];
-                      
-                      auto label = lvgl.label.get_widget("gradussulicy");
+                      auto label = lvgl.label.get("gradussulicy");
                       if (label) {
                         snprintf(buf, sizeof(buf), "%+.1f", t1);
                         lvgl.label.update(label, "text", buf);
                       }
-                      label = lvgl.label.get_widget("widget_1781262306198_b9dnjbboi");
+                      label = lvgl.label.get("widget_1781262306198_b9dnjbboi");
                       if (label) {
                         snprintf(buf, sizeof(buf), "%+.1f", t2);
                         lvgl.label.update(label, "text", buf);
                       }
-                      label = lvgl.label.get_widget("widget_1781262307812_3m3qdg397");
+                      label = lvgl.label.get("widget_1781262307812_3m3qdg397");
                       if (label) {
                         snprintf(buf, sizeof(buf), "%+.1f", t3);
                         lvgl.label.update(label, "text", buf);
                       }
-                      label = lvgl.label.get_widget("widget_1781262308709_dnoiw7el6");
+                      label = lvgl.label.get("widget_1781262308709_dnoiw7el6");
                       if (label) {
                         snprintf(buf, sizeof(buf), "%+.1f", t4);
                         lvgl.label.update(label, "text", buf);
@@ -483,11 +449,9 @@ interval:
                     }
                   }
                 } catch (...) {
-                  // ignore parse errors
                 }
               }
             }
-            # ========== ОБРАБОТКА ФИЛЬТРОВ ==========
             else if (line.rfind("FILTER:", 0) == 0) {
               std::string filter_data = line.substr(7);
               size_t pos = filter_data.find(',');
@@ -495,56 +459,46 @@ interval:
                 try {
                   int supply = std::stoi(filter_data.substr(0, pos));
                   int exhaust = std::stoi(filter_data.substr(pos+1));
-                  
                   id(filter_supply) = supply;
                   id(filter_exhaust) = exhaust;
-                  
                   char buf[16];
-                  
-                  auto arc_supply = lvgl.arc.get_widget("widget_1781261697547_smtgd7w9q");
+                  auto arc_supply = lvgl.arc.get("widget_1781261697547_smtgd7w9q");
                   if (arc_supply) {
                     lvgl.arc.update(arc_supply, "value", supply);
                   }
-                  auto label_supply = lvgl.label.get_widget("lv_label_0");
+                  auto label_supply = lvgl.label.get("lv_label_0");
                   if (label_supply) {
                     snprintf(buf, sizeof(buf), "%d%%", supply);
                     lvgl.label.update(label_supply, "text", buf);
                   }
-                  
-                  auto arc_exhaust = lvgl.arc.get_widget("widget_1781261697547_jcbrfzs59");
+                  auto arc_exhaust = lvgl.arc.get("widget_1781261697547_jcbrfzs59");
                   if (arc_exhaust) {
                     lvgl.arc.update(arc_exhaust, "value", exhaust);
                   }
-                  auto label_exhaust = lvgl.label.get_widget("widget_1781261697547_036jpjyoc");
+                  auto label_exhaust = lvgl.label.get("widget_1781261697547_036jpjyoc");
                   if (label_exhaust) {
                     snprintf(buf, sizeof(buf), "%d%%", exhaust);
                     lvgl.label.update(label_exhaust, "text", buf);
                   }
                 } catch (...) {
-                  // ignore parse errors
                 }
               }
             }
-            # ========== ОБРАБОТКА РЕЖИМА ==========
             else if (line.rfind("MODE:", 0) == 0) {
               std::string mode_data = line.substr(5);
               mode_data.erase(0, mode_data.find_first_not_of(" \t\n\r"));
               mode_data.erase(mode_data.find_last_not_of(" \t\n\r") + 1);
-              
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                
-                auto mode_display = lvgl.label.get_widget("mode_display");
+                auto mode_display = lvgl.label.get("mode_display");
                 if (mode_display) {
                   lvgl.label.update(mode_display, "text", mode_data);
                 }
               }
             }
-            # ========== ОБРАБОТКА СТАТУСА ==========
             else if (line.rfind("STATUS:", 0) == 0) {
               std::string status = line.substr(7);
-              
               size_t temp_pos = status.find("Temp=");
               if (temp_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', temp_pos);
@@ -553,20 +507,16 @@ interval:
                     std::string temp_str = status.substr(temp_pos+5, comma_pos-temp_pos-5);
                     id(room_temp) = std::stof(temp_str);
                   } catch (...) {
-                    // ignore parse errors
                   }
                 }
               }
-              
               size_t eff_pos = status.find("Eff=");
               if (eff_pos != std::string::npos) {
                 try {
                   id(efficiency) = std::stof(status.substr(eff_pos+4));
                 } catch (...) {
-                  // ignore parse errors
                 }
               }
-              
               size_t err_pos = status.find("Error=");
               if (err_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', err_pos);
@@ -581,7 +531,6 @@ interval:
                   }
                 }
               }
-              
               size_t state_pos = status.find("State=");
               if (state_pos != std::string::npos) {
                 size_t comma_pos = status.find(',', state_pos);
@@ -589,7 +538,6 @@ interval:
                   try {
                     id(system_state) = std::stoi(status.substr(state_pos+6, comma_pos-state_pos-6));
                   } catch (...) {
-                    // ignore parse errors
                   }
                 }
               }
@@ -597,10 +545,6 @@ interval:
             else if (line.rfind("PONG", 0) == 0) {
               id(arduino_connected) = true;
             }
-            else if (line.rfind("OK:", 0) == 0) {
-              // OK:MODE_ACCEPTED - режим принят
-            }
-            
             newline_pos = id(uart_buffer).find('\n');
           }
 
@@ -610,7 +554,6 @@ interval:
           if (id(screensaver_active)) {
             float target = id(screensaver_brightness);
             float step = 0.01;
-            
             if (id(current_brightness) > target) {
               id(current_brightness) -= step;
               if (id(current_brightness) < target) {
@@ -623,7 +566,6 @@ interval:
           } else {
             float target = id(normal_brightness);
             float step = 0.03;
-            
             if (id(current_brightness) < target) {
               id(current_brightness) += step;
               if (id(current_brightness) > target) {
@@ -635,49 +577,41 @@ interval:
             }
           }
 
-# Изображения
 image:
   - file: "img/olako.png"
     id: background_image
     type: RGB565
     resize: 480x480
-  
   - file: "img/family-home.png"
     id: icon_home
     type: RGB565
     resize: 32x32
     transparency: alpha_channel
-    
   - file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
     resize: 32x32
     transparency: alpha_channel
-
   - file: "img/settings-heart.png"
     id: icon_settings
     type: RGB565
     resize: 32x32
     transparency: alpha_channel
 
-# Шрифты
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
     size: 40
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
-  
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_24
     size: 24
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
-
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_12
     size: 12
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
 
-# Реле
 switch:
   - platform: gpio
     name: "Реле 1"
@@ -698,7 +632,6 @@ switch:
       inverted: true
       mode: OUTPUT
 
-# Подсветка
 output:
   - platform: ledc
     id: backlight_output
@@ -715,19 +648,16 @@ light:
     restore_mode: ALWAYS_ON
     default_transition_length: 0s
 
-# SPI для дисплея
 spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
 
-# I2C для тачскрина (GT911)
 i2c:
   id: touchscreen_bus
   sda: GPIO19
   scl: GPIO45
 
-# Дисплей
 display:
   - platform: mipi_rgb
     id: tft_display
@@ -736,7 +666,6 @@ display:
     cs_pin: GPIO39
     invert_colors: False
 
-# Сенсор экрана (GT911)
 touchscreen:
   - platform: gt911
     id: my_touchscreen
@@ -750,7 +679,6 @@ touchscreen:
       then:
         - lambda: |-
             ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
-            
             if (id(screensaver_active)) {
               ESP_LOGI("touch", "Waking up from screensaver");
               id(screensaver_active) = false;
@@ -765,7 +693,6 @@ touchscreen:
         - lambda: |-
             ESP_LOGI("touch", "Released");
 
-# LVGL
 lvgl:
   id: lvgl_component
   displays:
@@ -774,9 +701,7 @@ lvgl:
     - my_touchscreen
   rotation: 180
   buffer_size: 100%
-  
   pages:
-    # ========== СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
       bg_color: 0x000000
       bg_opa: 100%
@@ -791,7 +716,6 @@ lvgl:
             bg_color: 0x000000
             bg_opa: 100%
             border_width: 0
-        
         - image:
             id: screensaver_image
             x: 0
@@ -801,7 +725,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-        
         - obj:
             id: screensaver_info_bg
             x: 40
@@ -813,7 +736,6 @@ lvgl:
             radius: 16
             border_width: 0
             shadow_width: 0
-        
         - label:
             id: screensaver_date
             x: 40
@@ -826,7 +748,6 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_24
             opa: 100%
-        
         - label:
             id: screensaver_time
             x: 40
@@ -839,7 +760,6 @@ lvgl:
             long_mode: CLIP
             text_font: cyrillic_font_40
             opa: 100%
-        
         - label:
             id: screensaver_hint
             x: 0
@@ -851,7 +771,6 @@ lvgl:
             text_align: CENTER
             text_font: cyrillic_font_12
             opa: 50%
-        
         - button:
             id: wakeup_button
             x: 0
@@ -874,7 +793,6 @@ lvgl:
                       id(last_screensaver_switch) = true;
                     }
 
-    # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
       bg_color: 0x111827
       bg_opa: 100%
@@ -889,7 +807,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-        
         - obj:
             id: Upscreen
             x: 1
@@ -1303,7 +1220,6 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-        
         - label:
             id: time_label
             x: 194
@@ -1327,7 +1243,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
-
         - button:
             id: domoi
             x: 0
@@ -1335,7 +1250,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1358,7 +1273,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  
         - button:
             id: modes
             x: 160
@@ -1366,7 +1280,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1389,7 +1303,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-
         - button:
             id: settings
             x: 320
@@ -1397,7 +1310,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1421,7 +1334,6 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_12
 
-    # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
       bg_color: 0x111827
       bg_opa: 100%
@@ -1436,7 +1348,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-        
         - obj:
             id: Upscreen_modes
             x: 1
@@ -1483,7 +1394,6 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_standard
             x: 40
@@ -1518,7 +1428,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_econom
             x: 40
@@ -1553,7 +1462,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_guest
             x: 40
@@ -1588,7 +1496,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_conditioner
             x: 40
@@ -1623,7 +1530,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_efficiency
             x: 40
@@ -1658,7 +1564,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: mode_stop
             x: 40
@@ -1693,7 +1598,6 @@ lvgl:
                   text_color: 0xA21C15
                   text_align: CENTER
                   text_font: cyrillic_font_24
-
         - button:
             id: domoi_modes
             x: 0
@@ -1701,7 +1605,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1724,7 +1628,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-
         - button:
             id: modes_modes
             x: 160
@@ -1732,7 +1635,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1755,7 +1658,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-
         - button:
             id: settings_modes
             x: 320
@@ -1763,7 +1665,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1787,7 +1689,6 @@ lvgl:
                   text_align: LEFT
                   text_font: cyrillic_font_12
 
-    # ========== СТРАНИЦА 3 (НАСТРОЙКА) ==========
     - id: settings_page
       bg_color: 0x111827
       bg_opa: 100%
@@ -1802,7 +1703,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-        
         - obj:
             id: Upscreen_settings
             x: 1
@@ -1849,7 +1749,6 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-
         - label:
             x: 0
             y: 60
@@ -1859,7 +1758,6 @@ lvgl:
             text_color: 0xFFFFFF
             text_align: CENTER
             text_font: cyrillic_font_24
-
         - obj:
             x: 40
             y: 110
@@ -1880,7 +1778,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   text_font: cyrillic_font_24
-
         - obj:
             x: 40
             y: 170
@@ -1901,7 +1798,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   text_font: cyrillic_font_24
-
         - obj:
             x: 40
             y: 230
@@ -1922,7 +1818,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   text_font: cyrillic_font_24
-
         - obj:
             x: 40
             y: 290
@@ -1943,7 +1838,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   text_font: cyrillic_font_24
-
         - button:
             id: domoi_settings
             x: 0
@@ -1951,7 +1845,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -1974,7 +1868,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-
         - button:
             id: modes_settings
             x: 160
@@ -1982,7 +1875,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
@@ -2005,7 +1898,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-
         - button:
             id: settings_settings
             x: 320
@@ -2013,7 +1905,7 @@ lvgl:
             width: 160
             height: 65
             bg_color: 0x12D90D
-            bg_opa: 100%    
+            bg_opa: 100%
             opa: 100%
             on_click:
               then:
