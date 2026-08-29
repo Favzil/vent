@@ -196,6 +196,14 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: time_short_global
+    type: std::string
+    restore_value: no
+    initial_value: '"14:32"'
+  - id: date_str_global
+    type: std::string
+    restore_value: no
+    initial_value: '"Сб 20-июнь-2026"'
 
 uart:
   id: uart_arduino
@@ -357,30 +365,7 @@ interval:
                   time_short = time_short.substr(0, 5);
                 }
               }
-              {
-                auto widget = lvgl.label.get("time_label");
-                if (widget != nullptr) {
-                  widget->set_text(time_short);
-                }
-              }
-              {
-                auto widget = lvgl.label.get("time_label_modes");
-                if (widget != nullptr) {
-                  widget->set_text(time_short);
-                }
-              }
-              {
-                auto widget = lvgl.label.get("time_label_settings");
-                if (widget != nullptr) {
-                  widget->set_text(time_short);
-                }
-              }
-              {
-                auto widget = lvgl.label.get("screensaver_time");
-                if (widget != nullptr) {
-                  widget->set_text(time_short);
-                }
-              }
+              id(time_short_global) = time_short;
               if (time_data.length() >= 10) {
                 std::string date_part = time_data.substr(0, 10);
                 int year = 0, month = 0, day = 0;
@@ -395,30 +380,7 @@ interval:
                   snprintf(date_str, sizeof(date_str), "-- --- ----");
                 }
                 id(current_date) = date_str;
-                {
-                  auto widget = lvgl.label.get("Date");
-                  if (widget != nullptr) {
-                    widget->set_text(date_str);
-                  }
-                }
-                {
-                  auto widget = lvgl.label.get("Date_modes");
-                  if (widget != nullptr) {
-                    widget->set_text(date_str);
-                  }
-                }
-                {
-                  auto widget = lvgl.label.get("Date_settings");
-                  if (widget != nullptr) {
-                    widget->set_text(date_str);
-                  }
-                }
-                {
-                  auto widget = lvgl.label.get("screensaver_date");
-                  if (widget != nullptr) {
-                    widget->set_text(date_str);
-                  }
-                }
+                id(date_str_global) = date_str;
               }
             }
             else if (line.rfind("TEMP:", 0) == 0) {
@@ -437,35 +399,6 @@ interval:
                     id(temp_outdoor) = t2;
                     id(temp_from_home) = t3;
                     id(temp_to_home) = t4;
-                    char buf[16];
-                    {
-                      auto widget = lvgl.label.get("gradussulicy");
-                      if (widget != nullptr) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t1);
-                        widget->set_text(buf);
-                      }
-                    }
-                    {
-                      auto widget = lvgl.label.get("widget_1781262306198_b9dnjbboi");
-                      if (widget != nullptr) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t2);
-                        widget->set_text(buf);
-                      }
-                    }
-                    {
-                      auto widget = lvgl.label.get("widget_1781262307812_3m3qdg397");
-                      if (widget != nullptr) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t3);
-                        widget->set_text(buf);
-                      }
-                    }
-                    {
-                      auto widget = lvgl.label.get("widget_1781262308709_dnoiw7el6");
-                      if (widget != nullptr) {
-                        snprintf(buf, sizeof(buf), "%+.1f", t4);
-                        widget->set_text(buf);
-                      }
-                    }
                   }
                 }
               }
@@ -478,33 +411,6 @@ interval:
                 int exhaust = std::stoi(filter_data.substr(pos+1));
                 id(filter_supply) = supply;
                 id(filter_exhaust) = exhaust;
-                char buf[16];
-                {
-                  auto widget = lvgl.arc.get("widget_1781261697547_smtgd7w9q");
-                  if (widget != nullptr) {
-                    widget->set_value(supply);
-                  }
-                }
-                {
-                  auto widget = lvgl.label.get("lv_label_0");
-                  if (widget != nullptr) {
-                    snprintf(buf, sizeof(buf), "%d%%", supply);
-                    widget->set_text(buf);
-                  }
-                }
-                {
-                  auto widget = lvgl.arc.get("widget_1781261697547_jcbrfzs59");
-                  if (widget != nullptr) {
-                    widget->set_value(exhaust);
-                  }
-                }
-                {
-                  auto widget = lvgl.label.get("widget_1781261697547_036jpjyoc");
-                  if (widget != nullptr) {
-                    snprintf(buf, sizeof(buf), "%d%%", exhaust);
-                    widget->set_text(buf);
-                  }
-                }
               }
             }
             else if (line.rfind("MODE:", 0) == 0) {
@@ -514,12 +420,6 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
-                {
-                  auto widget = lvgl.label.get("mode_display");
-                  if (widget != nullptr) {
-                    widget->set_text(mode_data);
-                  }
-                }
               }
             }
             else if (line.rfind("STATUS:", 0) == 0) {
@@ -563,6 +463,34 @@ interval:
             }
             newline_pos = id(uart_buffer).find('\n');
           }
+
+  - interval: 1s
+    then:
+      - lambda: |-
+          lvgl.label.set_text("time_label", id(time_short_global));
+          lvgl.label.set_text("time_label_modes", id(time_short_global));
+          lvgl.label.set_text("time_label_settings", id(time_short_global));
+          lvgl.label.set_text("screensaver_time", id(time_short_global));
+          lvgl.label.set_text("Date", id(date_str_global));
+          lvgl.label.set_text("Date_modes", id(date_str_global));
+          lvgl.label.set_text("Date_settings", id(date_str_global));
+          lvgl.label.set_text("screensaver_date", id(date_str_global));
+          lvgl.label.set_text("mode_display", id(selected_mode));
+          char buf[16];
+          snprintf(buf, sizeof(buf), "%+.1f", id(temp_street));
+          lvgl.label.set_text("gradussulicy", buf);
+          snprintf(buf, sizeof(buf), "%+.1f", id(temp_outdoor));
+          lvgl.label.set_text("widget_1781262306198_b9dnjbboi", buf);
+          snprintf(buf, sizeof(buf), "%+.1f", id(temp_from_home));
+          lvgl.label.set_text("widget_1781262307812_3m3qdg397", buf);
+          snprintf(buf, sizeof(buf), "%+.1f", id(temp_to_home));
+          lvgl.label.set_text("widget_1781262308709_dnoiw7el6", buf);
+          lvgl.arc.set_value("widget_1781261697547_smtgd7w9q", id(filter_supply));
+          snprintf(buf, sizeof(buf), "%d%%", id(filter_supply));
+          lvgl.label.set_text("lv_label_0", buf);
+          lvgl.arc.set_value("widget_1781261697547_jcbrfzs59", id(filter_exhaust));
+          snprintf(buf, sizeof(buf), "%d%%", id(filter_exhaust));
+          lvgl.label.set_text("widget_1781261697547_036jpjyoc", buf);
 
   - interval: 50ms
     then:
