@@ -464,34 +464,6 @@ interval:
             newline_pos = id(uart_buffer).find('\n');
           }
 
-  - interval: 1s
-    then:
-      - lambda: |-
-          lvgl.label.set_text("time_label", id(time_short_global));
-          lvgl.label.set_text("time_label_modes", id(time_short_global));
-          lvgl.label.set_text("time_label_settings", id(time_short_global));
-          lvgl.label.set_text("screensaver_time", id(time_short_global));
-          lvgl.label.set_text("Date", id(date_str_global));
-          lvgl.label.set_text("Date_modes", id(date_str_global));
-          lvgl.label.set_text("Date_settings", id(date_str_global));
-          lvgl.label.set_text("screensaver_date", id(date_str_global));
-          lvgl.label.set_text("mode_display", id(selected_mode));
-          char buf[16];
-          snprintf(buf, sizeof(buf), "%+.1f", id(temp_street));
-          lvgl.label.set_text("gradussulicy", buf);
-          snprintf(buf, sizeof(buf), "%+.1f", id(temp_outdoor));
-          lvgl.label.set_text("widget_1781262306198_b9dnjbboi", buf);
-          snprintf(buf, sizeof(buf), "%+.1f", id(temp_from_home));
-          lvgl.label.set_text("widget_1781262307812_3m3qdg397", buf);
-          snprintf(buf, sizeof(buf), "%+.1f", id(temp_to_home));
-          lvgl.label.set_text("widget_1781262308709_dnoiw7el6", buf);
-          lvgl.arc.set_value("widget_1781261697547_smtgd7w9q", id(filter_supply));
-          snprintf(buf, sizeof(buf), "%d%%", id(filter_supply));
-          lvgl.label.set_text("lv_label_0", buf);
-          lvgl.arc.set_value("widget_1781261697547_jcbrfzs59", id(filter_exhaust));
-          snprintf(buf, sizeof(buf), "%d%%", id(filter_exhaust));
-          lvgl.label.set_text("widget_1781261697547_036jpjyoc", buf);
-
   - interval: 50ms
     then:
       - lambda: |-
