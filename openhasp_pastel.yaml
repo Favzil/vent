@@ -420,6 +420,11 @@ interval:
               if (mode_data.length() > 0) {
                 id(selected_mode) = mode_data;
                 id(current_mode_from_arduino) = mode_data;
+                // Обновляем лейбл на главном экране
+                auto mode_label = lvgl.label.get("mode_display");
+                if (mode_label.has_value()) {
+                  mode_label->set_text(mode_data);
+                }
               }
             }
             else if (line.rfind("STATUS:", 0) == 0) {
