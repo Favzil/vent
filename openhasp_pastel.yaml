@@ -422,8 +422,8 @@ interval:
                 id(current_mode_from_arduino) = mode_data;
                 // Обновляем лейбл на главном экране
                 auto mode_label = lvgl.label.get("mode_display");
-                if (mode_label.has_value()) {
-                  mode_label->set_text(mode_data);
+                if (mode_label) {
+                  mode_label->set_text(mode_data.c_str());
                 }
               }
             }
