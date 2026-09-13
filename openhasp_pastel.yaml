@@ -12,7 +12,7 @@ psram:
   speed: 80MHz
 
 logger:
-  level: DEBUG
+  level: INFO
 
 # Глобальные переменные
 globals:
@@ -82,6 +82,7 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
+  rx_buffer_size: 1024
 
 # Интервалы
 interval:
@@ -164,14 +165,14 @@ interval:
           id(uart_arduino).write_str("GET_MODE\n");
 
   # ================= ПРИЁМ И ПАРСИНГ ДАННЫХ =================
-  - interval: 200ms
+  - interval: 100ms
     then:
       - lambda: |-
           if (!id(uart_arduino).available()) return;
 
           while (id(uart_arduino).available()) {
-            uint8_t byte;
-            if (id(uart_arduino).read_byte(&byte)) {
+            int byte = id(uart_arduino).read();
+            if (byte >= 0) {
               id(uart_buffer) += static_cast<char>(byte);
             }
           }
@@ -412,7 +413,7 @@ touchscreen:
     on_touch:
       then:
         - lambda: |-
-            ESP_LOGI("touch", "Touched at x=%d, y=%d", touch.x, touch.y);
+            ESP_LOGI("touch", "Touched");
         - if:
             condition:
               lambda: 'return id(screensaver_active);'
@@ -1191,7 +1192,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
             on_release:
@@ -1226,7 +1227,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 2;
                     id(mode_activated) = false;
             on_release:
@@ -1261,7 +1262,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 3;
                     id(mode_activated) = false;
             on_release:
@@ -1296,7 +1297,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 4;
                     id(mode_activated) = false;
             on_release:
@@ -1331,7 +1332,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 5;
                     id(mode_activated) = false;
             on_release:
@@ -1366,7 +1367,7 @@ lvgl:
             on_press:
               then:
                 - lambda: |-
-                    id(press_timer) = 100;
+                    id(press_timer) = 0;
                     id(active_mode_id) = 6;
                     id(mode_activated) = false;
             on_release:
