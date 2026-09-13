@@ -170,10 +170,12 @@ interval:
       - lambda: |-
           if (!id(uart_arduino).available()) return;
 
-          while (id(uart_arduino).available()) {
-            int byte = id(uart_arduino).read();
-            if (byte >= 0) {
+          while (id(uart_arduino).available() > 0) {
+            uint8_t byte;
+            if (id(uart_arduino).read_array(&byte, 1)) {
               id(uart_buffer) += static_cast<char>(byte);
+            } else {
+              break;
             }
           }
 
