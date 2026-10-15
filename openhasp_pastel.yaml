@@ -103,11 +103,8 @@ interval:
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
               id(inactivity_timer) = 0;
-              lv_obj_t *scr = lv_obj_get_parent(id(screensaver_image));
-              if (scr != nullptr) {
-                lv_scr_load(scr);
-                lv_refr_now(nullptr);
-              }
+              // Исправление #1: используем API ESPHome LVGL show_page
+              id(lvgl_component).show_page(id(screensaver_page));
             }
           }
 
@@ -139,15 +136,9 @@ interval:
                 ESP_LOGI("mode", "Sent command: %s", cmd);
               }
               
-              // Возвращаемся на главную страницу
-              lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
-              if (main_page != nullptr) {
-                lv_scr_load(main_page);
-                lv_refr_now(nullptr);
-                ESP_LOGI("mode", "Switched to main page");
-              } else {
-                ESP_LOGE("mode", "main_page is null!");
-              }
+              // Исправление #1: возврат на главную через show_page
+              id(lvgl_component).show_page(id(main_page));
+              ESP_LOGI("mode", "Switched to main page");
               
               id(active_mode_id) = 0;
               id(mode_activated) = false;
@@ -216,6 +207,15 @@ interval:
               std::string key = data.substr(0, c1);
               std::string val = data.substr(c1 + 1);
 
+              // Исправление #5: нормализация формата температуры (+23.5 / -5.2)
+              // Убираем пробелы
+              val.erase(std::remove_if(val.begin(), val.end(),
+                        [](unsigned char c){ return std::isspace(c); }), val.end());
+              // Если строка непустая и не начинается с +/- — добавляем '+'
+              if (!val.empty() && val[0] != '+' && val[0] != '-') {
+                val = "+" + val;
+              }
+
               if (key == "OUT") {
                 lv_label_set_text(id(gradussulicy), val.c_str());
               } else if (key == "TO_OUT") {
@@ -254,14 +254,14 @@ interval:
             else if (line.rfind("MODE_CURRENT:", 0) == 0) {
               std::string m = line.substr(13);
               std::string ru = m;
-              lv_color_t color = lv_color_hex(0x0F0F33);
+              lv_color_t color = lv_color_hex(0xFFFFFF);   // Исправление #3: светлый цвет по умолчанию
 
               if      (m == "STANDARD")        ru = "СТАНДАРТНЫЙ";
               else if (m == "ECONOM")          ru = "ЭКОНОМИЧНЫЙ";
               else if (m == "GUEST")           ru = "ГОСТЕВОЙ";
               else if (m == "CONDITIONER")     ru = "КОНДИЦИОНЕР";
               else if (m == "HIGH_EFFICIENCY") ru = "ВЫСОКИЙ КПД";
-              else if (m == "STOP")          { ru = "СТОП"; color = lv_color_hex(0xFF0000); }
+              else if (m == "STOP")          { ru = "СТОП"; color = lv_color_hex(0xFF4444); }
 
               id(selected_mode) = ru;
               lv_label_set_text(id(mode_display), ru.c_str());
@@ -425,11 +425,8 @@ touchscreen:
                   id(screensaver_active) = false;
                   id(inactivity_timer) = 0;
                   id(wakeup_block) = 5;
-                  lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
-                  if (main_page != nullptr) {
-                    lv_scr_load(main_page);
-                    lv_refr_now(nullptr);
-                  }
+                  // Исправление #1: show_page вместо lv_scr_load
+                  id(lvgl_component).show_page(id(main_page));
             else:
               - lambda: |-
                   ESP_LOGI("touch", "Resetting inactivity timer");
@@ -550,11 +547,8 @@ lvgl:
                           id(screensaver_active) = false;
                           id(inactivity_timer) = 0;
                           id(wakeup_block) = 5;
-                          lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
-                          if (main_page != nullptr) {
-                            lv_scr_load(main_page);
-                            lv_refr_now(nullptr);
-                          }
+                          // Исправление #1: show_page вместо lv_scr_load
+                          id(lvgl_component).show_page(id(main_page));
 
     # ========== СТРАНИЦА 1 (ГЛАВНАЯ) ==========
     - id: main_page
@@ -572,13 +566,14 @@ lvgl:
             align: CENTER
             opa: 100%
 
+        # Исправление #2 и #3: time_label перенесён ВНУТРЬ Upscreen, тёмный фон
         - obj:
             id: Upscreen
             x: 1
             y: 0
             width: 478
             height: 35
-            bg_color: 0x12D90D
+            bg_color: 0x1F2937
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -592,7 +587,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x12D90D
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -607,6 +602,17 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
+              - label:
+                  id: time_label
+                  x: 194
+                  y: 1
+                  width: 88
+                  height: 32
+                  text: "14:32"
+                  text_color: 0xF1F5F9
+                  text_align: CENTER
+                  long_mode: CLIP
+                  text_font: cyrillic_font_24
 
         - obj:
             id: t_indoor
@@ -992,18 +998,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_12
 
-        - label:
-            id: time_label
-            x: 194
-            y: 1
-            width: 88
-            height: 32
-            text: "14:32"
-            text_color: 0xF1F5F9
-            text_align: CENTER
-            long_mode: CLIP
-            text_font: cyrillic_font_24
-
+        # Исправление #3: светлый текст на тёмном фоне для читаемости
         - label:
             id: mode_display
             x: 3
@@ -1012,7 +1007,7 @@ lvgl:
             height: 100
             align: CENTER
             text: "СТАНДАРТНЫЙ"
-            text_color: 0x0F0F33
+            text_color: 0xFFFFFF
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
@@ -1132,13 +1127,14 @@ lvgl:
             align: CENTER
             opa: 100%
 
+        # Исправление #3: тёмный фон верхней панели
         - obj:
             id: Upscreen_modes
             x: 1
             y: 0
             width: 478
             height: 35
-            bg_color: 0x12D90D
+            bg_color: 0x1F2937
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -1152,7 +1148,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x12D90D
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -1386,7 +1382,7 @@ lvgl:
                   width: 398
                   height: 50
                   text: "СТОП"
-                  text_color: 0xA21C15
+                  text_color: 0xFF6666
                   text_align: CENTER
                   text_font: cyrillic_font_24
 
@@ -1503,13 +1499,14 @@ lvgl:
             align: CENTER
             opa: 100%
 
+        # Исправление #3: тёмный фон верхней панели
         - obj:
             id: Upscreen_settings
             x: 1
             y: 0
             width: 478
             height: 35
-            bg_color: 0x12D90D
+            bg_color: 0x1F2937
             border_width: 1
             border_color: 0x4B5563
             radius: 8
@@ -1523,7 +1520,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x12D90D
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
