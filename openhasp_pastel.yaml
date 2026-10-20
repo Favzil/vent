@@ -60,7 +60,7 @@ globals:
     type: float
     restore_value: no
     initial_value: '1.0'
-  # ★ Watchdog связи с Arduino ★
+  # Watchdog связи с Arduino
   - id: last_uart_rx_ms
     type: uint32_t
     restore_value: no
@@ -84,13 +84,9 @@ uart:
   data_bits: 8
   parity: NONE
 
-# ★ Хелпер: установить "NA" во все поля данных ★
-# (используется при старте и при потере связи)
-# Реализован через lambda в интервалах ниже.
-
 # Интервалы
 interval:
-  # ★ Watchdog: если от Arduino нет валидных строк > 60 с — показать NA ★
+  # Watchdog: если от Arduino нет валидных строк > 60 с — показать NA
   - interval: 5s
     then:
       - lambda: |-
@@ -125,7 +121,6 @@ interval:
             lv_label_set_text(id(screensaver_date),    "NA");
             lv_label_set_text(id(screensaver_time),    "NA");
           }
-          // Восстановление связи произойдёт само при приёме строк (см. парсер)
 
   - interval: 1s
     then:
@@ -221,7 +216,7 @@ interval:
             }
           }
   
-  # ★ РАСШИРЕННЫЙ ПАРСЕР UART (опрос раз в 2 с) ★
+  # РАСШИРЕННЫЙ ПАРСЕР UART (опрос раз в 2 с)
   - interval: 2s
     then:
       - lambda: |-
@@ -383,7 +378,7 @@ interval:
             }
           }
 
-# ★ ИЗОБРАЖЕНИЯ ★
+# ИЗОБРАЖЕНИЯ
 image:
   - file: "img/olako.png"
     id: background_image
@@ -517,7 +512,7 @@ touchscreen:
         - lambda: |-
             ESP_LOGI("touch", "Released");
 
-# ★ LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ ★
+# LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ
 lvgl:
   id: lvgl_component
   displays:
@@ -657,7 +652,7 @@ lvgl:
             opa: 100%
             clickable: false
        
-        # ★ ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована (clickable: false) ★
+        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen
             x: 1
@@ -697,7 +692,7 @@ lvgl:
                   text_font: cyrillic_font_12
                   clickable: false
 
-        # ★ ТЕМПЕРАТУРНЫЕ КВАДРАТЫ — зафиксированы ★
+        # ТЕМПЕРАТУРНЫЕ КВАДРАТЫ — зафиксированы
         - obj:
             id: t_indoor
             x: 23
@@ -967,7 +962,7 @@ lvgl:
                   line_rounded: true
                   clickable: false
 
-        # ★ ФИЛЬТРЫ — зафиксированы ★
+        # ФИЛЬТРЫ — зафиксированы
         - obj:
             id: Pritok_filter
             x: 16
@@ -1107,7 +1102,7 @@ lvgl:
                   text_font: cyrillic_font_12
                   clickable: false
         
-        # ★ ВЕРХНЕЕ ВРЕМЯ (главная) — зафиксировано ★
+        # ВЕРХНЕЕ ВРЕМЯ (главная) — зафиксировано
         - label:
             id: time_label
             x: 194
@@ -1134,7 +1129,7 @@ lvgl:
             text_font: cyrillic_font_40
             clickable: false
 
-        # ★ КНОПКА "ДОМ" ★
+        # КНОПКА "ДОМ"
         - button:
             id: domoi
             x: 0
@@ -1169,7 +1164,7 @@ lvgl:
                   text_font: cyrillic_font_12
                   clickable: false
                 
-        # ★ КНОПКА "РЕЖИМЫ" ★
+        # КНОПКА "РЕЖИМЫ"
         - button:
             id: modes
             x: 160
@@ -1204,7 +1199,7 @@ lvgl:
                   text_font: cyrillic_font_12
                   clickable: false
 
-        # ★ КНОПКА "НАСТРОЙКА" ★
+        # КНОПКА "НАСТРОЙКА"
         - button:
             id: settings
             x: 320
@@ -1256,7 +1251,7 @@ lvgl:
             opa: 100%
             clickable: false
         
-        # ★ ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована ★
+        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen_modes
             x: 1
@@ -1643,7 +1638,7 @@ lvgl:
             opa: 100%
             clickable: false
         
-        # ★ ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована ★
+        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen_settings
             x: 1
@@ -1706,6 +1701,7 @@ lvgl:
             text_font: cyrillic_font_24
             clickable: false
 
+        # Пункты настроек — текст по центру, как на странице «Режимы»
         - obj:
             x: 40
             y: 110
@@ -1719,13 +1715,13 @@ lvgl:
             clickable: false
             widgets:
               - label:
-                  x: 20
-                  y: 10
-                  width: 360
-                  height: 30
+                  x: 0
+                  y: 0
+                  width: 400
+                  height: 50
                   text: "Яркость экрана"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
                   clickable: false
 
@@ -1742,13 +1738,13 @@ lvgl:
             clickable: false
             widgets:
               - label:
-                  x: 20
-                  y: 10
-                  width: 360
-                  height: 30
+                  x: 0
+                  y: 0
+                  width: 400
+                  height: 50
                   text: "Таймаут экрана"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
                   clickable: false
 
@@ -1765,13 +1761,13 @@ lvgl:
             clickable: false
             widgets:
               - label:
-                  x: 20
-                  y: 10
-                  width: 360
-                  height: 30
+                  x: 0
+                  y: 0
+                  width: 400
+                  height: 50
                   text: "Единицы измерения"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
                   clickable: false
 
@@ -1788,13 +1784,13 @@ lvgl:
             clickable: false
             widgets:
               - label:
-                  x: 20
-                  y: 10
-                  width: 360
-                  height: 30
+                  x: 0
+                  y: 0
+                  width: 400
+                  height: 50
                   text: "О системе"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
                   clickable: false
 
