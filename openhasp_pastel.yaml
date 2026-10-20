@@ -125,7 +125,7 @@ interval:
           if (id(last_uart_rx_ms) == 0) return;
           uint32_t age = now - id(last_uart_rx_ms);
           if (age > 60000 && !id(data_stale)) {
-            ESP_LOGW("uart", "No END from Arduino for %u ms -> showing NA", age);
+            ESP_LOGW("uart", "No END from Arduino for %u ms -> showing NA", (unsigned) age);
             id(data_stale) = true;
 
             // Температуры
@@ -240,7 +240,7 @@ interval:
               }
 
               if (!uart_cmd.empty()) {
-                id(uart_arduino).write_str(uart_cmd);
+                id(uart_arduino).write_str(uart_cmd.c_str());
                 ESP_LOGI("mode", "Sent to Arduino: %s", uart_cmd.c_str());
               }
 
@@ -337,7 +337,7 @@ interval:
               }
 
               float val = atof(valstr.c_str());
-              if (isnan(val) || isinf(val)) continue;
+              if (std::isnan(val) || std::isinf(val)) continue;
 
               char buf[16];
               snprintf(buf, sizeof(buf), "%.1f", val);
