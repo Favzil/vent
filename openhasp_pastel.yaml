@@ -13,6 +13,7 @@ psram:
 
 logger:
   level: DEBUG
+  # baud_rate: 0  # ОТКЛЮЧЕНО: логи идут через USB_SERIAL_JTAG (порт "USB")
 
 # ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
 globals:
@@ -105,6 +106,7 @@ globals:
 
 # ==================== UART ====================
 # Скорость 9600 для длинных проводов
+# ДОБАВЛЕНА ОТЛАДКА: в логах будут видны >>> (отправка) и <<< (приём)
 uart:
   id: uart_arduino
   tx_pin: GPIO43
@@ -113,6 +115,13 @@ uart:
   stop_bits: 1
   data_bits: 8
   parity: NONE
+  debug:
+    direction: BOTH
+    dummy_receiver: true
+    after:
+      delimiter: "\n"
+    sequence:
+      - lambda: UARTDebug::log_string(direction, bytes);
 
 # ==================== ИНТЕРВАЛЫ ====================
 interval:
@@ -258,6 +267,8 @@ interval:
   - interval: 1s
     then:
       - lambda: |-
+          ESP_LOGI("diag", "Interval tick, millis=%u", (unsigned) millis());
+
           uint32_t now = millis();
 
           // Таймаут запроса: если ответа нет дольше 5 с — считаем пакет потерянным
