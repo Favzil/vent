@@ -202,7 +202,7 @@ interval:
             
             ESP_LOGI("uart", "Line: %s", line.c_str());
             
-            // ==================== TEMP / FAN ====================
+            // ==================== TEMP ====================
             if (line.rfind("TEMP:", 0) == 0) {
               // TEMP:<SENSOR>:<value>
               size_t c1 = line.find(':', 5);
@@ -226,23 +226,51 @@ interval:
               continue;
             }
             
-            if (line.rfind("FAN:", 0) == 0) {
-              // FAN:<SUPPLY|EXHAUST>:<0-100>
-              size_t c1 = line.find(':', 4);
+            // ==================== СОСТОЯНИЕ ФИЛЬТРОВ ====================
+            // FILTER:<SUPPLY|EXHAUST>:<0-100>
+            // 0% = чистый, 100% = забит
+            // Пороги цвета:
+            //   0-50   -> зелёный  0x12D90D
+            //   51-70  -> жёлтый   0xF59E0B
+            //   71-100 -> красный  0xDC2626
+            if (line.rfind("FILTER:", 0) == 0) {
+              size_t c1 = line.find(':', 7);
               if (c1 != std::string::npos) {
-                std::string ch = line.substr(4, c1 - 4);
+                std::string ch = line.substr(7, c1 - 7);
                 int pct = atoi(line.substr(c1 + 1).c_str());
-                if (pct < 0) pct = 0;
+                if (pct < 0)   pct = 0;
                 if (pct > 100) pct = 100;
+                
+                lv_color_t color;
+                if (pct <= 50) {
+                  color = lv_color_hex(0x12D90D);   // зелёный
+                } else if (pct <= 70) {
+                  color = lv_color_hex(0xF59E0B);   // жёлтый
+                } else {
+                  color = lv_color_hex(0xDC2626);   // красный
+                }
+                
                 char buf[8];
                 snprintf(buf, sizeof(buf), "%d%%", pct);
                 
                 if (ch == "SUPPLY") {
-                  lv_arc_set_value(id(arc_supply), pct);
-                  lv_label_set_text(id(label_supply_pct), buf);
+                  lv_arc_set_value(id(arc_filter_supply), pct);
+                  // индикатор дуги
+                  lv_obj_set_style_arc_color(id(arc_filter_supply),
+                                             color,
+                                             LV_PART_INDICATOR);
+                  // текст процентов
+                  lv_label_set_text(id(label_filter_supply_pct), buf);
+                  lv_obj_set_style_text_color(id(label_filter_supply_pct),
+                                              color, 0);
                 } else if (ch == "EXHAUST") {
-                  lv_arc_set_value(id(arc_exhaust), pct);
-                  lv_label_set_text(id(label_exhaust_pct), buf);
+                  lv_arc_set_value(id(arc_filter_exhaust), pct);
+                  lv_obj_set_style_arc_color(id(arc_filter_exhaust),
+                                             color,
+                                             LV_PART_INDICATOR);
+                  lv_label_set_text(id(label_filter_exhaust_pct), buf);
+                  lv_obj_set_style_text_color(id(label_filter_exhaust_pct),
+                                              color, 0);
                 }
               }
               continue;
@@ -252,7 +280,7 @@ interval:
             // Поддерживаем форматы:
             //   "DATE <дата> <время>"
             //   "<дата> <время>"
-            // ВАЖНО: <дата> не должна содержать пробелов (парсер режет по первому пробелу)
+            // ВАЖНО: <дата> не должна содержать пробелов
             std::string payload = line;
             if (payload.rfind("DATE ", 0) == 0) {
               payload = payload.substr(5);
@@ -877,7 +905,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - arc:
-                  id: arc_supply
+                  id: arc_filter_supply
                   x: 8
                   y: 4
                   width: 92
@@ -893,7 +921,7 @@ lvgl:
                   arc_opa: 20%
                   arc_rounded: true
                   indicator:
-                    arc_color: 0x12D90D
+                    arc_color: 0xDC2626
                     arc_width: 10
                     arc_opa: 100%
                     arc_rounded: true
@@ -902,13 +930,13 @@ lvgl:
                   bg_opa: 0%
                   border_width: 0
               - label:
-                  id: label_supply_pct
+                  id: label_filter_supply_pct
                   x: 2
                   y: 32
                   width: 92
                   height: 24
                   text: "72%"
-                  text_color: 0xFFFFFF
+                  text_color: 0xDC2626
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -942,7 +970,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - arc:
-                  id: arc_exhaust
+                  id: arc_filter_exhaust
                   x: 8
                   y: 4
                   width: 92
@@ -967,13 +995,13 @@ lvgl:
                   bg_opa: 0%
                   border_width: 0
               - label:
-                  id: label_exhaust_pct
+                  id: label_filter_exhaust_pct
                   x: 2
                   y: 32
                   width: 92
                   height: 24
                   text: "31%"
-                  text_color: 0xFFFFFF
+                  text_color: 0x12D90D
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
