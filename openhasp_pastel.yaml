@@ -211,7 +211,7 @@ interval:
            ESP_LOGI("main", "TX: GET_DATA");
          }
 
- # ★ Чтение и разбор пакета от Arduino ★
+ # ★★★ ДИАГНОСТИЧЕСКИЙ РЕЖИМ: только читаем и выводим в лог, НЕ парсим ★★★
  - interval: 500ms
    then:
      - lambda: |-
@@ -223,98 +223,14 @@ interval:
              }
            }
 
-           // Разбираем все полные строки в буфере
-           size_t newline_pos;
-           while ((newline_pos = id(uart_buffer).find('\n')) != std::string::npos) {
-             std::string line = id(uart_buffer).substr(0, newline_pos);
-             id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
+           // Прямой вывод всего буфера в лог — видно ли данные от Arduino
+           ESP_LOGI("raw_uart", "===== BUFFER (%d bytes) =====", id(uart_buffer).length());
+           ESP_LOGI("raw_uart", "[%s]", id(uart_buffer).c_str());
 
-             // Убираем \r
-             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-             if (line.empty()) continue;
-
-             ESP_LOGI("main", "RX: %s", line.c_str());
-
-             // --- TEMP:OUT:+12.3 ---
-             if (line.rfind("TEMP:", 0) == 0) {
-               size_t c1 = line.find(':', 5);
-               if (c1 != std::string::npos) {
-                 std::string key = line.substr(5, c1 - 5);
-                 float val = atof(line.substr(c1 + 1).c_str());
-
-                 if (key == "OUT") {
-                   id(temp_outdoor_val) = val;
-                   char buf[16]; snprintf(buf, sizeof(buf), "%+.1f", val);
-                   lv_label_set_text(id(gradussulicy), buf);
-                 } else if (key == "IN") {
-                   id(temp_indoor_val) = val;
-                   char buf[16]; snprintf(buf, sizeof(buf), "%+.1f", val);
-                   lv_label_set_text(id(widget_1781262306198_b9dnjbboi), buf);
-                 } else if (key == "SUPPLY") {
-                   id(temp_supply_val) = val;
-                   char buf[16]; snprintf(buf, sizeof(buf), "%+.1f", val);
-                   lv_label_set_text(id(widget_1781262307812_3m3qdg397), buf);
-                 } else if (key == "EXHAUST") {
-                   id(temp_exhaust_val) = val;
-                   char buf[16]; snprintf(buf, sizeof(buf), "%+.1f", val);
-                   lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buf);
-                 }
-               }
-             }
-             // --- FILTER:SUPPLY:5 ---
-             else if (line.rfind("FILTER:", 0) == 0) {
-               size_t c1 = line.find(':', 7);
-               if (c1 != std::string::npos) {
-                 std::string key = line.substr(7, c1 - 7);
-                 int val = atoi(line.substr(c1 + 1).c_str());
-
-                 if (key == "SUPPLY") {
-                   id(filter_supply_val) = val;
-                   lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), val);
-                   char buf[8]; snprintf(buf, sizeof(buf), "%d%%", val);
-                   lv_label_set_text(id(lv_label_0), buf);
-                 } else if (key == "EXHAUST") {
-                   id(filter_exhaust_val) = val;
-                   lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), val);
-                   char buf[8]; snprintf(buf, sizeof(buf), "%d%%", val);
-                   lv_label_set_text(id(widget_1781261697547_036jpjyoc), buf);
-                 }
-               }
-             }
-             // --- MODE:ЭКОНОМИЧНЫЙ ---
-             else if (line.rfind("MODE:", 0) == 0) {
-               std::string mode = line.substr(5);
-               id(selected_mode) = mode;
-               lv_label_set_text(id(mode_display), mode.c_str());
-               ESP_LOGI("main", "Mode from Arduino: %s", mode.c_str());
-             }
-             // --- DATE 20-октябрь-2026 23:15 ---
-             else if (line.rfind("DATE ", 0) == 0) {
-               std::string rest = line.substr(5);
-               size_t sp = rest.find(' ');
-               if (sp != std::string::npos) {
-                 std::string date_part = rest.substr(0, sp);
-                 std::string time_part = rest.substr(sp + 1);
-
-                 lv_label_set_text(id(Date), date_part.c_str());
-                 lv_label_set_text(id(time_label), time_part.c_str());
-                 lv_label_set_text(id(Date_modes), date_part.c_str());
-                 lv_label_set_text(id(time_label_modes), time_part.c_str());
-                 lv_label_set_text(id(Date_settings), date_part.c_str());
-                 lv_label_set_text(id(time_label_settings), time_part.c_str());
-                 lv_label_set_text(id(screensaver_date), date_part.c_str());
-                 lv_label_set_text(id(screensaver_time), time_part.c_str());
-               }
-             }
-             // --- END ---
-             else if (line == "END") {
-               id(packet_in_progress) = false;
-               ESP_LOGI("main", "Packet complete");
-             }
-             else {
-               ESP_LOGW("main", "Unknown line: %s", line.c_str());
-             }
-           }
+           // Очищаем буфер, чтобы не разрастался (парсинг пока отключён)
+           id(uart_buffer) = "";
+         } else {
+           ESP_LOGD("raw_uart", "No data available");
          }
 
  # Интервал для плавного затухания подсветки
@@ -353,13 +269,11 @@ interval:
 
 # ★ ИЗОБРАЖЕНИЯ ★
 image:
- # Фоновое изображение
  - file: "img/olako.png"
    id: background_image
    type: RGB565
    resize: 480x480
  
- # ★ ИКОНКИ С ПРОЗРАЧНОСТЬЮ ★
  - file: "img/family-home.png"
    id: icon_home
    type: RGB565
@@ -1163,7 +1077,6 @@ lvgl:
      bg_opa: 100%
      pad_all: 0
      widgets:
-       # Фоновое изображение
        - image:
            id: background_image_modes
            x: 0
@@ -1174,7 +1087,6 @@ lvgl:
            align: CENTER
            opa: 100%
        
-       # Верхняя панель
        - obj:
            id: Upscreen_modes
            x: 1
@@ -1222,7 +1134,6 @@ lvgl:
                  long_mode: CLIP
                  text_font: cyrillic_font_24
 
-       # Кнопки режимов с долгим нажатием
        - button:
            id: mode_standard
            x: 40
@@ -1433,7 +1344,6 @@ lvgl:
                  text_align: CENTER
                  text_font: cyrillic_font_24
 
-       # Нижняя панель с кнопками (как на главной странице)
        - button:
            id: domoi_modes
            x: 0
@@ -1536,7 +1446,6 @@ lvgl:
      bg_opa: 100%
      pad_all: 0
      widgets:
-       # Фоновое изображение
        - image:
            id: background_image_settings
            x: 0
@@ -1547,7 +1456,6 @@ lvgl:
            align: CENTER
            opa: 100%
        
-       # Верхняя панель
        - obj:
            id: Upscreen_settings
            x: 1
@@ -1595,7 +1503,6 @@ lvgl:
                  long_mode: CLIP
                  text_font: cyrillic_font_24
 
-       # Заголовок
        - label:
            x: 0
            y: 60
@@ -1606,7 +1513,6 @@ lvgl:
            text_align: CENTER
            text_font: cyrillic_font_24
 
-       # Пункты настроек
        - obj:
            x: 40
            y: 110
@@ -1691,7 +1597,6 @@ lvgl:
                  text_align: LEFT
                  text_font: cyrillic_font_24
 
-       # Нижняя панель с кнопками (как на главной странице)
        - button:
            id: domoi_settings
            x: 0
