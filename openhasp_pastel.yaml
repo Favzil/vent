@@ -97,8 +97,8 @@ globals:
 # UART для связи с Arduino
 uart:
  id: uart_arduino
- tx_pin: GPIO43
- rx_pin: GPIO44
+ tx_pin: GPIO17
+ rx_pin: GPIO18
  baud_rate: 115200
  stop_bits: 1
  data_bits: 8
