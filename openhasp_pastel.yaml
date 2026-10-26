@@ -874,7 +874,8 @@ lvgl:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
                   y: 62
-                  width: 80                  height: 10
+                  width: 80                  
+                  height: 10
                   points:
                     - 0, 0
                     - 129, 0
