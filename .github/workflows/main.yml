@@ -12,8 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ------------------------------------------------------------
+      # Явно фиксируем Python 3.12:
+      # ESPHome 2025.12.7 требует Python >=3.11,<3.14,
+      # а ubuntu-latest (26.04) по умолчанию даёт Python 3.14+,
+      # с которым pip отказывается ставить ESPHome 2025.12.7.
+      # ------------------------------------------------------------
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # ------------------------------------------------------------
+      # Фиксируем версию ESPHome 2025.12.7:
+      # в 2026.x удалены uart.available()/read_byte(),
+      # на которых построен парсер UART в openhasp_pastel.yaml.
+      # ------------------------------------------------------------
       - name: Install ESPHome
         run: |
+          python -m pip install --upgrade pip
           pip install esphome==2025.12.7
 
       - name: Compile firmware
@@ -25,16 +42,16 @@ jobs:
         run: |
           echo "🔍 Поиск всех .bin файлов..."
           find . -name "*.bin" -type f -ls
-          
+
           echo ""
           echo "🔍 Поиск firmware.factory.bin..."
           find . -name "firmware.factory.bin" -type f -exec ls -la {} \;
-          
+
           # Копируем ВСЕ найденные .bin файлы в корень
           echo ""
           echo "📂 Копирование всех .bin файлов в корень..."
           find . -name "*.bin" -type f -exec cp {} ./ \; || true
-          
+
           echo ""
           echo "📂 Содержимое корневой папки:"
           ls -la *.bin 2>/dev/null || echo "❌ .bin файлы не найдены"
