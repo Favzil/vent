@@ -14,13 +14,19 @@ psram:
 logger:
   level: DEBUG
 
-# Глобальные переменные
+# ============================================================
+# ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+# ============================================================
 globals:
   - id: uart_buffer
     type: std::string
     restore_value: no
     initial_value: '""'
   - id: selected_mode
+    type: std::string
+    restore_value: no
+    initial_value: '"СТАНДАРТНЫЙ"'
+  - id: current_mode_from_arduino
     type: std::string
     restore_value: no
     initial_value: '"СТАНДАРТНЫЙ"'
@@ -60,6 +66,39 @@ globals:
     type: float
     restore_value: no
     initial_value: '1.0'
+  - id: current_date
+    type: std::string
+    restore_value: no
+    initial_value: '"Сб 20-июнь-2026"'
+  - id: current_time
+    type: std::string
+    restore_value: no
+    initial_value: '"14:32"'
+  # Данные с Arduino
+  - id: temp_street
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: temp_outdoor
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: temp_from_home
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: temp_to_home
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: filter_supply
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: filter_exhaust
+    type: int
+    restore_value: no
+    initial_value: '0'
   # Watchdog связи с Arduino
   - id: last_uart_rx_ms
     type: uint32_t
@@ -74,7 +113,9 @@ globals:
     restore_value: no
     initial_value: 'false'
 
-# UART для связи с Arduino
+# ============================================================
+# UART ДЛЯ СВЯЗИ С ARDUINO
+# ============================================================
 uart:
   id: uart_arduino
   tx_pin: GPIO43
@@ -84,24 +125,36 @@ uart:
   data_bits: 8
   parity: NONE
 
-# Интервалы
+# ============================================================
+# ИНТЕРВАЛЫ
+# ============================================================
 interval:
-  # ============================================================
-  # 1) ЗАПРОС ДАННЫХ у Arduino каждые 2 секунды
-  # ============================================================
-  - interval: 2s
+  # ----------------------------------------------------------
+  # 1) ЗАПРОС ДАННЫХ у Arduino каждые 5 секунд
+  # ----------------------------------------------------------
+  - interval: 5s
     then:
       - lambda: |-
+          ESP_LOGI("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
-          ESP_LOGD("uart", "Sent GET_DATA");
 
-  # ============================================================
-  # 2) ПАРСЕР UART — быстрый, ловит ответ Arduino
-  # ============================================================
+  # ----------------------------------------------------------
+  # 2) ПАРСЕР UART — читает ВСЕ строки за один проход
+  #    Формат Arduino:
+  #      TEMP:OUT:+24.1
+  #      TEMP:IN:+23.9
+  #      TEMP:SUPPLY:+24.5
+  #      TEMP:EXHAUST:+23.9
+  #      FILTER:SUPPLY:5
+  #      FILTER:EXHAUST:2
+  #      MODE:ЭКОНОМИЧНЫЙ
+  #      DATE 26-октябрь-2026 22:39
+  #      END
+  # ----------------------------------------------------------
   - interval: 200ms
     then:
       - lambda: |-
-          // ---- Чтение всего, что пришло ----
+          // --- Читаем всё, что пришло, с защитой от зависания ---
           int guard = 0;
           while (id(uart_arduino).available() && guard++ < 1024) {
             uint8_t byte;
@@ -117,13 +170,13 @@ interval:
 
           bool got_valid = false;
 
-          // Обрабатываем ВСЕ полные строки в буфере
+          // --- Обрабатываем ВСЕ полные строки в буфере ---
           size_t newline_pos;
           while ((newline_pos = id(uart_buffer).find('\n')) != std::string::npos) {
             std::string line = id(uart_buffer).substr(0, newline_pos);
             id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
 
-            // \r убрать, пробелы по краям убрать
+            // Убираем \r и пробелы по краям
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             size_t start = line.find_first_not_of(" \t");
             size_t end   = line.find_last_not_of(" \t");
@@ -131,7 +184,7 @@ interval:
             line = line.substr(start, end - start + 1);
             if (line.empty()) continue;
 
-            ESP_LOGI("uart", "Line: %s", line.c_str());
+            ESP_LOGI("main", "Received: %s", line.c_str());
             got_valid = true;
 
             // ==================== END ====================
@@ -147,16 +200,24 @@ interval:
                 std::string sensor = line.substr(5, c1 - 5);
                 float val = atof(line.substr(c1 + 1).c_str());
                 char buf[16];
-                snprintf(buf, sizeof(buf), "%.1f", val);
+                snprintf(buf, sizeof(buf), "%+.1f", val);
 
                 if (sensor == "OUT") {
-                  lv_label_set_text(id(temp_outdoor_val), buf);
+                  id(temp_street) = val;
+                  lv_label_set_text(id(gradussulicy), buf);
+                  ESP_LOGI("temp", "OUT -> %s", buf);
                 } else if (sensor == "IN") {
-                  lv_label_set_text(id(temp_indoor_val), buf);
+                  id(temp_outdoor) = val;
+                  lv_label_set_text(id(widget_1781262306198_b9dnjbboi), buf);
+                  ESP_LOGI("temp", "IN -> %s", buf);
                 } else if (sensor == "SUPPLY") {
-                  lv_label_set_text(id(temp_supply_val), buf);
+                  id(temp_from_home) = val;
+                  lv_label_set_text(id(widget_1781262307812_3m3qdg397), buf);
+                  ESP_LOGI("temp", "SUPPLY -> %s", buf);
                 } else if (sensor == "EXHAUST") {
-                  lv_label_set_text(id(temp_exhaust_val), buf);
+                  id(temp_to_home) = val;
+                  lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buf);
+                  ESP_LOGI("temp", "EXHAUST -> %s", buf);
                 }
               }
               continue;
@@ -164,7 +225,6 @@ interval:
 
             // ==================== FILTER ====================
             // FILTER:<SUPPLY|EXHAUST>:<0-100>
-            // 0% = чистый, 100% = забит
             // 0-50 зелёный, 51-70 жёлтый, 71-100 красный
             if (line.rfind("FILTER:", 0) == 0) {
               size_t c1 = line.find(':', 7);
@@ -187,28 +247,33 @@ interval:
                 snprintf(buf, sizeof(buf), "%d%%", pct);
 
                 if (ch == "SUPPLY") {
-                  lv_arc_set_value(id(arc_filter_supply), pct);
-                  lv_obj_set_style_arc_color(id(arc_filter_supply), color, LV_PART_INDICATOR);
-                  lv_label_set_text(id(label_filter_supply_pct), buf);
-                  lv_obj_set_style_text_color(id(label_filter_supply_pct), color, 0);
+                  id(filter_supply) = pct;
+                  lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), pct);
+                  lv_obj_set_style_arc_color(id(widget_1781261697547_smtgd7w9q), color, LV_PART_INDICATOR);
+                  lv_label_set_text(id(lv_label_0), buf);
+                  lv_obj_set_style_text_color(id(lv_label_0), color, 0);
+                  ESP_LOGI("filter", "SUPPLY -> %s", buf);
                 } else if (ch == "EXHAUST") {
-                  lv_arc_set_value(id(arc_filter_exhaust), pct);
-                  lv_obj_set_style_arc_color(id(arc_filter_exhaust), color, LV_PART_INDICATOR);
-                  lv_label_set_text(id(label_filter_exhaust_pct), buf);
-                  lv_obj_set_style_text_color(id(label_filter_exhaust_pct), color, 0);
+                  id(filter_exhaust) = pct;
+                  lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), pct);
+                  lv_obj_set_style_arc_color(id(widget_1781261697547_jcbrfzs59), color, LV_PART_INDICATOR);
+                  lv_label_set_text(id(widget_1781261697547_036jpjyoc), buf);
+                  lv_obj_set_style_text_color(id(widget_1781261697547_036jpjyoc), color, 0);
+                  ESP_LOGI("filter", "EXHAUST -> %s", buf);
                 }
               }
               continue;
             }
 
             // ==================== MODE ====================
-            // MODE:<название>  — обновляем selected_mode и label (без переключения страниц!)
+            // MODE:<название>
             if (line.rfind("MODE:", 0) == 0) {
               std::string mode = line.substr(5);
               size_t s = mode.find_first_not_of(" \t");
               size_t e = mode.find_last_not_of(" \t");
               if (s != std::string::npos) mode = mode.substr(s, e - s + 1);
 
+              id(current_mode_from_arduino) = mode;
               id(selected_mode) = mode;
               lv_label_set_text(id(mode_display), mode.c_str());
 
@@ -217,11 +282,12 @@ interval:
               } else {
                 lv_obj_set_style_text_color(id(mode_display), lv_color_hex(0x0F0F33), 0);
               }
+              ESP_LOGI("mode", "MODE -> %s", mode.c_str());
               continue;
             }
 
             // ==================== DATE / TIME ====================
-            // DATE <дата> <время>  (или просто "<дата> <время>")
+            // DATE <дата> <время>  или просто "<дата> <время>"
             std::string payload = line;
             if (payload.rfind("DATE ", 0) == 0) {
               payload = payload.substr(5);
@@ -232,14 +298,19 @@ interval:
               std::string date_part = payload.substr(0, space_pos);
               std::string time_part = payload.substr(space_pos + 1);
 
-              lv_label_set_text(id(Date),                 date_part.c_str());
-              lv_label_set_text(id(time_label),           time_part.c_str());
-              lv_label_set_text(id(Date_modes),           date_part.c_str());
-              lv_label_set_text(id(time_label_modes),     time_part.c_str());
-              lv_label_set_text(id(Date_settings),        date_part.c_str());
-              lv_label_set_text(id(time_label_settings),  time_part.c_str());
-              lv_label_set_text(id(screensaver_date),     date_part.c_str());
-              lv_label_set_text(id(screensaver_time),     time_part.c_str());
+              id(current_date) = date_part;
+              id(current_time) = time_part;
+
+              lv_label_set_text(id(Date),                date_part.c_str());
+              lv_label_set_text(id(time_label),          time_part.c_str());
+              lv_label_set_text(id(Date_modes),          date_part.c_str());
+              lv_label_set_text(id(time_label_modes),    time_part.c_str());
+              lv_label_set_text(id(Date_settings),       date_part.c_str());
+              lv_label_set_text(id(time_label_settings), time_part.c_str());
+              lv_label_set_text(id(screensaver_date),    date_part.c_str());
+              lv_label_set_text(id(screensaver_time),    time_part.c_str());
+
+              ESP_LOGI("time", "DATE=%s, TIME=%s", date_part.c_str(), time_part.c_str());
             }
           }
 
@@ -252,9 +323,9 @@ interval:
             }
           }
 
-  # ============================================================
+  # ----------------------------------------------------------
   # 3) WATCHDOG: нет валидных строк > 60 с — показать NA
-  # ============================================================
+  # ----------------------------------------------------------
   - interval: 5s
     then:
       - lambda: |-
@@ -266,19 +337,19 @@ interval:
             ESP_LOGW("uart", "No data from Arduino for %u ms -> showing NA", age);
             id(data_stale) = true;
             // Температуры
-            lv_label_set_text(id(temp_outdoor_val), "NA");
-            lv_label_set_text(id(temp_indoor_val),  "NA");
-            lv_label_set_text(id(temp_supply_val),  "NA");
-            lv_label_set_text(id(temp_exhaust_val), "NA");
+            lv_label_set_text(id(gradussulicy), "NA");
+            lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "NA");
+            lv_label_set_text(id(widget_1781262307812_3m3qdg397), "NA");
+            lv_label_set_text(id(widget_1781262308709_dnoiw7el6), "NA");
             // Фильтры -> NA и серый цвет
-            lv_label_set_text(id(label_filter_supply_pct),  "NA");
-            lv_label_set_text(id(label_filter_exhaust_pct), "NA");
-            lv_obj_set_style_text_color(id(label_filter_supply_pct),  lv_color_hex(0x9CA3AF), 0);
-            lv_obj_set_style_text_color(id(label_filter_exhaust_pct), lv_color_hex(0x9CA3AF), 0);
-            lv_arc_set_value(id(arc_filter_supply), 0);
-            lv_arc_set_value(id(arc_filter_exhaust), 0);
-            lv_obj_set_style_arc_color(id(arc_filter_supply),  lv_color_hex(0x6B7280), LV_PART_INDICATOR);
-            lv_obj_set_style_arc_color(id(arc_filter_exhaust), lv_color_hex(0x6B7280), LV_PART_INDICATOR);
+            lv_label_set_text(id(lv_label_0), "NA");
+            lv_label_set_text(id(widget_1781261697547_036jpjyoc), "NA");
+            lv_obj_set_style_text_color(id(lv_label_0), lv_color_hex(0x9CA3AF), 0);
+            lv_obj_set_style_text_color(id(widget_1781261697547_036jpjyoc), lv_color_hex(0x9CA3AF), 0);
+            lv_arc_set_value(id(widget_1781261697547_smtgd7w9q), 0);
+            lv_arc_set_value(id(widget_1781261697547_jcbrfzs59), 0);
+            lv_obj_set_style_arc_color(id(widget_1781261697547_smtgd7w9q), lv_color_hex(0x6B7280), LV_PART_INDICATOR);
+            lv_obj_set_style_arc_color(id(widget_1781261697547_jcbrfzs59), lv_color_hex(0x6B7280), LV_PART_INDICATOR);
             // Дата/время
             lv_label_set_text(id(Date),                "NA");
             lv_label_set_text(id(time_label),          "NA");
@@ -290,9 +361,9 @@ interval:
             lv_label_set_text(id(screensaver_time),    "NA");
           }
 
-  # ============================================================
+  # ----------------------------------------------------------
   # 4) Скринсейвер: тик 1 с
-  # ============================================================
+  # ----------------------------------------------------------
   - interval: 1s
     then:
       - lambda: |-
@@ -317,9 +388,9 @@ interval:
             }
           }
 
-  # ============================================================
+  # ----------------------------------------------------------
   # 5) Кнопки режимов: удержание 3 с
-  # ============================================================
+  # ----------------------------------------------------------
   - interval: 100ms
     then:
       - lambda: |-
@@ -390,9 +461,9 @@ interval:
             }
           }
 
-  # ============================================================
+  # ----------------------------------------------------------
   # 6) Плавное затухание/пробуждение подсветки
-  # ============================================================
+  # ----------------------------------------------------------
   - interval: 50ms
     then:
       - lambda: |-
@@ -426,7 +497,9 @@ interval:
             }
           }
 
+# ============================================================
 # ИЗОБРАЖЕНИЯ
+# ============================================================
 image:
   - file: "img/olako.png"
     id: background_image
@@ -451,6 +524,9 @@ image:
     resize: 32x32
     transparency: alpha_channel
 
+# ============================================================
+# ШРИФТЫ
+# ============================================================
 font:
   - file: "fonts/Roboto-Regular.ttf"
     id: cyrillic_font_40
@@ -467,7 +543,9 @@ font:
     size: 12
     glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
 
-# Реле
+# ============================================================
+# РЕЛЕ
+# ============================================================
 switch:
   - platform: gpio
     name: "Реле 1"
@@ -485,7 +563,9 @@ switch:
       number: GPIO1
       inverted: true
 
-# Подсветка
+# ============================================================
+# ПОДСВЕТКА
+# ============================================================
 output:
   - platform: ledc
     id: backlight_output
@@ -502,19 +582,25 @@ light:
     restore_mode: ALWAYS_ON
     default_transition_length: 0s
 
-# SPI для дисплея
+# ============================================================
+# SPI ДЛЯ ДИСПЛЕЯ
+# ============================================================
 spi:
   - id: lcd_spi
     clk_pin: GPIO48
     mosi_pin: GPIO47
 
-# I2C для тачскрина (GT911)
+# ============================================================
+# I2C ДЛЯ ТАЧСКРИНА (GT911)
+# ============================================================
 i2c:
   id: touchscreen_bus
   sda: GPIO19
   scl: GPIO45
 
+# ============================================================
 # ДИСПЛЕЙ
+# ============================================================
 display:
   - platform: mipi_rgb
     id: tft_display
@@ -523,7 +609,9 @@ display:
     cs_pin: GPIO39
     invert_colors: False
 
+# ============================================================
 # СЕНСОР ЭКРАНА (GT911)
+# ============================================================
 touchscreen:
   - platform: gt911
     id: my_touchscreen
@@ -560,7 +648,9 @@ touchscreen:
         - lambda: |-
             ESP_LOGI("touch", "Released");
 
-# LVGL С КРАСИВЫМ ОФОРМЛЕНИЕМ
+# ============================================================
+# LVGL
+# ============================================================
 lvgl:
   id: lvgl_component
   displays:
@@ -587,7 +677,6 @@ lvgl:
             bg_color: 0x000000
             bg_opa: 100%
             border_width: 0
-            clickable: false
 
         - image:
             id: screensaver_image
@@ -598,7 +687,6 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-            clickable: false
 
         - obj:
             id: screensaver_info_bg
@@ -611,7 +699,6 @@ lvgl:
             radius: 16
             border_width: 0
             shadow_width: 0
-            clickable: false
 
         - label:
             id: screensaver_date
@@ -619,13 +706,12 @@ lvgl:
             y: 185
             width: 400
             height: 40
-            text: "NA"
+            text: "Сб 20-июнь-2026"
             text_color: 0xFFFFFF
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_24
             opa: 100%
-            clickable: false
 
         - label:
             id: screensaver_time
@@ -633,13 +719,12 @@ lvgl:
             y: 230
             width: 400
             height: 60
-            text: "NA"
+            text: "14:32"
             text_color: 0xFFFFFF
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
             opa: 100%
-            clickable: false
 
         - label:
             id: screensaver_hint
@@ -652,7 +737,6 @@ lvgl:
             text_align: CENTER
             text_font: cyrillic_font_12
             opa: 50%
-            clickable: false
 
         - button:
             id: wakeup_button
@@ -698,9 +782,7 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-            clickable: false
 
-        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen
             x: 1
@@ -713,7 +795,6 @@ lvgl:
             radius: 8
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: KhaKar
@@ -726,21 +807,18 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: Date
                   x: 280
                   y: 9
                   width: 200
                   height: 20
-                  text: "NA"
+                  text: "Сб 20-июнь-2026"
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
 
-        # ТЕМПЕРАТУРНЫЕ КВАДРАТЫ — зафиксированы
         - obj:
             id: t_indoor
             x: 23
@@ -758,7 +836,6 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: znakgradussulicy
@@ -771,19 +848,17 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
-                  id: temp_outdoor_val
+                  id: gradussulicy
                   x: 10
                   y: 37
                   width: 60
                   height: 25
-                  text: "NA"
+                  text: "+0.0"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: widget_1781262141723_srplhrgb8
                   x: 2
@@ -795,19 +870,17 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - line:
                   id: widget_1781262141723_w1ztx4tjt
                   x: 2
                   y: 62
-                  width: 80
-                  height: 10
+                  width: 80                  height: 10
                   points:
                     - 0, 0
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
-                  clickable: false
+
         - obj:
             id: t_outdoor
             x: 140
@@ -825,7 +898,6 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: widget_1781262306198_2zgbqa3dx
@@ -838,19 +910,17 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
-                  id: temp_indoor_val
+                  id: widget_1781262306198_b9dnjbboi
                   x: 10
                   y: 37
                   width: 60
                   height: 25
-                  text: "NA"
+                  text: "+0.0"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: widget_1781262306198_igmmcl5k8
                   x: 2
@@ -862,7 +932,6 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - line:
                   id: widget_1781262306198_l8xm8o3gl
                   x: 2
@@ -874,7 +943,7 @@ lvgl:
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
-                  clickable: false
+
         - obj:
             id: t_fromhome
             x: 265
@@ -892,7 +961,6 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: widget_1781262307812_ou8uo1mfn
@@ -905,19 +973,17 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
-                  id: temp_supply_val
+                  id: widget_1781262307812_3m3qdg397
                   x: 10
                   y: 37
                   width: 60
                   height: 25
-                  text: "NA"
+                  text: "+0.0"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: widget_1781262307812_n406bgqc4
                   x: 2
@@ -929,7 +995,6 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - line:
                   id: widget_1781262307812_cmiqci34b
                   x: 2
@@ -941,7 +1006,7 @@ lvgl:
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
-                  clickable: false
+
         - obj:
             id: t_tohome
             x: 380
@@ -959,7 +1024,6 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: widget_1781262308709_71wbrk8p9
@@ -972,19 +1036,17 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
-                  id: temp_exhaust_val
+                  id: widget_1781262308709_dnoiw7el6
                   x: 10
                   y: 37
                   width: 60
                   height: 25
-                  text: "NA"
+                  text: "+0.0"
                   text_color: 0xFFFFFF
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: textvdom
                   x: 2
@@ -996,7 +1058,6 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - line:
                   id: linevdom
                   x: 2
@@ -1008,9 +1069,7 @@ lvgl:
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
-                  clickable: false
 
-        # ФИЛЬТРЫ — зафиксированы
         - obj:
             id: Pritok_filter
             x: 16
@@ -1028,10 +1087,9 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - arc:
-                  id: arc_filter_supply
+                  id: widget_1781261697547_smtgd7w9q
                   x: 8
                   y: 4
                   width: 92
@@ -1055,19 +1113,17 @@ lvgl:
                     bg_opa: 0%
                   bg_opa: 0%
                   border_width: 0
-                  clickable: false
               - label:
-                  id: label_filter_supply_pct
+                  id: lv_label_0
                   x: 2
                   y: 32
                   width: 92
                   height: 24
-                  text: "NA"
-                  text_color: 0x9CA3AF
+                  text: "0%"
+                  text_color: 0xFFFFFF
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: widget_1781261697547_a6nmh00ld
                   x: 4
@@ -1079,7 +1135,7 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
+
         - obj:
             id: Vityazh_filter
             x: 365
@@ -1097,10 +1153,9 @@ lvgl:
             shadow_opa: 0%
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - arc:
-                  id: arc_filter_exhaust
+                  id: widget_1781261697547_jcbrfzs59
                   x: 8
                   y: 4
                   width: 92
@@ -1124,19 +1179,17 @@ lvgl:
                     bg_opa: 0%
                   bg_opa: 0%
                   border_width: 0
-                  clickable: false
               - label:
-                  id: label_filter_exhaust_pct
+                  id: widget_1781261697547_036jpjyoc
                   x: 2
                   y: 32
                   width: 92
                   height: 24
-                  text: "NA"
-                  text_color: 0x9CA3AF
+                  text: "0%"
+                  text_color: 0xFFFFFF
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: widget_1781261697547_2lq5vokc6
                   x: 4
@@ -1148,21 +1201,19 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
 
-        # ВЕРХНЕЕ ВРЕМЯ (главная) — зафиксировано
         - label:
             id: time_label
             x: 194
             y: 1
             width: 88
             height: 32
-            text: "NA"
+            text: "14:32"
             text_color: 0xF1F5F9
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_24
-            clickable: false
+
         - label:
             id: mode_display
             x: 3
@@ -1175,7 +1226,6 @@ lvgl:
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
-            clickable: false
 
         # КНОПКА "ДОМ"
         - button:
@@ -1199,7 +1249,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_home
-                  clickable: false
               - label:
                   id: text_dom
                   x: 51
@@ -1210,7 +1259,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         # КНОПКА "РЕЖИМЫ"
         - button:
@@ -1234,7 +1282,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_modes
-                  clickable: false
               - label:
                   id: rezhim
                   x: 39
@@ -1245,7 +1292,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         # КНОПКА "НАСТРОЙКА"
         - button:
@@ -1269,7 +1315,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_settings
-                  clickable: false
               - label:
                   id: nastroika
                   x: 32
@@ -1280,7 +1325,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
     # ========== СТРАНИЦА 2 (РЕЖИМЫ) ==========
     - id: modes_page
@@ -1297,9 +1341,7 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-            clickable: false
 
-        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen_modes
             x: 1
@@ -1312,7 +1354,6 @@ lvgl:
             radius: 8
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: KhaKar_modes
@@ -1325,31 +1366,28 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: Date_modes
                   x: 280
                   y: 9
                   width: 200
                   height: 20
-                  text: "NA"
+                  text: "Сб 20-июнь-2026"
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - label:
                   id: time_label_modes
                   x: 194
                   y: 1
                   width: 88
                   height: 32
-                  text: "NA"
+                  text: "14:32"
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_standard
@@ -1385,7 +1423,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_econom
@@ -1421,7 +1458,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_guest
@@ -1457,7 +1493,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_conditioner
@@ -1493,7 +1528,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_efficiency
@@ -1529,7 +1563,6 @@ lvgl:
                   text_color: 0xFFFFFF
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: mode_stop
@@ -1565,7 +1598,6 @@ lvgl:
                   text_color: 0xA21C15
                   text_align: CENTER
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: domoi_modes
@@ -1588,7 +1620,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_home
-                  clickable: false
               - label:
                   id: dom_modes
                   x: 51
@@ -1599,7 +1630,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         - button:
             id: modes_modes
@@ -1622,7 +1652,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_modes
-                  clickable: false
               - label:
                   id: rezhim_modes
                   x: 39
@@ -1633,7 +1662,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         - button:
             id: settings_modes
@@ -1656,7 +1684,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_settings
-                  clickable: false
               - label:
                   id: nastroika_modes
                   x: 32
@@ -1667,7 +1694,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
     # ========== СТРАНИЦА 3 (НАСТРОЙКА) ==========
     - id: settings_page
@@ -1684,9 +1710,7 @@ lvgl:
             src: background_image
             align: CENTER
             opa: 100%
-            clickable: false
 
-        # ВЕРХНЯЯ ПАНЕЛЬ — зафиксирована
         - obj:
             id: Upscreen_settings
             x: 1
@@ -1699,7 +1723,6 @@ lvgl:
             radius: 8
             pad_all: 0
             scrollbar_mode: "OFF"
-            clickable: false
             widgets:
               - label:
                   id: KhaKar_settings
@@ -1712,31 +1735,28 @@ lvgl:
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
               - label:
                   id: Date_settings
                   x: 280
                   y: 9
                   width: 200
                   height: 20
-                  text: "NA"
+                  text: "Сб 20-июнь-2026"
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-                  clickable: false
               - label:
                   id: time_label_settings
                   x: 194
                   y: 1
                   width: 88
                   height: 32
-                  text: "NA"
+                  text: "14:32"
                   text_color: 0xF1F5F9
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - label:
             x: 0
@@ -1747,10 +1767,8 @@ lvgl:
             text_color: 0xFFFFFF
             text_align: CENTER
             text_font: cyrillic_font_24
-            clickable: false
 
-        # Пункты настроек — button (скролл по умолчанию выключен), текст по центру
-        - button:
+        - obj:
             x: 40
             y: 110
             width: 400
@@ -1760,20 +1778,18 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            scrollbar_mode: "OFF"
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 400
-                  height: 50
+                  x: 20
+                  y: 10
+                  width: 360
+                  height: 30
                   text: "Яркость экрана"
                   text_color: 0xFFFFFF
-                  text_align: CENTER
+                  text_align: LEFT
                   text_font: cyrillic_font_24
-                  clickable: false
 
-        - button:
+        - obj:
             x: 40
             y: 170
             width: 400
@@ -1783,20 +1799,18 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            scrollbar_mode: "OFF"
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 400
-                  height: 50
+                  x: 20
+                  y: 10
+                  width: 360
+                  height: 30
                   text: "Таймаут экрана"
                   text_color: 0xFFFFFF
-                  text_align: CENTER
+                  text_align: LEFT
                   text_font: cyrillic_font_24
-                  clickable: false
 
-        - button:
+        - obj:
             x: 40
             y: 230
             width: 400
@@ -1806,20 +1820,18 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            scrollbar_mode: "OFF"
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 400
-                  height: 50
+                  x: 20
+                  y: 10
+                  width: 360
+                  height: 30
                   text: "Единицы измерения"
                   text_color: 0xFFFFFF
-                  text_align: CENTER
+                  text_align: LEFT
                   text_font: cyrillic_font_24
-                  clickable: false
 
-        - button:
+        - obj:
             x: 40
             y: 290
             width: 400
@@ -1829,18 +1841,16 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            scrollbar_mode: "OFF"
             widgets:
               - label:
-                  x: 0
-                  y: 0
-                  width: 400
-                  height: 50
+                  x: 20
+                  y: 10
+                  width: 360
+                  height: 30
                   text: "О системе"
                   text_color: 0xFFFFFF
-                  text_align: CENTER
+                  text_align: LEFT
                   text_font: cyrillic_font_24
-                  clickable: false
 
         - button:
             id: domoi_settings
@@ -1863,7 +1873,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_home
-                  clickable: false
               - label:
                   id: dom_settings
                   x: 51
@@ -1874,7 +1883,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         - button:
             id: modes_settings
@@ -1897,7 +1905,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_modes
-                  clickable: false
               - label:
                   id: rezhim_settings
                   x: 39
@@ -1908,7 +1915,6 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
 
         - button:
             id: settings_settings
@@ -1931,7 +1937,6 @@ lvgl:
                   width: 32
                   height: 32
                   src: icon_settings
-                  clickable: false
               - label:
                   id: nastroika_settings
                   x: 32
@@ -1942,4 +1947,3 @@ lvgl:
                   text_color: 0x000000
                   text_align: LEFT
                   text_font: cyrillic_font_12
-                  clickable: false
