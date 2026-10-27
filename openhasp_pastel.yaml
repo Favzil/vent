@@ -74,7 +74,6 @@ globals:
     type: std::string
     restore_value: no
     initial_value: '"14:32"'
-  # Данные с Arduino
   - id: temp_street
     type: float
     restore_value: no
@@ -99,7 +98,6 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
-  # Watchdog связи с Arduino
   - id: last_uart_rx_ms
     type: uint32_t
     restore_value: no
@@ -129,50 +127,39 @@ uart:
 # ИНТЕРВАЛЫ
 # ============================================================
 interval:
-  # ----------------------------------------------------------
-  # 1) ЗАПРОС ДАННЫХ у Arduino каждые 5 секунд
-  # ----------------------------------------------------------
+  # 1) Запрос данных у Arduino каждые 5 секунд
   - interval: 5s
     then:
       - lambda: |-
           ESP_LOGI("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
 
-  # ----------------------------------------------------------
-  # 2) ПАРСЕР UART — ESPHome 2026: используем read_available()
-  #    Формат Arduino:
-  #      TEMP:OUT:+24.1
-  #      TEMP:IN:+23.9
-  #      TEMP:SUPPLY:+24.5
-  #      TEMP:EXHAUST:+23.9
-  #      FILTER:SUPPLY:5
-  #      FILTER:EXHAUST:2
-  #      MODE:ЭКОНОМИЧНЫЙ
-  #      DATE 26-октябрь-2026 22:39
-  #      END
-  # ----------------------------------------------------------
+  # 2) Парсер UART — ESPHome 2026: available() + read_array()
   - interval: 200ms
     then:
       - lambda: |-
-          // --- ESPHome 2026: читаем все доступные байты через read_available ---
-          id(uart_arduino).read_available([&](uint8_t byte) {
-            id(uart_buffer) += static_cast<char>(byte);
-          });
+          // --- Чтение через available() + read_array() ---
+          size_t avail = id(uart_arduino).available();
+          if (avail > 0) {
+            uint8_t tmp[128];
+            size_t to_read = std::min(avail, sizeof(tmp));
+            if (id(uart_arduino).read_array(tmp, to_read)) {
+              for (size_t i = 0; i < to_read; i++) {
+                id(uart_buffer) += static_cast<char>(tmp[i]);
+              }
+            }
+          }
 
-          // Ограничитель буфера на случай мусора
           if (id(uart_buffer).size() > 512) {
             id(uart_buffer).erase(0, id(uart_buffer).size() - 256);
           }
 
           bool got_valid = false;
-
-          // --- Обрабатываем ВСЕ полные строки в буфере ---
           size_t newline_pos;
           while ((newline_pos = id(uart_buffer).find('\n')) != std::string::npos) {
             std::string line = id(uart_buffer).substr(0, newline_pos);
             id(uart_buffer) = id(uart_buffer).substr(newline_pos + 1);
 
-            // Убираем \r и пробелы по краям
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             size_t start = line.find_first_not_of(" \t");
             size_t end   = line.find_last_not_of(" \t");
@@ -183,12 +170,11 @@ interval:
             ESP_LOGI("main", "Received: %s", line.c_str());
             got_valid = true;
 
-            // ==================== END ====================
             if (line == "END") {
               continue;
             }
 
-            // ==================== TEMP ====================
+            // TEMP:<OUT|IN|SUPPLY|EXHAUST>:<value>
             if (line.rfind("TEMP:", 0) == 0) {
               size_t c1 = line.find(':', 5);
               if (c1 != std::string::npos) {
@@ -214,7 +200,7 @@ interval:
               continue;
             }
 
-            // ==================== FILTER ====================
+            // FILTER:<SUPPLY|EXHAUST>:<0-100>
             if (line.rfind("FILTER:", 0) == 0) {
               size_t c1 = line.find(':', 7);
               if (c1 != std::string::npos) {
@@ -252,7 +238,7 @@ interval:
               continue;
             }
 
-            // ==================== MODE ====================
+            // MODE:<название>
             if (line.rfind("MODE:", 0) == 0) {
               std::string mode = line.substr(5);
               size_t s = mode.find_first_not_of(" \t");
@@ -271,7 +257,7 @@ interval:
               continue;
             }
 
-            // ==================== DATE / TIME ====================
+            // DATE <дата> <время>
             std::string payload = line;
             if (payload.rfind("DATE ", 0) == 0) {
               payload = payload.substr(5);
@@ -305,9 +291,7 @@ interval:
             }
           }
 
-  # ----------------------------------------------------------
   # 3) WATCHDOG: нет валидных строк > 60 с — показать NA
-  # ----------------------------------------------------------
   - interval: 5s
     then:
       - lambda: |-
@@ -316,7 +300,7 @@ interval:
           if (id(last_uart_rx_ms) == 0) return;
           uint32_t age = now - id(last_uart_rx_ms);
           if (age > 60000 && !id(data_stale)) {
-            ESP_LOGW("uart", "No data from Arduino for %u ms -> showing NA", age);
+            ESP_LOGW("uart", "No data from Arduino for %lu ms -> showing NA", (unsigned long) age);
             id(data_stale) = true;
             lv_label_set_text(id(gradussulicy), "NA");
             lv_label_set_text(id(widget_1781262306198_b9dnjbboi), "NA");
@@ -340,19 +324,15 @@ interval:
             lv_label_set_text(id(screensaver_time),    "NA");
           }
 
-  # ----------------------------------------------------------
   # 4) Скринсейвер: тик 1 с
-  # ----------------------------------------------------------
   - interval: 1s
     then:
       - lambda: |-
           if (id(wakeup_block) > 0) {
             id(wakeup_block)--;
           }
-
           if (!id(screensaver_active) && id(wakeup_block) == 0) {
             id(inactivity_timer)++;
-
             if (id(inactivity_timer) >= 30) {
               ESP_LOGI("screensaver", "Activating screensaver!");
               id(screensaver_active) = true;
@@ -365,24 +345,19 @@ interval:
             }
           }
 
-  # ----------------------------------------------------------
   # 5) Кнопки режимов: удержание 3 с
-  # ----------------------------------------------------------
   - interval: 100ms
     then:
       - lambda: |-
           if (id(press_timer) > 0) {
             id(press_timer) += 100;
-
             if (id(press_timer) >= 3000 && !id(mode_activated)) {
               id(press_timer) = 0;
               id(mode_activated) = true;
-
               lv_obj_t *main_page = lv_obj_get_parent(id(mode_display));
               if (main_page == nullptr) {
                 main_page = lv_scr_act();
               }
-
               switch(id(active_mode_id)) {
                 case 1:
                   id(selected_mode) = "СТАНДАРТНЫЙ";
@@ -421,20 +396,16 @@ interval:
                   id(uart_arduino).write_str("MODE:STOP\n");
                   break;
               }
-
               if (main_page != nullptr) {
                 lv_scr_load(main_page);
                 lv_refr_now(nullptr);
               }
-
               id(active_mode_id) = 0;
               id(mode_activated) = false;
             }
           }
 
-  # ----------------------------------------------------------
   # 6) Плавное затухание/пробуждение подсветки
-  # ----------------------------------------------------------
   - interval: 50ms
     then:
       - lambda: |-
@@ -557,7 +528,7 @@ i2c:
   scl: GPIO45
 
 # ============================================================
-# ДИСПЛЕЙ — В ESPHome 2026 rotation убран отсюда!
+# ДИСПЛЕЙ
 # ============================================================
 display:
   - platform: mipi_rgb
@@ -605,7 +576,7 @@ touchscreen:
             ESP_LOGI("touch", "Released");
 
 # ============================================================
-# LVGL — rotation ТЕПЕРЬ ЗДЕСЬ (требование ESPHome 2026)
+# LVGL
 # ============================================================
 lvgl:
   id: lvgl_component
