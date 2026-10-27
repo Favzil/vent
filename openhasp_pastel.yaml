@@ -134,19 +134,17 @@ interval:
           ESP_LOGI("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
 
-  # 2) Парсер UART — ESPHome 2026: available() + read_array()
+  # 2) Парсер UART — ИСПРАВЛЕНО: read_bytes() вместо read_array()
   - interval: 200ms
     then:
       - lambda: |-
-          // --- Чтение через available() + read_array() ---
-          size_t avail = id(uart_arduino).available();
-          if (avail > 0) {
-            uint8_t tmp[128];
-            size_t to_read = std::min(avail, sizeof(tmp));
-            if (id(uart_arduino).read_array(tmp, to_read)) {
-              for (size_t i = 0; i < to_read; i++) {
-                id(uart_buffer) += static_cast<char>(tmp[i]);
-              }
+          // === ЧТЕНИЕ: read_bytes() — неблокирующий, возвращает все доступные байты ===
+          std::vector<uint8_t> chunk;
+          id(uart_arduino).read_bytes(chunk);
+          if (!chunk.empty()) {
+            ESP_LOGD("uart", "read %d bytes from UART", (int)chunk.size());
+            for (uint8_t b : chunk) {
+              id(uart_buffer) += static_cast<char>(b);
             }
           }
 
@@ -324,7 +322,19 @@ interval:
             lv_label_set_text(id(screensaver_time),    "NA");
           }
 
-  # 4) Скринсейвер: тик 1 с
+  # 4) ДИАГНОСТИКА: раз в 10 секунд выводим состояние UART
+  - interval: 10s
+    then:
+      - lambda: |-
+          ESP_LOGI("diag", "avail=%d, buf_len=%d, last_rx=%lu, link_ok=%d, stale=%d, scr=%d",
+                   (int)id(uart_arduino).available(),
+                   (int)id(uart_buffer).size(),
+                   (unsigned long)id(last_uart_rx_ms),
+                   (int)id(uart_link_ok),
+                   (int)id(data_stale),
+                   (int)id(screensaver_active));
+
+  # 5) Скринсейвер: тик 1 с
   - interval: 1s
     then:
       - lambda: |-
@@ -345,7 +355,7 @@ interval:
             }
           }
 
-  # 5) Кнопки режимов: удержание 3 с
+  # 6) Кнопки режимов: удержание 3 с
   - interval: 100ms
     then:
       - lambda: |-
@@ -405,7 +415,7 @@ interval:
             }
           }
 
-  # 6) Плавное затухание/пробуждение подсветки
+  # 7) Плавное затухание/пробуждение подсветки
   - interval: 50ms
     then:
       - lambda: |-
