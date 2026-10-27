@@ -134,18 +134,23 @@ interval:
           ESP_LOGI("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
 
-  # 2) Парсер UART — ИСПРАВЛЕНО: read_bytes() вместо read_array()
+  # 2) Парсер UART — ИСПРАВЛЕНО: read_byte() в цикле вместо read_array()
   - interval: 200ms
     then:
       - lambda: |-
-          // === ЧТЕНИЕ: read_bytes() — неблокирующий, возвращает все доступные байты ===
-          std::vector<uint8_t> chunk;
-          id(uart_arduino).read_bytes(chunk);
-          if (!chunk.empty()) {
-            ESP_LOGD("uart", "read %d bytes from UART", (int)chunk.size());
-            for (uint8_t b : chunk) {
-              id(uart_buffer) += static_cast<char>(b);
+          // === ЧТЕНИЕ: read_byte() в цикле — неблокирующий, читает всё доступное ===
+          uint8_t byte;
+          int count = 0;
+          while (id(uart_arduino).available() > 0 && count < 128) {
+            if (id(uart_arduino).read_byte(&byte)) {
+              id(uart_buffer) += static_cast<char>(byte);
+              count++;
+            } else {
+              break;
             }
+          }
+          if (count > 0) {
+            ESP_LOGD("uart", "read %d bytes from UART", count);
           }
 
           if (id(uart_buffer).size() > 512) {
@@ -1127,7 +1132,7 @@ lvgl:
             height: 100
             align: CENTER
             text: "СТАНДАРТНЫЙ"
-            text_color: 0x0F0F33
+            text_color: 0xFFFFFF
             text_align: CENTER
             long_mode: CLIP
             text_font: cyrillic_font_40
