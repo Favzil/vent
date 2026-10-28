@@ -63,19 +63,23 @@ globals:
     type: float
     restore_value: no
     initial_value: '-999.0'
+  - id: total_rx_bytes
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 # ============================================================
 # ИНТЕРВАЛЫ
 # ============================================================
 interval:
-  # Запрос данных
+  # Запрос данных у Arduino каждые 5 секунд
   - interval: 5s
     then:
       - lambda: |-
           id(uart_arduino).write_str("GET_DATA\n");
 
   # ============================================================
-  # ПАРСЕР: читаем UART и обновляем 4 метки РАЗНЫМИ способами
+  # ПАРСЕР: 4 варианта обновления дисплея одновременно
   # ============================================================
   - interval: 200ms
     then:
@@ -86,6 +90,7 @@ interval:
           while (id(uart_arduino).available() > 0 && count < 128) {
             if (id(uart_arduino).read_byte(&byte)) {
               id(uart_buffer) += static_cast<char>(byte);
+              id(total_rx_bytes) = id(total_rx_bytes) + 1;
               count++;
             } else break;
           }
@@ -104,7 +109,6 @@ interval:
 
             // ============================================================
             // ВАРИАНТ A: lv_label_set_text + lv_refr_now (прямая перерисовка)
-            // "С улицы" — TEMP:OUT
             // ============================================================
             if (line.rfind("TEMP:OUT:", 0) == 0) {
               float v = atof(line.substr(9).c_str());
@@ -113,14 +117,11 @@ interval:
               char b[24];
               snprintf(b, sizeof(b), "%+.1f", v);
               lv_label_set_text(id(gradussulicy), b);
-              lv_refr_now(nullptr);  // Принудительная перерисовка
-              ESP_LOGI("disp_a", "A: OUT -> %s, count=%d", b, id(cnt_a));
+              lv_refr_now(nullptr);
             }
 
             // ============================================================
-            // ВАРИАНТ B: через встроенное действие lvgl.label.update
-            // "На улицу" — TEMP:IN
-            // Обновление через action, не через прямой вызов LVGL API
+            // ВАРИАНТ B: только lv_label_set_text (без lv_refr_now)
             // ============================================================
             if (line.rfind("TEMP:IN:", 0) == 0) {
               float v = atof(line.substr(8).c_str());
@@ -128,15 +129,11 @@ interval:
               id(cnt_b) = id(cnt_b) + 1;
               char b[24];
               snprintf(b, sizeof(b), "%+.1f", v);
-              // Используем action ESPHome (не прямой C-вызов)
-              id(label_update_action).set_text(b);
-              id(label_update_action).perform();
-              ESP_LOGI("disp_b", "B: IN -> %s, count=%d", b, id(cnt_b));
+              lv_label_set_text(id(widget_1781262306198_b9dnjbboi), b);
             }
 
             // ============================================================
-            // ВАРИАНТ C: только set_text, перерисовка отдельным интервалом
-            // "Из дома" — TEMP:SUPPLY
+            // ВАРИАНТ C: set_text + отдельная перерисовка интервалом
             // ============================================================
             if (line.rfind("TEMP:SUPPLY:", 0) == 0) {
               float v = atof(line.substr(12).c_str());
@@ -145,13 +142,10 @@ interval:
               char b[24];
               snprintf(b, sizeof(b), "%+.1f", v);
               lv_label_set_text(id(widget_1781262307812_3m3qdg397), b);
-              // НЕ вызываем lv_refr_now здесь — перерисовка в отдельном interval
-              ESP_LOGI("disp_c", "C: SUPPLY -> %s, count=%d", b, id(cnt_c));
             }
 
             // ============================================================
-            // ВАРИАНТ D: display.update после обновления метки
-            // "В дом" — TEMP:EXHAUST
+            // ВАРИАНТ D: set_text + display.update()
             // ============================================================
             if (line.rfind("TEMP:EXHAUST:", 0) == 0) {
               float v = atof(line.substr(13).c_str());
@@ -160,17 +154,13 @@ interval:
               char b[24];
               snprintf(b, sizeof(b), "%+.1f", v);
               lv_label_set_text(id(widget_1781262308709_dnoiw7el6), b);
-              // Принудительное обновление через компонент дисплея
               id(tft_display).update();
-              ESP_LOGI("disp_d", "D: EXHAUST -> %s, count=%d", b, id(cnt_d));
             }
           }
 
-          // ============================================================
-          // ОБНОВЛЕНИЕ СЧЁТЧИКОВ НА ЭКРАНЕ
-          // ============================================================
+          // === ОБНОВЛЕНИЕ СЧЁТЧИКОВ И СТАТУСА ===
           {
-            char b[40];
+            char b[48];
             snprintf(b, sizeof(b), "A: %d", id(cnt_a));
             lv_label_set_text(id(label_cnt_a), b);
             snprintf(b, sizeof(b), "B: %d", id(cnt_b));
@@ -179,14 +169,360 @@ interval:
             lv_label_set_text(id(label_cnt_c), b);
             snprintf(b, sizeof(b), "D: %d", id(cnt_d));
             lv_label_set_text(id(label_cnt_d), b);
+
+            const char* sa = (id(cnt_a) > 0) ? "A:OK" : "A:--";
+            const char* sb = (id(cnt_b) > 0) ? "B:OK" : "B:--";
+            const char* sc = (id(cnt_c) > 0) ? "C:OK" : "C:--";
+            const char* sd = (id(cnt_d) > 0) ? "D:OK" : "D:--";
+            snprintf(b, sizeof(b), "%s %s %s %s | RX:%d", sa, sb, sc, sd, id(total_rx_bytes));
+            lv_label_set_text(id(label_status), b);
           }
 
   # ============================================================
-  # ВАРИАНТ C: перерисовка отдельным интервалом (для проверки гипотезы)
+  # ВАРИАНТ C: перерисовка отдельным интервалом
   # ============================================================
   - interval: 300ms
     then:
       - lambda: |-
-          // Только для варианта C: принудительная перерисовка
-          // Если A работает, а C нет — значит проблема в тайминге
           lv_refr_now(nullptr);
+
+# ============================================================
+# ИЗОБРАЖЕНИЯ (пути должны существовать!)
+# ============================================================
+image:
+  - file: "img/olako.png"
+    id: background_image
+    type: RGB565
+    resize: 480x480
+
+# ============================================================
+# ШРИФТЫ
+# ============================================================
+font:
+  - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_40
+    size: 40
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+  - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_24
+    size: 24
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+  - file: "fonts/Roboto-Regular.ttf"
+    id: cyrillic_font_12
+    size: 12
+    glyphs: ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя°'
+
+# ============================================================
+# ПОДСВЕТКА
+# ============================================================
+output:
+  - platform: ledc
+    id: backlight_output
+    pin: GPIO38
+    frequency: 150Hz
+    min_power: 0.01
+    zero_means_zero: true
+
+light:
+  - platform: monochromatic
+    name: "Подсветка"
+    id: display_backlight
+    output: backlight_output
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+
+# ============================================================
+# SPI / I2C
+# ============================================================
+spi:
+  - id: lcd_spi
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
+
+i2c:
+  id: touchscreen_bus
+  sda: GPIO19
+  scl: GPIO45
+
+# ============================================================
+# ДИСПЛЕЙ (id: tft_display — обязательно!)
+# ============================================================
+display:
+  - platform: mipi_rgb
+    id: tft_display
+    model: GUITION-4848S040
+    spi_id: lcd_spi
+    cs_pin: GPIO39
+    invert_colors: False
+    update_interval: never
+    auto_clear_enabled: false
+
+# ============================================================
+# ТАЧСКРИН
+# ============================================================
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    display: tft_display
+    i2c_id: touchscreen_bus
+    address: 0x5D
+    transform:
+      mirror_x: true
+      mirror_y: true
+
+# ============================================================
+# LVGL
+# ============================================================
+lvgl:
+  id: lvgl_component
+  displays:
+    - tft_display
+  touchscreens:
+    - my_touchscreen
+  rotation: 180
+  buffer_size: 100%
+
+  pages:
+    - id: main_page
+      bg_color: 0x111827
+      bg_opa: 100%
+      pad_all: 0
+      widgets:
+        - image:
+            id: background_image_widget
+            x: 0
+            y: 0
+            width: 480
+            height: 480
+            src: background_image
+            align: CENTER
+            opa: 100%
+
+        # ===== Заголовок =====
+        - label:
+            id: title
+            x: 0
+            y: 5
+            width: 480
+            height: 30
+            text: "TEST A/B/C/D"
+            text_color: 0xFFFFFF
+            text_align: CENTER
+            text_font: cyrillic_font_24
+
+        # ============================================================
+        # БЛОК A: "С улицы" — lv_label_set_text + lv_refr_now
+        # ============================================================
+        - obj:
+            id: box_a
+            x: 10
+            y: 50
+            width: 220
+            height: 100
+            bg_color: 0x0F0F33
+            bg_opa: 95%
+            radius: 12
+            border_width: 2
+            border_color: 0x22C55E
+            pad_all: 0
+            widgets:
+              - label:
+                  id: title_a
+                  x: 10
+                  y: 5
+                  width: 200
+                  height: 18
+                  text: "A: set_text+refr_now | OUT"
+                  text_color: 0x22C55E
+                  text_font: cyrillic_font_12
+              - label:
+                  id: gradussulicy
+                  x: 10
+                  y: 25
+                  width: 200
+                  height: 40
+                  text: "+0.0"
+                  text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
+              - label:
+                  id: label_cnt_a
+                  x: 10
+                  y: 75
+                  width: 200
+                  height: 18
+                  text: "A: 0"
+                  text_color: 0x9CA3AF
+                  text_font: cyrillic_font_12
+
+        # ============================================================
+        # БЛОК B: "На улицу" — только set_text (без refr_now)
+        # ============================================================
+        - obj:
+            id: box_b
+            x: 250
+            y: 50
+            width: 220
+            height: 100
+            bg_color: 0x0F0F33
+            bg_opa: 95%
+            radius: 12
+            border_width: 2
+            border_color: 0xF59E0B
+            pad_all: 0
+            widgets:
+              - label:
+                  id: title_b
+                  x: 10
+                  y: 5
+                  width: 200
+                  height: 18
+                  text: "B: set_text only | IN"
+                  text_color: 0xF59E0B
+                  text_font: cyrillic_font_12
+              - label:
+                  id: widget_1781262306198_b9dnjbboi
+                  x: 10
+                  y: 25
+                  width: 200
+                  height: 40
+                  text: "+0.0"
+                  text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
+              - label:
+                  id: label_cnt_b
+                  x: 10
+                  y: 75
+                  width: 200
+                  height: 18
+                  text: "B: 0"
+                  text_color: 0x9CA3AF
+                  text_font: cyrillic_font_12
+
+        # ============================================================
+        # БЛОК C: "Из дома" — set_text + отдельный interval refr_now
+        # ============================================================
+        - obj:
+            id: box_c
+            x: 10
+            y: 165
+            width: 220
+            height: 100
+            bg_color: 0x0F0F33
+            bg_opa: 95%
+            radius: 12
+            border_width: 2
+            border_color: 0x3B82F6
+            pad_all: 0
+            widgets:
+              - label:
+                  id: title_c
+                  x: 10
+                  y: 5
+                  width: 200
+                  height: 18
+                  text: "C: set_text + 300ms refr | SUPPLY"
+                  text_color: 0x3B82F6
+                  text_font: cyrillic_font_12
+              - label:
+                  id: widget_1781262307812_3m3qdg397
+                  x: 10
+                  y: 25
+                  width: 200
+                  height: 40
+                  text: "+0.0"
+                  text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
+              - label:
+                  id: label_cnt_c
+                  x: 10
+                  y: 75
+                  width: 200
+                  height: 18
+                  text: "C: 0"
+                  text_color: 0x9CA3AF
+                  text_font: cyrillic_font_12
+
+        # ============================================================
+        # БЛОК D: "В дом" — set_text + display.update()
+        # ============================================================
+        - obj:
+            id: box_d
+            x: 250
+            y: 165
+            width: 220
+            height: 100
+            bg_color: 0x0F0F33
+            bg_opa: 95%
+            radius: 12
+            border_width: 2
+            border_color: 0xA855F7
+            pad_all: 0
+            widgets:
+              - label:
+                  id: title_d
+                  x: 10
+                  y: 5
+                  width: 200
+                  height: 18
+                  text: "D: set_text + disp.update | EXHAUST"
+                  text_color: 0xA855F7
+                  text_font: cyrillic_font_12
+              - label:
+                  id: widget_1781262308709_dnoiw7el6
+                  x: 10
+                  y: 25
+                  width: 200
+                  height: 40
+                  text: "+0.0"
+                  text_color: 0xFFFFFF
+                  text_font: cyrillic_font_40
+              - label:
+                  id: label_cnt_d
+                  x: 10
+                  y: 75
+                  width: 200
+                  height: 18
+                  text: "D: 0"
+                  text_color: 0x9CA3AF
+                  text_font: cyrillic_font_12
+
+        # ============================================================
+        # СТРОКА СТАТУСА
+        # ============================================================
+        - obj:
+            id: box_status
+            x: 10
+            y: 290
+            width: 460
+            height: 50
+            bg_color: 0x000000
+            bg_opa: 80%
+            radius: 8
+            border_width: 2
+            border_color: 0x22C55E
+            pad_all: 0
+            widgets:
+              - label:
+                  id: label_status
+                  x: 10
+                  y: 10
+                  width: 440
+                  height: 30
+                  text: "A:-- B:-- C:-- D:-- | RX:0"
+                  text_color: 0x22C55E
+                  text_align: CENTER
+                  text_font: cyrillic_font_24
+
+        # ============================================================
+        # Легенда
+        # ============================================================
+        - label:
+            id: legend
+            x: 10
+            y: 350
+            width: 460
+            height: 20
+            text: "Счётчик растёт = вариант работает"
+            text_color: 0x9CA3AF
+            text_align: CENTER
+            text_font: cyrillic_font_12
