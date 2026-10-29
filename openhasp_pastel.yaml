@@ -90,7 +90,6 @@ globals:
     type: float
     restore_value: no
     initial_value: '0.0'
-  # NEW: температура из рекуператора
   - id: temp_recuperator
     type: float
     restore_value: no
@@ -103,7 +102,6 @@ globals:
     type: int
     restore_value: no
     initial_value: '0'
-  # NEW: КПД
   - id: efficiency
     type: int
     restore_value: no
@@ -120,7 +118,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  # NEW: старт опроса Arduino через 30 с после включения
   - id: arduino_poll_started
     type: bool
     restore_value: no
@@ -146,7 +143,7 @@ uart:
 # ИНТЕРВАЛЫ
 # ============================================================
 interval:
-  # 0) Инициализация: запомнить момент загрузки
+  # 0) Запомнить момент загрузки
   - interval: 1s
     then:
       - lambda: |-
@@ -155,7 +152,7 @@ interval:
             ESP_LOGI("boot", "Boot time recorded, Arduino polling will start in 30 s");
           }
 
-  # 1) Запрос данных у Arduino каждые 5 секунд (только после 30 с)
+  # 1) Запрос данных у Arduino каждые 5 с (только после 30 с)
   - interval: 5s
     then:
       - lambda: |-
@@ -171,11 +168,10 @@ interval:
           ESP_LOGI("data", "Requesting data from Arduino");
           id(uart_arduino).write_str("GET_DATA\n");
 
-  # 2) Парсер UART — ESPHome 2026: available() + read_array()
+  # 2) Парсер UART
   - interval: 200ms
     then:
       - lambda: |-
-          // --- Чтение через available() + read_array() ---
           size_t avail = id(uart_arduino).available();
           if (avail > 0) {
             uint8_t tmp[128];
@@ -191,7 +187,6 @@ interval:
             id(uart_buffer).erase(0, id(uart_buffer).size() - 256);
           }
 
-          // До старта опроса Arduino данные не разбираем — просто копим/дренируем буфер
           if (!id(arduino_poll_started)) {
             return;
           }
@@ -238,7 +233,6 @@ interval:
                   id(temp_to_home) = val;
                   lv_label_set_text(id(widget_1781262308709_dnoiw7el6), buf);
                 } else if (sensor == "RECUP") {
-                  // NEW: "Из рек-ра"
                   id(temp_recuperator) = val;
                   lv_label_set_text(id(temp_recup_value), buf);
                 }
@@ -284,7 +278,7 @@ interval:
               continue;
             }
 
-            // NEW: EFFICIENCY:<0-100> (также принимаем EFF)
+            // EFFICIENCY:<0-100> / EFF:<0-100>
             if (line.rfind("EFFICIENCY:", 0) == 0 || line.rfind("EFF:", 0) == 0) {
               size_t pos = line.find(':');
               if (pos != std::string::npos) {
@@ -365,7 +359,7 @@ interval:
             }
           }
 
-  # 3) WATCHDOG: нет валидных строк > 60 с — показать N/A
+  # 3) WATCHDOG: нет данных > 60 с -> N/A
   - interval: 5s
     then:
       - lambda: |-
@@ -404,7 +398,7 @@ interval:
             lv_label_set_text(id(screensaver_time),    "N/A");
           }
 
-  # 4) Скринсейвер: тик 1 с
+  # 4) Скринсейвер
   - interval: 1s
     then:
       - lambda: |-
@@ -812,263 +806,10 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-        # ---- 4 виджета температуры, равномерно: x = 16, 128, 240, 352 (ширина 100) ----
+
+        # ---- РЯД ИЗ 5 ВИДЖЕТОВ ТЕМПЕРАТУРЫ (ширина 85, шаг 98) ----
         - obj:
             id: t_indoor
-            x: 16
-            y: 68
-            width: 100
-            height: 80
-            bg_color: 0x0F0F33
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: znakgradussulicy
-                  x: 65
-                  y: 10
-                  width: 40
-                  height: 26
-                  text: "°C"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: gradussulicy
-                  x: 10
-                  y: 37
-                  width: 75
-                  height: 25
-                  text: "+0.0"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262141723_srplhrgb8
-                  x: 2
-                  y: 22
-                  width: 80
-                  height: 15
-                  text: "С улицы"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262141723_w1ztx4tjt
-                  x: 2
-                  y: 62
-                  width: 95
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x805705
-                  line_rounded: true
-        - obj:
-            id: t_outdoor
-            x: 128
-            y: 68
-            width: 100
-            height: 80
-            bg_color: 0x0F0F33
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262306198_2zgbqa3dx
-                  x: 65
-                  y: 10
-                  width: 40
-                  height: 26
-                  text: "°C"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262306198_b9dnjbboi
-                  x: 10
-                  y: 37
-                  width: 75
-                  height: 25
-                  text: "+0.0"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262306198_igmmcl5k8
-                  x: 2
-                  y: 22
-                  width: 80
-                  height: 15
-                  text: "На улицу"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262306198_l8xm8o3gl
-                  x: 2
-                  y: 62
-                  width: 95
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x805705
-                  line_rounded: true
-        - obj:
-            id: t_fromhome
-            x: 240
-            y: 68
-            width: 100
-            height: 80
-            bg_color: 0x0F0F33
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262307812_ou8uo1mfn
-                  x: 65
-                  y: 10
-                  width: 40
-                  height: 26
-                  text: "°C"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262307812_3m3qdg397
-                  x: 10
-                  y: 37
-                  width: 75
-                  height: 25
-                  text: "+0.0"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262307812_n406bgqc4
-                  x: 2
-                  y: 22
-                  width: 80
-                  height: 15
-                  text: "Из дома"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: widget_1781262307812_cmiqci34b
-                  x: 2
-                  y: 62
-                  width: 95
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x805705
-                  line_rounded: true
-        - obj:
-            id: t_tohome
-            x: 352
-            y: 68
-            width: 100
-            height: 80
-            bg_color: 0x0F0F33
-            bg_opa: 95%
-            border_width: 1
-            border_color: 0x162038
-            border_opa: 20%
-            radius: 16
-            shadow_width: 0
-            pad_all: 0
-            scrollbar_mode: "OFF"
-            widgets:
-              - label:
-                  id: widget_1781262308709_71wbrk8p9
-                  x: 65
-                  y: 10
-                  width: 40
-                  height: 26
-                  text: "°C"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: widget_1781262308709_dnoiw7el6
-                  x: 10
-                  y: 37
-                  width: 75
-                  height: 25
-                  text: "+0.0"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_24
-              - label:
-                  id: textvdom
-                  x: 2
-                  y: 22
-                  width: 80
-                  height: 15
-                  text: "В дом"
-                  text_color: 0xFFFFFF
-                  text_align: LEFT
-                  long_mode: CLIP
-                  text_font: cyrillic_font_12
-              - line:
-                  id: linevdom
-                  x: 2
-                  y: 62
-                  width: 95
-                  height: 10
-                  points:
-                    - 0, 0
-                    - 129, 0
-                  line_color: 0x805705
-                  line_rounded: true
-        # ---- НОВЫЙ виджет "Из рек-ра" (x=464 не влезает, поэтому сдвигаем ряд: 4-й виджет уже "В дом" → нужен 5-й)
-        # Чтобы разместить 4 температуры + «Из рек-ра» на одной строке без наложения, оставляем
-        # 4 виджета температуры и добавляем «Из рек-ра» как 5-й в этот же ряд не получится при ширине 100.
-        # Решение: ряд из 4-х стандартных виджетов + «Из рек-ра» — на второй строке под ними,
-        # но по заданию «на том же уровне, что и другие виджеты температуры».
-        # Поэтому уменьшаем ширину всех 5 виджетов до 85 px и шаг 12 px:
-        #   x = 10, 108, 206, 304, 402 (ширина 85, зазор 13/12/12/12/12 → 5*85 + 4*12.5 ≈ 475)
-        # Ниже приведён ряд из 5 виджетов шириной 85 px (см. исправленные координаты).
-        # ВНИМАНИЕ: предыдущие 4 виджета выше уже переопределены под 100 px; чтобы не дублировать,
-        # замените их на 5 виджетов шириной 85 px (см. ниже полный корректный фрагмент).
-        # -----------------------------------------------------------------
-        # НИЖЕ — ПРАВИЛЬНЫЙ РЯД ИЗ 5 ВИДЖЕТОВ ТЕМПЕРАТУРЫ (ширина 85, x = 10,108,206,304,402)
-        # (этот фрагмент заменяет 4 виджета выше; в итоговом коде оставлен только этот вариант)
-        # -----------------------------------------------------------------
-        - obj:
-            id: t_indoor2
             x: 10
             y: 68
             width: 85
@@ -1084,7 +825,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - label:
-                  id: znakgradussulicy2
+                  id: znakgradussulicy
                   x: 50
                   y: 10
                   width: 40
@@ -1095,7 +836,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: gradussulicy2
+                  id: gradussulicy
                   x: 10
                   y: 37
                   width: 60
@@ -1106,7 +847,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262141723_srplhrgb8_2
+                  id: widget_1781262141723_srplhrgb8
                   x: 2
                   y: 22
                   width: 60
@@ -1117,7 +858,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
-                  id: widget_1781262141723_w1ztx4tjt_2
+                  id: widget_1781262141723_w1ztx4tjt
                   x: 2
                   y: 62
                   width: 80
@@ -1128,7 +869,7 @@ lvgl:
                   line_color: 0x805705
                   line_rounded: true
         - obj:
-            id: t_outdoor2
+            id: t_outdoor
             x: 108
             y: 68
             width: 85
@@ -1144,7 +885,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - label:
-                  id: widget_1781262306198_2zgbqa3dx_2
+                  id: widget_1781262306198_2zgbqa3dx
                   x: 50
                   y: 10
                   width: 40
@@ -1155,7 +896,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262306198_b9dnjbboi_2
+                  id: widget_1781262306198_b9dnjbboi
                   x: 10
                   y: 37
                   width: 60
@@ -1166,7 +907,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262306198_igmmcl5k8_2
+                  id: widget_1781262306198_igmmcl5k8
                   x: 2
                   y: 22
                   width: 60
@@ -1177,7 +918,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
-                  id: widget_1781262306198_l8xm8o3gl_2
+                  id: widget_1781262306198_l8xm8o3gl
                   x: 2
                   y: 62
                   width: 80
@@ -1188,7 +929,7 @@ lvgl:
                   line_color: 0x805705
                   line_rounded: true
         - obj:
-            id: t_fromhome2
+            id: t_fromhome
             x: 206
             y: 68
             width: 85
@@ -1204,7 +945,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - label:
-                  id: widget_1781262307812_ou8uo1mfn_2
+                  id: widget_1781262307812_ou8uo1mfn
                   x: 50
                   y: 10
                   width: 40
@@ -1215,7 +956,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262307812_3m3qdg397_2
+                  id: widget_1781262307812_3m3qdg397
                   x: 10
                   y: 37
                   width: 60
@@ -1226,7 +967,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262307812_n406bgqc4_2
+                  id: widget_1781262307812_n406bgqc4
                   x: 2
                   y: 22
                   width: 60
@@ -1237,7 +978,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
-                  id: widget_1781262307812_cmiqci34b_2
+                  id: widget_1781262307812_cmiqci34b
                   x: 2
                   y: 62
                   width: 80
@@ -1248,7 +989,7 @@ lvgl:
                   line_color: 0x805705
                   line_rounded: true
         - obj:
-            id: t_tohome2
+            id: t_tohome
             x: 304
             y: 68
             width: 85
@@ -1264,7 +1005,7 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - label:
-                  id: widget_1781262308709_71wbrk8p9_2
+                  id: widget_1781262308709_71wbrk8p9
                   x: 50
                   y: 10
                   width: 40
@@ -1275,7 +1016,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: widget_1781262308709_dnoiw7el6_2
+                  id: widget_1781262308709_dnoiw7el6
                   x: 10
                   y: 37
                   width: 60
@@ -1286,7 +1027,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_24
               - label:
-                  id: textvdom2
+                  id: textvdom
                   x: 2
                   y: 22
                   width: 60
@@ -1297,7 +1038,7 @@ lvgl:
                   long_mode: CLIP
                   text_font: cyrillic_font_12
               - line:
-                  id: linevdom2
+                  id: linevdom
                   x: 2
                   y: 62
                   width: 80
@@ -1307,7 +1048,6 @@ lvgl:
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
-        # ---- НОВЫЙ виджет "Из рек-ра" (5-й в ряду) ----
         - obj:
             id: t_recup
             x: 402
@@ -1368,6 +1108,8 @@ lvgl:
                     - 129, 0
                   line_color: 0x805705
                   line_rounded: true
+
+        # ---- РЯД ФИЛЬТРОВ: ПРИТОЧКА / КПД / ВЫТЯЖКА (по 120 px, шаг 125) ----
         - obj:
             id: Pritok_filter
             x: 40
@@ -1386,7 +1128,7 @@ lvgl:
             widgets:
               - arc:
                   id: widget_1781261697547_smtgd7w9q
-                  x: 18
+                  x: 14
                   y: 4
                   width: 92
                   height: 80
@@ -1411,7 +1153,7 @@ lvgl:
                   border_width: 0
               - label:
                   id: lv_label_0
-                  x: 12
+                  x: 14
                   y: 32
                   width: 92
                   height: 24
@@ -1431,10 +1173,9 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
-        # ---- НОВЫЙ виджет "КПД" (в ряду фильтров, справа) ----
         - obj:
             id: efficiency_filter
-            x: 320
+            x: 180
             y: 300
             width: 120
             height: 100
@@ -1450,7 +1191,7 @@ lvgl:
             widgets:
               - arc:
                   id: efficiency_arc
-                  x: 18
+                  x: 14
                   y: 4
                   width: 92
                   height: 80
@@ -1475,7 +1216,7 @@ lvgl:
                   border_width: 0
               - label:
                   id: efficiency_label
-                  x: 12
+                  x: 14
                   y: 32
                   width: 92
                   height: 24
@@ -1497,9 +1238,9 @@ lvgl:
                   text_font: cyrillic_font_12
         - obj:
             id: Vityazh_filter
-            x: 365
+            x: 320
             y: 300
-            width: 100
+            width: 120
             height: 100
             bg_color: 0x0F0F33
             bg_opa: 95%
@@ -1513,7 +1254,7 @@ lvgl:
             widgets:
               - arc:
                   id: widget_1781261697547_jcbrfzs59
-                  x: 8
+                  x: 14
                   y: 4
                   width: 92
                   height: 80
@@ -1538,7 +1279,7 @@ lvgl:
                   border_width: 0
               - label:
                   id: widget_1781261697547_036jpjyoc
-                  x: 2
+                  x: 14
                   y: 32
                   width: 92
                   height: 24
@@ -1549,7 +1290,7 @@ lvgl:
                   text_font: cyrillic_font_24
               - label:
                   id: widget_1781261697547_2lq5vokc6
-                  x: 4
+                  x: 14
                   y: 80
                   width: 92
                   height: 12
@@ -1558,6 +1299,7 @@ lvgl:
                   text_align: CENTER
                   long_mode: CLIP
                   text_font: cyrillic_font_12
+
         - label:
             id: time_label
             x: 194
