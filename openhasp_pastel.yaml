@@ -1771,8 +1771,8 @@ lvgl:
                   height: 26
                   text: "НАСТРОЙКА"
                   text_color: 0x000000
-                  text_align
-                          - button:
+                  text_align: LEFT
+        - button:
             id: settings_modes
             x: 320
             y: 415
