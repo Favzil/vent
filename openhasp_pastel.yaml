@@ -807,7 +807,7 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
 
         # ---- РЯД ИЗ 5 ВИДЖЕТОВ ТЕМПЕРАТУРЫ (ширина 85, шаг 98) ----
         - obj:
@@ -1469,7 +1469,7 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: time_label_modes
                   x: 194
@@ -1829,7 +1829,7 @@ lvgl:
                   text_color: 0xEFF0F0
                   text_align: CENTER
                   long_mode: CLIP
-                  text_font: cyrillic_font_12
+                  text_font: cyrillic_font_24
               - label:
                   id: time_label_settings
                   x: 194
@@ -1860,6 +1860,7 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            scrollable: false
             widgets:
               - label:
                   x: 20
@@ -1880,6 +1881,7 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            scrollable: false
             widgets:
               - label:
                   x: 20
@@ -1900,6 +1902,7 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            scrollable: false
             widgets:
               - label:
                   x: 20
@@ -1920,6 +1923,7 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            scrollable: false
             widgets:
               - label:
                   x: 20
