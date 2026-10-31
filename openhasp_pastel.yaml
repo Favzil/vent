@@ -1424,7 +1424,7 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
-      id: modes_page
+      scrollable: false
       widgets:
         - image:
             id: background_image_modes
