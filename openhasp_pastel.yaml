@@ -667,6 +667,7 @@ lvgl:
       bg_color: 0x000000
       bg_opa: 100%
       pad_all: 0
+      scrollable: false
       widgets:
         - obj:
             id: black_background
@@ -761,6 +762,7 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
+      scrollable: false
       widgets:
         - image:
             id: background_image_widget
@@ -1422,6 +1424,7 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
+      id: modes_page
       widgets:
         - image:
             id: background_image_modes
@@ -1781,6 +1784,7 @@ lvgl:
       bg_color: 0x111827
       bg_opa: 100%
       pad_all: 0
+      scrollable: false
       widgets:
         - image:
             id: background_image_settings
