@@ -1558,10 +1558,6 @@ lvgl:
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
-            radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
