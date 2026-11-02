@@ -1526,6 +1526,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
@@ -1560,6 +1563,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
@@ -1594,6 +1600,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
@@ -1628,6 +1637,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
@@ -1662,6 +1674,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
@@ -1696,6 +1711,9 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
+            styles:
+              - pressed:
+                  bg_color: 0x12D90D
             on_press:
               then:
                 - lambda: |-
