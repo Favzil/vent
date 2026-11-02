@@ -1566,7 +1566,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 1;
+                    id(active_mode_id) = 2;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
                     lv_obj_set_style_bg_color(id(mode_econom), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
@@ -1604,7 +1604,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 1;
+                    id(active_mode_id) = 3;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
                     lv_obj_set_style_bg_color(id(mode_guest), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
@@ -1642,7 +1642,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 1;
+                    id(active_mode_id) = 4;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
                     lv_obj_set_style_bg_color(id(mode_conditioner), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
@@ -1680,7 +1680,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 1;
+                    id(active_mode_id) = 5;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
                     lv_obj_set_style_bg_color(id(mode_efficiency), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
@@ -1718,7 +1718,7 @@ lvgl:
               then:
                 - lambda: |-
                     id(press_timer) = 100;
-                    id(active_mode_id) = 1;
+                    id(active_mode_id) = 6;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
                     lv_obj_set_style_bg_color(id(mode_stop), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
