@@ -1569,7 +1569,7 @@ lvgl:
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
+                    lv_obj_set_style_bg_color(id(mode_econom), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1578,7 +1578,7 @@ lvgl:
                       id(active_mode_id) = 0;
                     }
                     // Возвращаем исходный цвет фона
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(id(mode_econom), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
@@ -1607,7 +1607,7 @@ lvgl:
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
+                    lv_obj_set_style_bg_color(id(mode_guest), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1616,7 +1616,7 @@ lvgl:
                       id(active_mode_id) = 0;
                     }
                     // Возвращаем исходный цвет фона
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(id(mode_guest), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
@@ -1645,7 +1645,7 @@ lvgl:
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
+                    lv_obj_set_style_bg_color(id(mode_conditioner), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1654,7 +1654,7 @@ lvgl:
                       id(active_mode_id) = 0;
                     }
                     // Возвращаем исходный цвет фона
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(id(mode_conditioner), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
@@ -1683,7 +1683,7 @@ lvgl:
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
+                    lv_obj_set_style_bg_color(id(mode_efficiency), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1692,7 +1692,7 @@ lvgl:
                       id(active_mode_id) = 0;
                     }
                     // Возвращаем исходный цвет фона
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(id(mode_efficiency), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
@@ -1721,7 +1721,7 @@ lvgl:
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
                     // Устанавливаем зелёный цвет фона при нажатии
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
+                    lv_obj_set_style_bg_color(id(mode_stop), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1730,7 +1730,7 @@ lvgl:
                       id(active_mode_id) = 0;
                     }
                     // Возвращаем исходный цвет фона
-                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(id(mode_stop), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
