@@ -532,21 +532,25 @@ interval:
 # ИЗОБРАЖЕНИЯ
 # ============================================================
 image:
-  - file: "img/olako.png"
+  - platform: file
+    file: "img/olako.png"
     id: background_image
     type: RGB565
     resize: 480x480
-  - file: "img/family-home.png"
+  - platform: file
+    file: "img/family-home.png"
     id: icon_home
     type: RGB565
     resize: 32x32
     transparency: alpha_channel
-  - file: "img/mode-fan.png"
+  - platform: file
+    file: "img/mode-fan.png"
     id: icon_modes
     type: RGB565
     resize: 32x32
     transparency: alpha_channel
-  - file: "img/settings-heart.png"
+  - platform: file
+    file: "img/settings-heart.png"
     id: icon_settings
     type: RGB565
     resize: 32x32
@@ -819,7 +823,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x0F0F33
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -1485,7 +1489,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x0F0F33
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -1517,7 +1521,7 @@ lvgl:
             y: 50
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1551,7 +1555,7 @@ lvgl:
             y: 110
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1585,7 +1589,7 @@ lvgl:
             y: 170
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1619,7 +1623,7 @@ lvgl:
             y: 230
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1653,7 +1657,7 @@ lvgl:
             y: 290
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1687,7 +1691,7 @@ lvgl:
             y: 350
             width: 398
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1845,7 +1849,7 @@ lvgl:
                   width: 160
                   height: 25
                   text: "KhaKar-032"
-                  text_color: 0xFFFFFF
+                  text_color: 0x0F0F33
                   text_align: LEFT
                   long_mode: CLIP
                   text_font: cyrillic_font_24
@@ -1877,7 +1881,7 @@ lvgl:
             width: 480
             height: 40
             text: "НАСТРОЙКИ СИСТЕМЫ"
-            text_color: 0xFFFFFF
+            text_color: 0x0F0F33
             text_align: CENTER
             text_font: cyrillic_font_24
         - obj:
@@ -1885,7 +1889,7 @@ lvgl:
             y: 110
             width: 400
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1899,14 +1903,14 @@ lvgl:
                   height: 30
                   text: "Яркость экрана"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
         - obj:
             x: 40
             y: 170
             width: 400
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1920,7 +1924,7 @@ lvgl:
                   height: 30
                   text: "Таймаут экрана"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
         - obj:
             x: 40
@@ -1930,7 +1934,7 @@ lvgl:
             bg_color: 0x374151
             bg_opa: 100%
             border_width: 1
-            border_color: 0x6B7280
+            border_color: 0x0F0F33
             radius: 8
             scrollable: false
             widgets:
@@ -1941,14 +1945,14 @@ lvgl:
                   height: 30
                   text: "Единицы измерения"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
         - obj:
             x: 40
             y: 290
             width: 400
             height: 50
-            bg_color: 0x374151
+            bg_color: 0x0F0F33
             bg_opa: 100%
             border_width: 1
             border_color: 0x6B7280
@@ -1962,7 +1966,7 @@ lvgl:
                   height: 30
                   text: "О системе"
                   text_color: 0xFFFFFF
-                  text_align: LEFT
+                  text_align: CENTER
                   text_font: cyrillic_font_24
         - button:
             id: domoi_settings
