@@ -704,11 +704,6 @@ lvgl:
     - my_touchscreen
   rotation: 180
   buffer_size: 100%
-  style_definitions:
-    - id: mode_pressed_style
-      bg_color: 0x12D90D
-      # сюда можно добавить другие свойства, которые должны меняться при нажатии
-
   pages:
     # ========== СТРАНИЦА ЗАСТАВКИ ==========
     - id: screensaver_page
@@ -1530,9 +1525,6 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
@@ -1604,9 +1596,6 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
@@ -1641,9 +1630,6 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
@@ -1678,9 +1664,6 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
@@ -1715,9 +1698,6 @@ lvgl:
             border_width: 1
             border_color: 0x6B7280
             radius: 8
-            styles:
-              - id: mode_pressed_style
-                state: pressed
             on_press:
               then:
                 - lambda: |-
