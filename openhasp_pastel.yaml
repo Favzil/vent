@@ -1531,6 +1531,8 @@ lvgl:
                     id(press_timer) = 100;
                     id(active_mode_id) = 1;
                     id(mode_activated) = false;
+                    // Устанавливаем зелёный цвет фона при нажатии
+                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x12D90D), LV_STATE_PRESSED);
             on_release:
               then:
                 - lambda: |-
@@ -1538,6 +1540,8 @@ lvgl:
                       id(press_timer) = 0;
                       id(active_mode_id) = 0;
                     }
+                    // Возвращаем исходный цвет фона
+                    lv_obj_set_style_bg_color(id(mode_standard), lv_color_hex(0x0F0F33), LV_STATE_DEFAULT);
             widgets:
               - label:
                   x: 0
